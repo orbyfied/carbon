@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.item;
 
-import net.minecraft.nbt.CompoundTag;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 
 public class CarbonItemState<I extends CarbonItem<?>> {
 
@@ -14,11 +15,11 @@ public class CarbonItemState<I extends CarbonItem<?>> {
         return item;
     }
 
-    public void save(CompoundTag tag) {
+    public void save(ItemMeta meta, PersistentDataContainer tag) {
 
     }
 
-    public void load(CompoundTag tag) {
+    public void load(ItemMeta meta, PersistentDataContainer tag) {
 
     }
 
