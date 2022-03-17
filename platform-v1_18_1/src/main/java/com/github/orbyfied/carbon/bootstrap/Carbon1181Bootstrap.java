@@ -1,6 +1,5 @@
-package com.github.orbyfied.carbon.boostrap;
+package com.github.orbyfied.carbon.bootstrap;
 
-import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.platform.impl.Platform1181;
 

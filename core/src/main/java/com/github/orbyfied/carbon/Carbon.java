@@ -1,16 +1,17 @@
 package com.github.orbyfied.carbon;
 
+import com.github.orbyfied.carbon.api.util.Version;
 import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * The carbon plugin and main class.
  */
-public class Carbon
-        extends JavaPlugin {
+public class Carbon {
+
+    public static final Version VERSION = Version.of("0.1.0");
 
     /* ----------- PLUGIN ------------ */
 
