@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url 'https://papermc.io/repo/repository/maven-public/'
+        }
+    }
+}
+
+rootProject.name = 'carbon'
+include 'platform-v1_18_1'
+include 'core'
+

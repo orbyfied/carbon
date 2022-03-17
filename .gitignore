@@ -1,0 +1,15 @@
+# IntelliJ IDEA
+/.idea/
+
+# Gradle
+/.gradle/
+/**/.gradle/
+!/gradle/wrapper/gradle-wrapper.jar
+!/gradle/wrapper/gradle-wrapper.properties
+/**/build/
+
+# Java
+*.jar
+
+# Other
+/lib/
