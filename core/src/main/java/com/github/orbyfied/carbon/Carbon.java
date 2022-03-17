@@ -3,6 +3,8 @@ package com.github.orbyfied.carbon;
 import com.github.orbyfied.carbon.api.util.Version;
 import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
+import com.github.orbyfied.carbon.core.mod.ModLoader;
+import com.github.orbyfied.carbon.logging.BukkitLogger;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
 
@@ -51,6 +53,11 @@ public class Carbon {
      */
     protected final Registry<Registry<?>> registries = new Registry<>("carbon:registries");
 
+    /**
+     * The main mod loader.
+     */
+    protected final ModLoader modLoader = new ModLoader(this);
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -61,6 +68,14 @@ public class Carbon {
 
     public PlatformProxy getPlatform() {
         return platform;
+    }
+
+    public ModLoader getModLoader() {
+        return modLoader;
+    }
+
+    public BukkitLogger getLogger(String id) {
+        return new BukkitLogger("Carbon" + id);
     }
 
 }

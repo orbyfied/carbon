@@ -22,8 +22,8 @@ public class CarbonBranding {
     public static final Color SECONDARY_COLOR_A = new Color(0xEE7575);
     public static final Color SECONDARY_COLOR_B = new Color(0xEDCB74);
 
-    public static final Color ICON_COLOR_A = new Color(0xC6C6C6);
-    public static final Color ICON_COLOR_B = new Color(0x353535);
+    public static final Color ICON_COLOR_A = new Color(0xF3F3F3);
+    public static final Color ICON_COLOR_B = new Color(0x282828);
 
     /**
      * Prefix.
@@ -41,12 +41,12 @@ public class CarbonBranding {
             "$$ |       \n" +
             "$$ |  $$\\ \n" +
             "\\$$$$$$  |\n" +
-            " \\______/ \n" ;
+            " \\______/   " ;
 
     public static final String BRAND_ICON_FORMATTED =
             TextFormatting.gradient2d2fTlbr(BRAND_ICON_UNCOLORED,
-                    PRIMARY_COLOR_A,
-                    PRIMARY_COLOR_B);
+                    ICON_COLOR_A,
+                    ICON_COLOR_B);
 
     public static final String BRAND_MESSAGE_FORMATTED =
             PREFIX + TextFormatting.gradient1d2fLr("v" + Carbon.VERSION, PRIMARY_COLOR_A.darker(), PRIMARY_COLOR_B.darker(), false) +

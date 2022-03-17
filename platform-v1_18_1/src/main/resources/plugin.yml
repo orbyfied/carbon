@@ -2,3 +2,4 @@ name: Carbon
 main: com.github.orbyfied.carbon.bootstrap.Carbon1181Bootstrap
 version: 0.1.0
 api-version: 1.18
+load: STARTUP

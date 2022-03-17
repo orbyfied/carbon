@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.bootstrap;
 
 import com.github.orbyfied.carbon.Carbon;
+import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
+import com.github.orbyfied.carbon.util.TextFormatting;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -64,10 +66,17 @@ public abstract class CarbonBootstrap extends JavaPlugin {
     public void onEnable() {
         // send fancy message
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
+        sender.sendMessage("");
         CarbonBranding.applyForEachLine(
                 CarbonBranding.BRAND_ICON_FORMATTED,
                 (n, l) -> sender.sendMessage("  " + l + (n == 3 || n == 4 ? "   " + CarbonBranding.BRAND_MESSAGE_FORMATTED : ""))
         );
+        sender.sendMessage("");
+
+        // start loading mods
+        ModLoader loader = main.getModLoader();
+        loader.loadAll();
+        loader.initializeAll();
     }
 
 }

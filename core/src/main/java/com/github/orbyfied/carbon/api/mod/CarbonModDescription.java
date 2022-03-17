@@ -11,13 +11,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-/* GET */ @CarbonModDescription("<none>")
 public @interface CarbonModDescription {
-
-    /**
-     * An instance for fast no-description comparison.
-     */
-    CarbonModDescription NONE = CarbonModDescription.class.getAnnotation(CarbonModDescription.class);
 
     /**
      * The description of this mod.

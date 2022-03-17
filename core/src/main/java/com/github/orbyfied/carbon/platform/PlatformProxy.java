@@ -9,6 +9,8 @@ package com.github.orbyfied.carbon.platform;
  */
 public interface PlatformProxy {
 
+    ModLoaderProxy getModLoaderProxy();
+
     ResourcePackProxy getResourcePackProxy();
 
 }

@@ -132,8 +132,6 @@ public class TextFormatting {
         String[] lines = text.split(NEWLINE_REGEX);
 
         // calculate length and frame increase
-        int lenX = text.length();
-        float px = 1f / (lenX - 1);
         int lenY = lines.length;
         float py = 1f / (lenY - 1);
 
@@ -163,12 +161,14 @@ public class TextFormatting {
             line = lines[y];
             int ll = line.length();
             float fx = 0;
+            float px = 1f / (line.length() - 1);
             for (int i = 0; i < ll; i++) {
                 // get character
                 char c = line.charAt(i);
 
                 // interpolate
-                Color col = colInterpolate(r1, g1, b1, r2, g2, b2, fx * fy);
+                float f = fx / 2 + fy / 2;
+                Color col = colInterpolate(r1, g1, b1, r2, g2, b2, f);
 
                 // create ChatColor and append it with extra formatting
                 net.md_5.bungee.api.ChatColor color = net.md_5.bungee.api.ChatColor.of(col);
@@ -179,7 +179,6 @@ public class TextFormatting {
             }
             builder.append("\n");
             fy += py;
-            fx  = 0;
         }
                        // remove trailing newline
         return builder.delete(builder.length() - 1, builder.length()).toString();

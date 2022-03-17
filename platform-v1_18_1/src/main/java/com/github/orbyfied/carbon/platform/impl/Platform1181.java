@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.platform.impl;
 
 import com.github.orbyfied.carbon.bootstrap.Carbon1181Bootstrap;
+import com.github.orbyfied.carbon.platform.ModLoaderProxy;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.platform.ResourcePackProxy;
 
@@ -21,6 +22,11 @@ public class Platform1181 implements PlatformProxy {
 
     public Carbon1181Bootstrap getPlugin() {
         return plugin;
+    }
+
+    private ModLoaderProxyImpl modLoaderProxy = new ModLoaderProxyImpl();
+    @Override public ModLoaderProxy getModLoaderProxy() {
+        return modLoaderProxy;
     }
 
     @Override
