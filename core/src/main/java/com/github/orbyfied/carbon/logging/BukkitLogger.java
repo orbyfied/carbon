@@ -1,0 +1,154 @@
+package com.github.orbyfied.carbon.logging;
+
+import com.github.orbyfied.carbon.util.ArrayUtil;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+/**
+ * Simple color supporting logger
+ * for the Bukkit console.
+ */
+public class BukkitLogger {
+
+    /**
+     * The sender to use.
+     */
+    private final CommandSender sender;
+
+    /**
+     * The tag of the logger.
+     */
+    private final String tag;
+
+    /**
+     * The current stage of the logger.
+     */
+    private String stage;
+
+    private Function<Integer, ChatColor> colorMapper = DEFAULT_LEVEL_COLORS;
+
+    private Function<Integer, String> nameMapper = DEFAULT_LEVEL_NAMES;
+
+    private int maxNameLength = DEFAULT_MAX_NAME_LENGTH;
+
+    public BukkitLogger(String tag) {
+        this.tag    = tag;
+        this.sender = Bukkit.getConsoleSender();
+    }
+
+    public BukkitLogger stage(String stage) {
+        this.stage = stage;
+        return this;
+    }
+
+    private String createLevelText(int level) {
+        String name = nameMapper.apply(level);
+
+        return colorMapper.apply(level) + "(" + " ".repeat(Math.max(0, maxNameLength - name.length())) + name + ")";
+    }
+
+    private String createArrayString(Object[] arr) {
+        StringBuilder b = new StringBuilder();
+        int l = arr.length;
+        for (int i = 0; i < l; i++) {
+            if (i != 0)
+                b.append(" ");
+            b.append(arr[i]);
+        }
+        return b.toString();
+    }
+
+    private String createLoggingString(int level, Object... msg) {
+        String msgstr;
+        if (msg.length == 0)
+            msgstr = "";
+        else if (msg.length == 1)
+            msgstr = Objects.toString(msg[0]);
+        else
+            msgstr = createArrayString(msg);
+        return createLevelText(level) + " " + ChatColor.RESET + ChatColor.GRAY + "[ " + ChatColor.WHITE + tag
+                + (stage != null ? ChatColor.DARK_GRAY + "/" + stage : "") + ChatColor.GRAY + " ] " + msgstr;
+    }
+
+    public BukkitLogger log(int level, Object msg) {
+        sender.sendMessage(createLoggingString(level, msg));
+        return this;
+    }
+
+    public BukkitLogger log(int level, String stage, Object msg) {
+        return stage(stage).log(level, msg);
+    }
+
+    public BukkitLogger info(Object msg) {
+        return log(-1, msg);
+    }
+
+    public BukkitLogger info(String stage, Object msg) {
+        return stage(stage).log(-1, msg);
+    }
+
+    public BukkitLogger ok(Object msg) {
+        return log(0, msg);
+    }
+
+    public BukkitLogger ok(String stage, Object msg) {
+        return stage(stage).log(0, msg);
+    }
+
+    public BukkitLogger warn(Object msg) {
+        return log(1, msg);
+    }
+
+    public BukkitLogger warn(String stage, Object msg) {
+        return stage(stage).log(1, msg);
+    }
+
+    public BukkitLogger err(Object msg) {
+        return log(2, msg);
+    }
+
+    public BukkitLogger err(String stage, Object msg) {
+        return stage(stage).log(2, msg);
+    }
+
+    public BukkitLogger misc(Object msg) {
+        return log(-2, msg);
+    }
+
+    public BukkitLogger misc(String stage, Object msg) {
+        return stage(stage).log(-2, msg);
+    }
+
+    /* --------- DEFAULT LEVELS --------- */
+
+    /*
+       - -1: INFO
+       -  0: OK
+       -  1: WARN
+       -  2: ERROR
+     */
+
+    public static final Function<Integer, String> DEFAULT_LEVEL_NAMES = level -> switch (level) {
+        case -1 -> "info";
+        case  0 -> "ok";
+        case  1 -> "warn";
+        case  2 -> "err";
+        default -> "misc";
+    };
+
+    public static final Function<Integer, ChatColor> DEFAULT_LEVEL_COLORS = level -> switch (level) {
+        case -1 -> ChatColor.AQUA;
+        case  0 -> ChatColor.GREEN;
+        case  1 -> ChatColor.YELLOW;
+        case  2 -> ChatColor.RED;
+        default -> ChatColor.DARK_PURPLE;
+    };
+
+    public static final int DEFAULT_MAX_NAME_LENGTH = 4;
+
+}
