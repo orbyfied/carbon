@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.logging;
 
 import com.github.orbyfied.carbon.util.ArrayUtil;
+import com.mojang.datafixers.types.Func;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -38,6 +39,16 @@ public class BukkitLogger {
     public BukkitLogger(String tag) {
         this.tag    = tag;
         this.sender = Bukkit.getConsoleSender();
+    }
+
+    public BukkitLogger setColorMapper(Function<Integer, ChatColor> f) {
+        this.colorMapper = f;
+        return this;
+    }
+
+    public BukkitLogger setNameMapper(Function<Integer, String> f) {
+        this.nameMapper = f;
+        return this;
     }
 
     public BukkitLogger stage(String stage) {

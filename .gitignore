@@ -13,3 +13,5 @@
 
 # Other
 /lib/
+/.test/
+/**/.test/

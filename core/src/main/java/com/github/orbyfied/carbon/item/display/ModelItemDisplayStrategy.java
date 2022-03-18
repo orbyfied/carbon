@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon.item.display;
 
 import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.content.ModelHolder;
+import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.ItemDisplayStrategy;
@@ -30,8 +31,13 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     }
 
     @Override
-    public void makeAssets() {
+    public void prepare() {
         bakeModels();
+    }
+
+    @Override
+    public void makeAssets(ResourcePackBuilder builder) {
+
     }
 
     @Override
@@ -40,7 +46,7 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
             CarbonItemState<?> state,
             ItemMeta meta,
             PersistentDataContainer tag) {
-
+        meta.setCustomModelData(cmdStart);
     }
 
     @Override
