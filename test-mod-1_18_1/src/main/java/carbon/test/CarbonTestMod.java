@@ -1,5 +1,6 @@
 package carbon.test;
 
+import com.destroystokyo.paper.utils.PaperPluginLogger;
 import com.github.orbyfied.carbon.api.CarbonModAPI;
 import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModDescription;
@@ -13,12 +14,12 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer {
 
     @Override
     public void modLoaded(LoadedMod mod) {
-        System.out.println("hi loading");
+        getLogger().info("------- LOADING");
     }
 
     @Override
     public void modInitialize(CarbonModAPI api) {
-        System.out.println("hi initialization");
+        getLogger().info("---- INITIALIZE");
     }
 
 }

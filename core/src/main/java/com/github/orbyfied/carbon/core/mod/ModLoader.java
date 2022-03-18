@@ -39,7 +39,7 @@ public class ModLoader {
             LoadedMod mod = new LoadedMod(main, plugin);
             mod.getDescriptor();
 
-            logger.info("Loading " + ChatColor.RED + mod.getId() + ChatColor.YELLOW +
+            logger.info("Loading " + ChatColor.AQUA + mod.getId() + ChatColor.BLUE +
                     " v" + mod.getVersion() + ChatColor.RESET + " of plugin " + ChatColor.GREEN +
                     plugin + ". "
 //                    + ChatColor.DARK_GRAY + "( " + ChatColor.GRAY + mod.asAvailableString() + ChatColor.GRAY + " )"
@@ -88,8 +88,28 @@ public class ModLoader {
     }
 
     public void initializeAll() {
-        for (LoadedMod mod : mods)
-            mod.initialize();
+        logger.stage("Init").info("Initializing " + ChatColor.AQUA + mods.size() +
+                ChatColor.RESET + " mods");
+        long t1 = System.currentTimeMillis();
+        int success = 0;
+        int failed  = 0;
+        for (LoadedMod mod : mods) {
+            logger.info("Initializing " + ChatColor.AQUA + mod.getId() +
+                    ChatColor.BLUE + " v" + mod.getVersion());
+            try {
+                mod.initialize();
+                success++;
+            } catch (Exception e) {
+                logger.err("Error while initializing " + mod.getId() + ";");
+                e.printStackTrace();
+                failed++;
+            }
+        }
+        long t2 = System.currentTimeMillis();
+        logger.ok("Successfully initialized " + ChatColor.GREEN + success +
+                ChatColor.RESET + " mods, failed to initialize " + ChatColor.RED + failed +
+                ChatColor.RESET + ". Time elapsed: " + ChatColor.YELLOW +
+                (t2 - t1) + "ms");
     }
 
 }

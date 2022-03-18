@@ -7,6 +7,11 @@ import com.github.orbyfied.carbon.util.TextFormatting;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.awt.*;
@@ -15,7 +20,8 @@ import java.awt.*;
  * The server bootstrap class for
  * Carbon.
  */
-public abstract class CarbonBootstrap extends JavaPlugin {
+public abstract class CarbonBootstrap
+        extends JavaPlugin implements Listener {
 
     /**
      * The instance of this plugin.
@@ -76,7 +82,18 @@ public abstract class CarbonBootstrap extends JavaPlugin {
         // start loading mods
         ModLoader loader = main.getModLoader();
         loader.loadAll();
+
+        // prepare to run initialize
+        Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
+
+    }
+
+    public void initialize() {
+
+        // start initializing
+        ModLoader loader = main.getModLoader();
         loader.initializeAll();
+
     }
 
 }

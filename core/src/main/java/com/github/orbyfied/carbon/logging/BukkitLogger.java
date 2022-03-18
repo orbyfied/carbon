@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
+import java.awt.*;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -34,8 +35,6 @@ public class BukkitLogger {
 
     private Function<Integer, String> nameMapper = DEFAULT_LEVEL_NAMES;
 
-    private int maxNameLength = DEFAULT_MAX_NAME_LENGTH;
-
     public BukkitLogger(String tag) {
         this.tag    = tag;
         this.sender = Bukkit.getConsoleSender();
@@ -48,8 +47,7 @@ public class BukkitLogger {
 
     private String createLevelText(int level) {
         String name = nameMapper.apply(level);
-
-        return colorMapper.apply(level) + "(" + " ".repeat(Math.max(0, maxNameLength - name.length())) + name + ")";
+        return colorMapper.apply(level) + "(" + name + ")";
     }
 
     private String createArrayString(Object[] arr) {
@@ -135,20 +133,28 @@ public class BukkitLogger {
 
     public static final Function<Integer, String> DEFAULT_LEVEL_NAMES = level -> switch (level) {
         case -1 -> "info";
-        case  0 -> "ok";
+        case  0 -> "  ok";
         case  1 -> "warn";
-        case  2 -> "err";
+        case  2 -> " err";
         default -> "misc";
     };
 
-    public static final Function<Integer, ChatColor> DEFAULT_LEVEL_COLORS = level -> switch (level) {
-        case -1 -> ChatColor.AQUA;
-        case  0 -> ChatColor.GREEN;
-        case  1 -> ChatColor.YELLOW;
-        case  2 -> ChatColor.RED;
-        default -> ChatColor.DARK_PURPLE;
-    };
+    public static final ChatColor COLOR_INFO = colOf(new Color(0x74badc));
+    public static final ChatColor COLOR_OK   = colOf(new Color(0x72db84));
+    public static final ChatColor COLOR_WARN = colOf(new Color(0xc5db72));
+    public static final ChatColor COLOR_ERR  = colOf(new Color(0xdb7272));
+    public static final ChatColor COLOR_MISC = colOf(new Color(0xca9a5a));
 
-    public static final int DEFAULT_MAX_NAME_LENGTH = 4;
+    private static ChatColor colOf(Color color) {
+        return ChatColor.of(color);
+    }
+
+    public static final Function<Integer, ChatColor> DEFAULT_LEVEL_COLORS = level -> switch (level) {
+        case -1 -> COLOR_INFO;
+        case  0 -> COLOR_OK  ;
+        case  1 -> COLOR_WARN;
+        case  2 -> COLOR_ERR ;
+        default -> COLOR_MISC;
+    };
 
 }

@@ -18,7 +18,7 @@ public interface CarbonModInitializer {
      * {@link com.github.orbyfied.carbon.api.annotation.PreInitialization}
      * @param mod The mod object.
      */
-    void modLoaded(LoadedMod mod);
+    default void modLoaded(LoadedMod mod) { }
 
     /**
      * Called when the mod is initialized.
