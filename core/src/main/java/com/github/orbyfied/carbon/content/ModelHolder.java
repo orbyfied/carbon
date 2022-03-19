@@ -1,13 +1,17 @@
 package com.github.orbyfied.carbon.content;
 
+import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.RegistrableElement;
+import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import org.bukkit.Material;
 
 public interface ModelHolder<T extends RegistrableElement> {
 
     int getCustomModelDataOffset();
 
-    Object getModel(int off);
+    SourcedAsset getModel(int off);
+
+    SourcedAsset[] getModels();
 
     // utility to make life easier
     default int registerAllAndGetOffset(

@@ -3,9 +3,11 @@ package com.github.orbyfied.carbon.item.display;
 import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.content.ModelHolder;
 import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
+import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.ItemDisplayStrategy;
+import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,8 +21,8 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     }
 
     public Material baseMaterial;
-    public Object[] models;
-    public int      cmdStart;
+    public SourcedAsset[] models;
+    public int cmdStart;
 
     public void bakeModels() {
         // register custom model data
@@ -28,6 +30,10 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
             throw new IllegalArgumentException("item with 0 models, cant bake");
         CMDRegistryService<CarbonItem<?>> service = item.getRegistry().getService(CMDRegistryService.class);
         cmdStart = registerAllAndGetOffset(baseMaterial, service, models.length);
+    }
+
+    private int getModelIdFrom(CarbonItemState<?> state) {
+        return 0;
     }
 
     @Override
@@ -46,7 +52,7 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
             CarbonItemState<?> state,
             ItemMeta meta,
             PersistentDataContainer tag) {
-        meta.setCustomModelData(cmdStart);
+        meta.setCustomModelData(cmdStart + getModelIdFrom(state));
     }
 
     @Override
@@ -55,8 +61,13 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     }
 
     @Override
-    public Object getModel(int off) {
+    public SourcedAsset getModel(int off) {
         return models[off];
+    }
+
+    @Override
+    public SourcedAsset[] getModels() {
+        return models;
     }
 
 }

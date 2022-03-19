@@ -1,13 +1,14 @@
 package com.github.orbyfied.carbon.content;
 
+import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
+import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.RegistrableElement;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.registry.RegistryService;
+import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import org.bukkit.Material;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class CMDRegistryService<T extends RegistrableElement>
         extends RegistryService<Registry<T>, T> {
@@ -36,9 +37,23 @@ public class CMDRegistryService<T extends RegistrableElement>
         return holders.get(off);
     }
 
-    public Object getModelOf(Material base, int off) {
+    public SourcedAsset getModelOf(Material base, int off) {
         ModelHolder<T> h = getHolderOf(base, off);
         return h.getModel(off - h.getCustomModelDataOffset());
+    }
+
+    public void buildAssets(ResourcePackBuilder builder) {
+        Set<Map.Entry<Material, ArrayList<ModelHolder<T>>>> entries = cmds.entrySet();
+        for (Map.Entry<Material, ArrayList<ModelHolder<T>>> entry : entries) {
+            Material base = entry.getKey();
+            ArrayList<ModelHolder<T>> modelHolders = entry.getValue();
+            for (ModelHolder<T> modelHolder : modelHolders) {
+                int off = modelHolder.getCustomModelDataOffset();
+                for (SourcedAsset modelAsset : modelHolder.getModels()) {
+                    off++;
+                }
+            }
+        }
     }
 
     public BaseEditing edit(Material base) {
