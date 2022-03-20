@@ -58,10 +58,13 @@ public class MultiTaskProcessTests {
                         new SyncTask<>().addWork(42069)
                 );
 
-        myProcess.run();
+        QueuedTickExecutionService.TickLoop tickLoop = service.tickLoop(true, null);
 
-        AtomicBoolean running = new AtomicBoolean(); // for terminating
-        service.tickLoop(true, null, running);
+        myProcess
+                .whenDone(tickLoop::end)
+                .run(service);
+
+        tickLoop.run();
 
     }
 

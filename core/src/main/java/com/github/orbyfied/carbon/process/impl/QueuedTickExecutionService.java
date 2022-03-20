@@ -6,6 +6,7 @@ import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Uses a queue and a lock to
@@ -51,23 +52,58 @@ public class QueuedTickExecutionService extends ExecutionService {
         return lock != null;
     }
 
-    public void tickLoop(boolean blocking,
-                         Runnable inbetween,
-                         AtomicBoolean running) {
-        while (running.get()) {
-            if (inbetween != null)
-                inbetween.run();
-            tick();
+    public class TickLoop {
+
+        public TickLoop(boolean blocking, Runnable between) {
+            this.blocking = blocking;
+            this.between  = between;
+        }
+
+        private final AtomicBoolean running  = new AtomicBoolean(false);
+        private final boolean       blocking;
+        private final Runnable      between;
+
+        public AtomicBoolean getRunning() {
+            return running;
+        }
+
+        public boolean isBlocking() {
+            return blocking;
+        }
+
+        public void end() {
+            running.set(false);
             if (blocking && lock != null) {
-                synchronized (this) {
-                    try {
-                        lock.wait();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        public void run() {
+            running.set(true);
+            while (running.get()) {
+                if (between != null)
+                    between.run();
+                tick();
+                if (blocking && lock != null) {
+                    synchronized (lock) {
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            // ignore
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return;
+                        }
                     }
                 }
             }
         }
+
+    }
+
+    public TickLoop tickLoop(boolean blocking,
+                             Runnable between) {
+        return new TickLoop(blocking, between);
     }
 
     public void tick() {
@@ -78,8 +114,11 @@ public class QueuedTickExecutionService extends ExecutionService {
     @Override
     public void doSync(Runnable r) {
         tasks.add(r);
-        if (lock != null)
-            lock.notifyAll();
+        if (lock != null) {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+        }
     }
 
     @Override

@@ -45,6 +45,12 @@ public class Process<T> {
     protected boolean isRunning;
 
     /**
+     * To run when the task has been
+     * completed.
+     */
+    protected Runnable whenDone;
+
+    /**
      * Constructor.
      * @param manager The parent manager.
      * @param workExecutor The work executor.
@@ -74,6 +80,11 @@ public class Process<T> {
 
     public Process<T> removeTask(Task<T, Process<T>> task) {
         tasks.remove(task);
+        return this;
+    }
+
+    public Process<T> whenDone(Runnable r) {
+        this.whenDone = r;
         return this;
     }
 
@@ -123,9 +134,14 @@ public class Process<T> {
      * Completes the process.
      */
     public void complete() {
+        // mark and notify
         isRunning = false;
         if (lock != null)
             lock.notifyAll();
+
+        // execute callback
+        if (whenDone != null)
+            whenDone.run();
     }
 
     /**
