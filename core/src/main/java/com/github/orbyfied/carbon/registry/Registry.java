@@ -1,5 +1,7 @@
 package com.github.orbyfied.carbon.registry;
 
+import org.checkerframework.checker.units.qual.A;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Consumer;
@@ -314,6 +316,19 @@ public class Registry<T extends RegistryItem>
         if (klass == null)
             return this;
         return removeService(servicesMapped.get(klass));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <S> ArrayList<S> getServicesOf(Class<S> type,
+                                          ArrayList<S> list) {
+        for (Object o : servicesLinear)
+            if (type.isAssignableFrom(o.getClass()))
+                list.add((S) o);
+        return list;
+    }
+
+    public <S> ArrayList<S> getServicesOf(Class<S> type) {
+        return getServicesOf(type, new ArrayList<>());
     }
 
     ///////////////////////////////

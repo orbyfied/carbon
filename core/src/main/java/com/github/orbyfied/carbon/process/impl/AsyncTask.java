@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.process.ExecutionService;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -63,6 +64,11 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
 
     @Override
     public AsyncTask<T, P> addWork(T... w) {
+        super.addWork(w);
+        return this;
+    }
+
+    public AsyncTask<T, P> addWork(List<T> w) {
         super.addWork(w);
         return this;
     }

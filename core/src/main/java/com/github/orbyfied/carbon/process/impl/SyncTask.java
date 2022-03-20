@@ -3,6 +3,7 @@ package com.github.orbyfied.carbon.process.impl;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class SyncTask<T, P extends Process<T>> extends Task<T, P> {
@@ -30,6 +31,11 @@ public class SyncTask<T, P extends Process<T>> extends Task<T, P> {
 
     @Override
     public SyncTask<T, P> addWork(T w) {
+        super.addWork(w);
+        return this;
+    }
+
+    public SyncTask<T, P> addWork(List<T> w) {
         super.addWork(w);
         return this;
     }

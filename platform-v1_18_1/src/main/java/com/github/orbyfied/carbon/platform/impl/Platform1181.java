@@ -29,9 +29,9 @@ public class Platform1181 implements PlatformProxy {
         return modLoaderProxy;
     }
 
-    @Override
-    public ResourcePackProxy getResourcePackProxy() {
-        return null;
+    private ResourcePackProxy resourcePackProxy = new ResourcePackProxyImpl();
+    @Override public ResourcePackProxy getResourcePackProxy() {
+        return resourcePackProxy;
     }
 
 }

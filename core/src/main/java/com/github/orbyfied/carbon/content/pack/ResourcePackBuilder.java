@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ResourcePackBuilder {
 
-    private final ResourcePackManager manager;
-    private Path srcDir;
-    private List<PackAssetBuilder> assets = new ArrayList<>();
+    protected final ResourcePackManager manager;
+    protected Path srcDir;
+
+    protected List<PackAssetBuilder> assets = new ArrayList<>();
+    protected Map<PackResource, PackAssetBuilder> assetsByResource = new HashMap<>();
 
     public ResourcePackBuilder(ResourcePackManager manager,
                                Path srcDir) {
@@ -29,11 +34,27 @@ public class ResourcePackBuilder {
     }
 
     public <T extends PackAssetBuilder> T asset(
+            Function<ResourcePackBuilder, T> constructor) {
+        return asset((b, __) -> constructor.apply(b), null);
+    }
+
+    public <T extends PackAssetBuilder> T asset(
             BiFunction<ResourcePackBuilder, PackResource, T> constructor,
             PackResource resource
             ) {
-        T ab = constructor.apply(this, resource);
+        T ab;
+        PackAssetBuilder b;
+        if ((b = assetsByResource.get(resource)) != null) {
+            try {
+                return (T) b;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        ab = constructor.apply(this, resource);
         assets.add(ab);
+        assetsByResource.put(resource, ab);
         return ab;
     }
 

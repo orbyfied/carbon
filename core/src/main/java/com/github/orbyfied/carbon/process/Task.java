@@ -70,6 +70,11 @@ public abstract class Task<T, P extends Process<T>> {
         return this;
     }
 
+    public Task<T, P> addWork(List<T> w) {
+        work.addAll(w);
+        return this;
+    }
+
     public Task<T, P> removeWork(T w) {
         work.remove(w);
         return this;

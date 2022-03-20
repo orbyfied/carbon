@@ -10,6 +10,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import java.awt.*;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Simple color supporting logger
@@ -31,6 +32,8 @@ public class BukkitLogger {
      * The current stage of the logger.
      */
     private String stage;
+
+    private boolean isDebug;
 
     private Function<Integer, ChatColor> colorMapper = DEFAULT_LEVEL_COLORS;
 
@@ -133,6 +136,32 @@ public class BukkitLogger {
         return stage(stage).log(-2, msg);
     }
 
+    public BukkitLogger debug(Object msg) {
+        return log(5, msg);
+    }
+
+    public BukkitLogger debug(String stage, Object msg) {
+        return stage(stage).log(5, msg);
+    }
+
+    public BukkitLogger debugc(Object msg) {
+        if (isDebug)
+            debug(msg);
+        return this;
+    }
+
+    public BukkitLogger debugc(Supplier<Object> supplier) {
+        if (isDebug)
+            debug(supplier.get());
+        return this;
+    }
+
+    public BukkitLogger debugc(String stage, Object msg) {
+        if (isDebug)
+            debug(stage, msg);
+        return this;
+    }
+
     /* --------- DEFAULT LEVELS --------- */
 
     /*
@@ -143,18 +172,20 @@ public class BukkitLogger {
      */
 
     public static final Function<Integer, String> DEFAULT_LEVEL_NAMES = level -> switch (level) {
-        case -1 -> "info";
-        case  0 -> "  ok";
-        case  1 -> "warn";
-        case  2 -> " err";
-        default -> "misc";
+        case -1 -> " info";
+        case  0 -> "   ok";
+        case  1 -> " warn";
+        case  2 -> "  err";
+        case  5 -> "debug";
+        default -> " misc";
     };
 
-    public static final ChatColor COLOR_INFO = colOf(new Color(0x74badc));
-    public static final ChatColor COLOR_OK   = colOf(new Color(0x72db84));
-    public static final ChatColor COLOR_WARN = colOf(new Color(0xc5db72));
-    public static final ChatColor COLOR_ERR  = colOf(new Color(0xdb7272));
-    public static final ChatColor COLOR_MISC = colOf(new Color(0xca9a5a));
+    public static final ChatColor COLOR_DEBUG = colOf(new Color(0x5261CB));
+    public static final ChatColor COLOR_INFO  = colOf(new Color(0x74badc));
+    public static final ChatColor COLOR_OK    = colOf(new Color(0x72db84));
+    public static final ChatColor COLOR_WARN  = colOf(new Color(0xc5db72));
+    public static final ChatColor COLOR_ERR   = colOf(new Color(0xdb7272));
+    public static final ChatColor COLOR_MISC  = colOf(new Color(0xC962D4));
 
     private static ChatColor colOf(Color color) {
         return ChatColor.of(color);
@@ -165,6 +196,7 @@ public class BukkitLogger {
         case  0 -> COLOR_OK  ;
         case  1 -> COLOR_WARN;
         case  2 -> COLOR_ERR ;
+        case  5 -> COLOR_DEBUG;
         default -> COLOR_MISC;
     };
 

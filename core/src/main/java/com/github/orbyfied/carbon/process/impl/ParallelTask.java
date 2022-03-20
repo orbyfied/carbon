@@ -113,6 +113,11 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
         return this;
     }
 
+    public ParallelTask<T, P> addWork(List<T> w) {
+        super.addWork(w);
+        return this;
+    }
+
     @Override
     public ParallelTask<T, P> removeWork(T w) {
         super.removeWork(w);
