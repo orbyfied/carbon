@@ -19,7 +19,13 @@ public abstract class Task<T, P extends Process<T>> {
      * The initial work it will have to do.
      * Undistributed, simple linear list.
      */
-    protected final List<T> work = new ArrayList<>();
+    protected List<T> work = new ArrayList<>();
+
+    /**
+     * If the worker should run once before
+     * it runs the work with null as parameter.
+     */
+    protected boolean runAbstract = false;
 
     /**
      * The work executor.
@@ -72,6 +78,21 @@ public abstract class Task<T, P extends Process<T>> {
     public Task<T, P> worker(BiConsumer<P, T> worker) {
         this.worker = worker;
         return this;
+    }
+
+    public Task<T, P> runnable(BiConsumer<P, T> worker) {
+        this.runAbstract = true;
+        this.worker = worker;
+        return this;
+    }
+
+    public Task<T, P> runAbstract(boolean b) {
+        this.runAbstract = b;
+        return this;
+    }
+
+    public boolean runAbstract() {
+        return this.runAbstract;
     }
 
 }

@@ -18,6 +18,14 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
 
         // create thread with program
         Thread t = es.newThread(() -> {
+            // call new task now if not joined
+            if (!isJoined)
+                nextTaskCallback.run();
+
+            // run abstract
+            if (runAbstract)
+                worker.accept(process, null);
+
             // do work
             for (T w : work)
                 worker.accept(process, w);
@@ -26,10 +34,6 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
             if (isJoined)
                 nextTaskCallback.run();
         });
-
-        // call new task now if not joined
-        if (!isJoined)
-            nextTaskCallback.run();
 
         // start the thread to run the program
         t.start();
@@ -58,6 +62,12 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
     }
 
     @Override
+    public AsyncTask<T, P> addWork(T... w) {
+        super.addWork(w);
+        return this;
+    }
+
+    @Override
     public AsyncTask<T, P> removeWork(T w) {
         super.removeWork(w);
         return this;
@@ -66,6 +76,18 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
     @Override
     public AsyncTask<T, P> worker(BiConsumer<P, T> worker) {
         super.worker(worker);
+        return this;
+    }
+
+    @Override
+    public AsyncTask<T, P> runnable(BiConsumer<P, T> worker) {
+        super.runnable(worker);
+        return this;
+    }
+
+    @Override
+    public AsyncTask<T, P> runAbstract(boolean b) {
+        super.runAbstract(b);
         return this;
     }
 

@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.process.ExecutionService;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.ProcessManager;
 import com.github.orbyfied.carbon.process.impl.AsyncTask;
+import com.github.orbyfied.carbon.process.impl.ParallelTask;
 import com.github.orbyfied.carbon.process.impl.QueuedTickExecutionService;
 import com.github.orbyfied.carbon.process.impl.SyncTask;
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,10 @@ public class MultiTaskProcessTests {
     /* ---- 1 ---- */
 
     @Test
-    public void testSyncProcess() {
+    public void testProcesses1() {
 
-        final BiConsumer<Process<Object>, Object> myWorkExecutor = (p, o) -> System.out.println(o);
+        final BiConsumer<Process<Object>, Object> myWorkExecutor =
+                (p, o) -> System.out.println("from " + Thread.currentThread().getName() + ": " + o);
 
         /* Run */
 
@@ -56,8 +58,9 @@ public class MultiTaskProcessTests {
                         new SyncTask<>().addWork(90000),
                         new SyncTask<>().addWork(42069),
                         new SyncTask<>()
-                                .worker((p, t) -> System.out.println("hello"))
-                                .addWork(1)
+                                .runnable((p, t) -> System.out.println("hello")),
+                        new ParallelTask<>().addWork(1, 2, 3, 4, 5, 6).joined(true),
+                        new SyncTask<>().addWork(90000)
                 );
 
         QueuedTickExecutionService.TickLoop tickLoop = service.tickLoop(true, null);

@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
 
     private boolean isJoined;
-    private int threadCount;
+    private int threadCount = 4;
 
     private ArrayList<T>[] workPerThread;
 
@@ -50,13 +50,17 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
             threads.add(thread);
         }
 
-        // run next task now if not joined
-        if (!isJoined)
-            nextTaskCallback.run();
+        // run abstract
+        if (runAbstract)
+            worker.accept(process, null);
 
         // start all threads
         for (Thread t : threads)
             t.start();
+
+        // run next task now if not joined
+        if (!isJoined)
+            nextTaskCallback.run();
     }
 
     @Override
@@ -104,6 +108,12 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
     }
 
     @Override
+    public ParallelTask<T, P> addWork(T... w) {
+        super.addWork(w);
+        return this;
+    }
+
+    @Override
     public ParallelTask<T, P> removeWork(T w) {
         super.removeWork(w);
         return this;
@@ -115,4 +125,15 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
         return this;
     }
 
+    @Override
+    public ParallelTask<T, P> runnable(BiConsumer<P, T> worker) {
+        super.runnable(worker);
+        return this;
+    }
+
+    @Override
+    public ParallelTask<T, P> runAbstract(boolean b) {
+        super.runAbstract(b);
+        return this;
+    }
 }
