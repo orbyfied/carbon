@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.content;
 
+import com.github.orbyfied.carbon.content.pack.PackResource;
 import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.RegistrableElement;
@@ -11,7 +12,8 @@ import org.bukkit.Material;
 import java.util.*;
 
 public class CMDRegistryService<T extends RegistrableElement>
-        extends RegistryService<Registry<T>, T> {
+        extends RegistryService<Registry<T>, T>
+        implements AssetPreparingService {
 
     public CMDRegistryService(Registry<T> registry) {
         super(registry);
@@ -58,6 +60,13 @@ public class CMDRegistryService<T extends RegistrableElement>
 
     public BaseEditing edit(Material base) {
         return new BaseEditing(base);
+    }
+
+    @Override
+    public void prepareAssets(ResourcePackBuilder builder) {
+
+        
+
     }
 
     public class BaseEditing {

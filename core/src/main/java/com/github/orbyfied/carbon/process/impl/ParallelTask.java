@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -25,10 +26,15 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
         // threads created and to be run
         ArrayList<Thread> threads = new ArrayList<>(threadCount);
         // done counter
+        final int threadsRegistered = threads.size();
         AtomicInteger done = new AtomicInteger(0);
         for (int t = 0; t < threadCount; t++) {
             // get work for the thread
             final List<T> workForThread = workPerThread[t];
+
+            // no work
+            if (workForThread == null)
+                continue;
 
             // create thread
             Thread thread = es.newThread(() -> {
@@ -40,7 +46,7 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
                 done.incrementAndGet();
                 // run next task if all are done
                 if (isJoined) {
-                    if (done.get() >= threadCount) {
+                    if (done.get() >= threadsRegistered) {
                         nextTaskCallback.run();
                     }
                 }
@@ -79,6 +85,7 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
             }
             l.add(work.get(i));
         }
+
     }
 
     public boolean joined() {

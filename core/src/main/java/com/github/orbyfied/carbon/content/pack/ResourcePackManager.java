@@ -11,6 +11,7 @@ import com.github.orbyfied.carbon.process.impl.QueuedTickExecutionService;
 import com.github.orbyfied.carbon.process.impl.SyncTask;
 import com.github.orbyfied.carbon.registry.Registry;
 import net.md_5.bungee.api.ChatColor;
+import org.apache.commons.io.file.StandardDeleteOption;
 import org.checkerframework.checker.units.qual.A;
 
 import java.io.FileNotFoundException;
@@ -48,6 +49,7 @@ public class ResourcePackManager {
         this.logger = main.getLogger("ResourcePack");
         this.packSrcDirectory = main.getFileInDirectory("resource_pack/src/");
         this.packPkgFile      = main.getFileInDirectory("resource_pack/pack.zip");
+        packPkgFileNamed      = main.getFileInDirectory("resource_pack/Carbon Mod Resources.zip");
     }
 
     public Carbon getMain() {
@@ -66,6 +68,22 @@ public class ResourcePackManager {
 
             int modCount = main.getModLoader().getMods().size();
             logger.info("Building resource pack for " + modCount + " mods.");
+
+            // delete old resource pack and create new
+            try {
+
+                // delete old
+                Files.deleteIfExists(packPkgFile);
+                Files.deleteIfExists(packPkgFileNamed);
+                deleteDirectory(packSrcDirectory);
+
+                // create new
+                Files.createDirectories(packSrcDirectory);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
 
             // create pack builder
             ResourcePackBuilder b = new ResourcePackBuilder(this, packSrcDirectory);
@@ -100,14 +118,18 @@ public class ResourcePackManager {
                 Path rp = builder.resource.getPath(b.srcDir);
                 logger.debugc(() -> prefixwt("Building resource " + builder.resource.getName() + ": " + rp));
                 try {
+                    // create file
+                    if (!Files.exists(rp))
+                        Files.createFile(rp);
+
                     // open output stream and write file, then close
                     OutputStream s = Files.newOutputStream(rp);
                     builder.write(s);
                     s.close();
                 } catch (Exception e) {
                     // log error
-                    logger.err("Error while building " + builder.resource.getName() + " (" +
-                            rp + "): " + e);
+                    logger.err(prefixwt("Error while building " + builder.resource.getName() + " (" +
+                            rp + "): " + e));
                     e.printStackTrace();
                 }
             };
@@ -171,8 +193,32 @@ public class ResourcePackManager {
 
     }
 
+    ///////////////////////////////////////////////////
+
     private String prefixwt(String s) {
-        return ChatColor.DARK_GRAY + "{ " + Thread.currentThread().getName() + " }" + s;
+        return ChatColor.DARK_GRAY + "{ " + Thread.currentThread().getName() + " }" + ChatColor.WHITE + " " + s;
+    }
+
+    private void deleteDirectory(Path path) throws IOException {
+        if (!Files.exists(path))
+            return;
+
+        Files.walkFileTree(path, new SimpleFileVisitor<>() {
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+        });
+
     }
 
     /**
@@ -180,6 +226,8 @@ public class ResourcePackManager {
      */
     private void zipFilesInFolder(String folder, Path resultFile){
         try {
+            if (!Files.exists(resultFile))
+                Files.createFile(resultFile);
             OutputStream fos = Files.newOutputStream(resultFile);
             ZipOutputStream zos = new ZipOutputStream(fos);
 
@@ -204,6 +252,9 @@ public class ResourcePackManager {
                     return FileVisitResult.CONTINUE;
                 }
             });
+
+            zos.close();
+            fos.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

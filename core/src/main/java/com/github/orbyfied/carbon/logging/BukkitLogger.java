@@ -33,7 +33,7 @@ public class BukkitLogger {
      */
     private String stage;
 
-    private boolean isDebug;
+    private boolean isDebug = true;
 
     private Function<Integer, ChatColor> colorMapper = DEFAULT_LEVEL_COLORS;
 

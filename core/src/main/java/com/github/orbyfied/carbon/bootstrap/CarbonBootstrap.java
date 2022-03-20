@@ -88,11 +88,17 @@ public abstract class CarbonBootstrap
 
     }
 
+    /**
+     * Initializes all mods and resources.
+     */
     public void initialize() {
 
-        // start initializing
+        // initialize all mods
         ModLoader loader = main.getModLoader();
         loader.initializeAll();
+
+        // build resource pack
+        main.getResourcePackManager().build();
 
     }
 

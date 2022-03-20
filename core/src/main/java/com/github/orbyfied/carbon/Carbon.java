@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon;
 
 import com.github.orbyfied.carbon.api.util.Version;
 import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
+import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
@@ -72,6 +73,11 @@ public class Carbon {
      */
     protected final ProcessManager processManager = new CarbonProcessManager(this);
 
+    /**
+     * The resource pack manager.
+     */
+    protected final ResourcePackManager resourcePackManager = new ResourcePackManager(this);
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -90,6 +96,10 @@ public class Carbon {
 
     public ProcessManager getProcessManager() {
         return processManager;
+    }
+
+    public ResourcePackManager getResourcePackManager() {
+        return resourcePackManager;
     }
 
     public BukkitLogger getLogger(String id) {
