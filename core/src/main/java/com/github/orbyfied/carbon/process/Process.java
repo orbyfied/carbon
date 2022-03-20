@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.process;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,14 +14,14 @@ import java.util.function.Consumer;
 public class Process<T> {
 
     /**
+     * The tasks to run.
+     */
+    protected List<Task<T, Process<T>>> tasks = new ArrayList<>();
+
+    /**
      * The executor of the work.
      */
     protected Consumer<T> workExecutor;
-
-    /**
-     * The tasks to run.
-     */
-    protected List<Task<T, Process<T>>> tasks;
 
     /**
      * The manager of this process.
@@ -80,11 +81,20 @@ public class Process<T> {
         return executionService;
     }
 
+    public Process<T> setExecutionService(ExecutionService service) {
+        this.executionService = service;
+        return this;
+    }
+
     public Object getLock() {
         if (lock == null) lock = new Object();
         return lock;
     }
 
+    /**
+     * Returns if the task is
+     * @return
+     */
     public boolean isRunning() {
         return isRunning;
     }
@@ -120,16 +130,31 @@ public class Process<T> {
 
     /**
      * Starts this process.
+     * @return This.
      */
-    public void run() {
+    public Process<T> run() {
         // get execution service
-        executionService = manager.getExecutionService(this);
+        if (executionService == null)
+            executionService = manager.getDefaultExecutionService(this);
 
         // set that we are running
         isRunning = true;
 
         // run the first task and start the chain
         runTask(0);
+
+        // return
+        return this;
+    }
+
+    /**
+     * @see Process#setExecutionService(ExecutionService)
+     * @see Process#run()
+     * @param service The service to run it with.
+     * @return This.
+     */
+    public Process<T> run(ExecutionService service) {
+        return setExecutionService(service).run();
     }
 
     /**
@@ -160,9 +185,23 @@ public class Process<T> {
         Task<T, Process<T>> task = tasks.get(id);
         if (task == null) return;
 
+        // get synchronous thread
+        Thread syncthread = Thread.currentThread();
+
         try {
+            // next task call
+            Runnable nextTask = () -> runTask(id + 1);
+
             // run task
-            task.run(this, () -> runTask(id + 1));
+            task.run(this, () -> {
+                // run synchronously
+                Thread ct = Thread.currentThread();
+                if (syncthread != ct) {
+                    executionService.doSync(nextTask);
+                } else {
+                    nextTask.run();
+                }
+            });
         } catch (Exception e) {
             // TODO: proper error handling
             e.printStackTrace();

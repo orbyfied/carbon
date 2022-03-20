@@ -7,28 +7,41 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
+/**
+ * Mod loader class which manages
+ * and keeps track of mods. It also
+ * executes the loading lifecycle.
+ */
 public class ModLoader {
 
-    private final ArrayList<LoadedMod> mods = new ArrayList<>();
-
-    private final HashMap<Class<? extends Plugin>, LoadedMod> modsByClass = new HashMap<>();
-
+    /**
+     * The Carbon instance.
+     */
     private final Carbon main;
 
+    /**
+     * All mods loaded in a list.
+     */
+    private final ArrayList<LoadedMod> mods = new ArrayList<>();
+
+    /**
+     * All mods loaded mapped by class.
+     */
+    private final HashMap<Class<? extends Plugin>, LoadedMod> modsByClass = new HashMap<>();
+
+    /**
+     * The logger for mod loading.
+     */
     private final BukkitLogger logger;
 
+    /** Constructor. */
     public ModLoader(Carbon main) {
         this.main = main;
         this.logger = main.getLogger("ModLoader");
     }
 
-    public List<LoadedMod> getMods() {
-        return Collections.unmodifiableList(mods);
-    }
-
-    public Map<Class<? extends Plugin>, LoadedMod> getModsByClass() {
-        return Collections.unmodifiableMap(modsByClass);
-    }
+    public List<LoadedMod> getMods() { return Collections.unmodifiableList(mods); }
+    public Map<Class<? extends Plugin>, LoadedMod> getModsByClass() { return Collections.unmodifiableMap(modsByClass); }
 
     public LoadedMod getByClass(Class<? extends Plugin> klass) {
         return modsByClass.get(klass);

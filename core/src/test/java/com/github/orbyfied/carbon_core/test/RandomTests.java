@@ -2,8 +2,12 @@ package com.github.orbyfied.carbon_core.test;
 
 import com.github.orbyfied.carbon.util.json.JsonArray;
 import com.github.orbyfied.carbon.util.json.JsonDocument;
+import org.checkerframework.checker.units.qual.C;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 public class RandomTests {
 
@@ -13,6 +17,22 @@ public class RandomTests {
         Map<Integer, List<Object>> dist = new HashMap<>();
         int y = 3;
 
+    }
+
+    @Test
+    public void cTest() throws Exception {
+        Callable<?> callable = Executors.callable(() ->
+                System.out.println(Thread.currentThread().getName()));
+
+        callable.call();
+
+        new Thread(() -> {
+            try {
+                callable.call();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }).start();
     }
 
 //    @Test

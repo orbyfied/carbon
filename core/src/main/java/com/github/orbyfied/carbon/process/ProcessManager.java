@@ -9,6 +9,6 @@ public abstract class ProcessManager {
         return null;
     }
 
-    public abstract ExecutionService getExecutionService(Process<?> process);
+    public abstract ExecutionService getDefaultExecutionService(Process<?> process);
 
 }

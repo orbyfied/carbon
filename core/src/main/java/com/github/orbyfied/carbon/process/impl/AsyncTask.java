@@ -24,7 +24,7 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
 
             // call next task if joined
             if (isJoined)
-                es.doSync(nextTaskCallback);
+                nextTaskCallback.run();
         });
 
         // call new task now if not joined

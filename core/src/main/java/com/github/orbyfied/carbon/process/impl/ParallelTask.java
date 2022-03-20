@@ -30,7 +30,7 @@ public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
                 done.incrementAndGet();
                 if (isJoined) {
                     if (done.get() >= threadCount) {
-                        es.doSync(nextTaskCallback);
+                        nextTaskCallback.run();
                     }
                 }
             });

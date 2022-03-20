@@ -6,6 +6,8 @@ import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
+import com.github.orbyfied.carbon.process.ProcessManager;
+import com.github.orbyfied.carbon.process.impl.CarbonProcessManager;
 import com.github.orbyfied.carbon.registry.Registry;
 
 /**
@@ -58,6 +60,11 @@ public class Carbon {
      */
     protected final ModLoader modLoader = new ModLoader(this);
 
+    /**
+     * The main process manager.
+     */
+    protected final ProcessManager processManager = new CarbonProcessManager(this);
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -72,6 +79,10 @@ public class Carbon {
 
     public ModLoader getModLoader() {
         return modLoader;
+    }
+
+    public ProcessManager getProcessManager() {
+        return processManager;
     }
 
     public BukkitLogger getLogger(String id) {
