@@ -1,21 +1,23 @@
 package com.github.orbyfied.carbon_core.test;
 
-import com.github.orbyfied.carbon.util.StringReader;
-import com.github.orbyfied.carbon.util.StructStringBuilder;
 import com.github.orbyfied.carbon.util.json.JsonArray;
 import com.github.orbyfied.carbon.util.json.JsonDocument;
-import com.github.orbyfied.carbon.util.json.JsonObject;
-import com.github.orbyfied.carbon.util.json.JsonValueSpec;
-import com.github.orbyfied.carbon.util.resource.ResourceHandle;
-import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class RandomTests {
 
-    @Test
+    public void distTest() {
+
+        List<Object> objs = Arrays.asList(1,2,3,4,5,6,7,8,9);
+        Map<Integer, List<Object>> dist = new HashMap<>();
+        int y = 3;
+
+    }
+
+//    @Test
     public void jsonTest() {
+
         JsonDocument doc1 = new JsonDocument();
         doc1
                 .set("numbera", 1)
