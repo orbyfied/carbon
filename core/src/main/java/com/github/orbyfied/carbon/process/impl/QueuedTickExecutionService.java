@@ -63,6 +63,8 @@ public class QueuedTickExecutionService extends ExecutionService {
         private final boolean       blocking;
         private final Runnable      between;
 
+        private final AtomicBoolean hasEnded = new AtomicBoolean(false);
+
         public AtomicBoolean getRunning() {
             return running;
         }
@@ -71,14 +73,23 @@ public class QueuedTickExecutionService extends ExecutionService {
             return blocking;
         }
 
-        public void end() {
+        public TickLoop end() {
+            hasEnded.set(true);
             running.set(false);
             if (blocking && lock != null) {
                 Thread.currentThread().interrupt();
             }
+            return this;
         }
 
-        public void run() {
+        public TickLoop reboot() {
+            hasEnded.set(false);
+            return this;
+        }
+
+        public TickLoop run() {
+            if (hasEnded.get())
+                return this;
             running.set(true);
             while (running.get()) {
                 if (between != null)
@@ -87,16 +98,17 @@ public class QueuedTickExecutionService extends ExecutionService {
                 if (blocking && lock != null) {
                     synchronized (lock) {
                         try {
-                            lock.wait();
+                            lock.wait(250);
                         } catch (InterruptedException e) {
                             // ignore
                         } catch (Exception e) {
                             e.printStackTrace();
-                            return;
+                            return this;
                         }
                     }
                 }
             }
+            return this;
         }
 
     }

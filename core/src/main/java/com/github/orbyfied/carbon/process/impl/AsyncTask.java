@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.process.ExecutionService;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
@@ -14,13 +15,12 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
     public void run(P process, Runnable nextTaskCallback) {
         // get execution service and work executor
         ExecutionService es = process.getExecutionService();
-        final Consumer<T> workExec = process.getWorkExecutor();
 
         // create thread with program
         Thread t = es.newThread(() -> {
             // do work
             for (T w : work)
-                workExec.accept(w);
+                worker.accept(process, w);
 
             // call next task if joined
             if (isJoined)
@@ -37,7 +37,7 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
 
     @Override
     public void bake(P process) {
-
+        super.bake(process);
     }
 
     public boolean joined() {
@@ -60,6 +60,12 @@ public class AsyncTask<T, P extends Process<T>> extends Task<T, P> {
     @Override
     public AsyncTask<T, P> removeWork(T w) {
         super.removeWork(w);
+        return this;
+    }
+
+    @Override
+    public AsyncTask<T, P> worker(BiConsumer<P, T> worker) {
+        super.worker(worker);
         return this;
     }
 

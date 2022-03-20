@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.process;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * One runnable part in a chain
@@ -20,6 +22,11 @@ public abstract class Task<T, P extends Process<T>> {
     protected final List<T> work = new ArrayList<>();
 
     /**
+     * The work executor.
+     */
+    protected BiConsumer<P, T> worker;
+
+    /**
      * Runs this task. Provides the process
      * and a callback to run the next task.
      * @param process The process it was called by.
@@ -35,7 +42,11 @@ public abstract class Task<T, P extends Process<T>> {
      * start of a process.
      * @param process The process that called this.
      */
-    public abstract void bake(final P process);
+    @SuppressWarnings("unchecked")
+    public void bake(final P process) {
+        if (worker == null)
+            worker = (BiConsumer<P, T>) process.getDefaultWorker();
+    }
 
     /* Work Modification */
 
@@ -48,8 +59,18 @@ public abstract class Task<T, P extends Process<T>> {
         return this;
     }
 
+    public Task<T, P> addWork(T... w) {
+        work.addAll(Arrays.asList(w));
+        return this;
+    }
+
     public Task<T, P> removeWork(T w) {
         work.remove(w);
+        return this;
+    }
+
+    public Task<T, P> worker(BiConsumer<P, T> worker) {
+        this.worker = worker;
         return this;
     }
 

@@ -10,6 +10,8 @@ import com.github.orbyfied.carbon.process.ProcessManager;
 import com.github.orbyfied.carbon.process.impl.CarbonProcessManager;
 import com.github.orbyfied.carbon.registry.Registry;
 
+import java.nio.file.Path;
+
 /**
  * The carbon plugin and main class.
  */
@@ -18,6 +20,11 @@ public class Carbon {
     public static final Version VERSION = Version.of("0.1.0");
 
     /* ----------- PLUGIN ------------ */
+
+    /**
+     * The data folder for Carbon.
+     */
+    protected final Path directory = Path.of("./.carbon");
 
     /**
      * The Carbon plugin instance.
@@ -87,6 +94,12 @@ public class Carbon {
 
     public BukkitLogger getLogger(String id) {
         return new BukkitLogger("Carbon" + id);
+    }
+
+    public Path getDirectory() { return directory; }
+
+    public Path getFileInDirectory(String n) {
+        return directory.resolve(n);
     }
 
 }

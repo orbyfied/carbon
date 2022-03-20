@@ -9,6 +9,7 @@ import com.github.orbyfied.carbon.process.impl.SyncTask;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class MultiTaskProcessTests {
@@ -43,19 +44,20 @@ public class MultiTaskProcessTests {
     @Test
     public void testSyncProcess() {
 
-        final Consumer<Object> myWorkExecutor = System.out::println;
+        final BiConsumer<Process<Object>, Object> myWorkExecutor = (p, o) -> System.out.println(o);
 
         /* Run */
 
         QueuedTickExecutionService service = new QueuedTickExecutionService(pm);
 
-        Process<Object> myProcess = new Process<>(pm, myWorkExecutor)
-                .addTask(
-                        new SyncTask<>().addWork(69420)
-                ).addTask(
-                        new AsyncTask<>().addWork(90000).joined(true)
-                ).addTask(
-                        new SyncTask<>().addWork(42069)
+        Process<Object> myProcess = pm.process(myWorkExecutor)
+                .addTasks(
+                        new SyncTask<>().addWork(69420),
+                        new SyncTask<>().addWork(90000),
+                        new SyncTask<>().addWork(42069),
+                        new SyncTask<>()
+                                .worker((p, t) -> System.out.println("hello"))
+                                .addWork(1)
                 );
 
         QueuedTickExecutionService.TickLoop tickLoop = service.tickLoop(true, null);

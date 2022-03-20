@@ -1,7 +1,11 @@
 package com.github.orbyfied.carbon.process;
 
+import com.github.orbyfied.carbon.util.TriConsumer;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -21,7 +25,7 @@ public class Process<T> {
     /**
      * The executor of the work.
      */
-    protected Consumer<T> workExecutor;
+    protected BiConsumer<Process<T>, T> defaultWorker;
 
     /**
      * The manager of this process.
@@ -56,13 +60,13 @@ public class Process<T> {
      * @param workExecutor The work executor.
      */
     public Process(ProcessManager manager,
-                   Consumer<T> workExecutor) {
+                   BiConsumer<Process<T>, T> workExecutor) {
         this.manager      = manager;
-        this.workExecutor = workExecutor;
+        this.defaultWorker = workExecutor;
     }
 
-    public Consumer<T> getWorkExecutor() {
-        return workExecutor;
+    public BiConsumer<Process<T>, T> getDefaultWorker() {
+        return defaultWorker;
     }
 
     public List<Task<T, Process<T>>> getTasks() {
@@ -75,6 +79,12 @@ public class Process<T> {
 
     public Process<T> addTask(Task<T, Process<T>> task) {
         tasks.add(task);
+        return this;
+    }
+
+    @SafeVarargs
+    public final Process<T> addTasks(Task<T, Process<T>>... t) {
+        tasks.addAll(Arrays.asList(t));
         return this;
     }
 
