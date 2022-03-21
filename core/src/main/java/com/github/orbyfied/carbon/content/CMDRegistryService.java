@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.content;
 
+import com.github.orbyfied.carbon.content.pack.CopyAssetBuilder;
 import com.github.orbyfied.carbon.content.pack.PackResource;
 import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.github.orbyfied.carbon.content.pack.SourcedAsset;
@@ -44,7 +45,12 @@ public class CMDRegistryService<T extends RegistrableElement>
         return h.getModel(off - h.getCustomModelDataOffset());
     }
 
-    public void buildAssets(ResourcePackBuilder builder) {
+    public BaseEditing edit(Material base) {
+        return new BaseEditing(base);
+    }
+
+    @Override
+    public void prepareAssets(ResourcePackBuilder builder) {
         Set<Map.Entry<Material, ArrayList<ModelHolder<T>>>> entries = cmds.entrySet();
         for (Map.Entry<Material, ArrayList<ModelHolder<T>>> entry : entries) {
             Material base = entry.getKey();
@@ -53,19 +59,13 @@ public class CMDRegistryService<T extends RegistrableElement>
                 int off = modelHolder.getCustomModelDataOffset();
                 for (SourcedAsset modelAsset : modelHolder.getModels()) {
                     off++;
+                    // build actual model
+                    builder.asset((b) ->
+                            new CopyAssetBuilder(b, modelAsset.getResource())
+                    ).setSource(modelAsset.getSource());
                 }
             }
         }
-    }
-
-    public BaseEditing edit(Material base) {
-        return new BaseEditing(base);
-    }
-
-    @Override
-    public void prepareAssets(ResourcePackBuilder builder) {
-
-        
 
     }
 

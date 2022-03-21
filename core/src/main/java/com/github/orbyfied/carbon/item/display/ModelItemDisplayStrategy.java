@@ -7,10 +7,9 @@ import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.ItemDisplayStrategy;
-import com.github.orbyfied.carbon.util.resource.ResourceHandle;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 
 public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements ModelHolder<CarbonItem<?>> {
@@ -50,9 +49,8 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     public void makeItem(
             ItemStack stack,
             CarbonItemState<?> state,
-            ItemMeta meta,
-            PersistentDataContainer tag) {
-        meta.setCustomModelData(cmdStart + getModelIdFrom(state));
+            CompoundTag tag) {
+        tag.putInt("CustomModelData", cmdStart + getModelIdFrom(state));
     }
 
     @Override
