@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.element;
 
+import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.registry.RegistryComponent;
 import com.github.orbyfied.carbon.registry.RegistryItem;
@@ -16,9 +17,9 @@ public class ModElementRegistry<T extends RegistrableElement> extends RegistryCo
 
     private Class<T> valType;
 
-    public ModElementRegistry(Registry<T> registry, Class<T> valType) {
+    public ModElementRegistry(Registry<T> registry, Class<? extends RegistrableElement> valType) {
         this(registry);
-        this.valType = valType;
+        this.valType = (Class<T>) valType;
 
         // init factories
         this.keyFactory   = RegistrableElement::getId;

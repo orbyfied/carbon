@@ -3,6 +3,7 @@ package com.github.orbyfied.carbon.content.pack;
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
 import com.github.orbyfied.carbon.content.AssetPreparingService;
+import com.github.orbyfied.carbon.content.pack.host.PackHostServer;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
@@ -13,6 +14,7 @@ import com.github.orbyfied.carbon.registry.Registry;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.io.file.StandardDeleteOption;
 import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -21,6 +23,7 @@ import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
@@ -44,6 +47,8 @@ public class ResourcePackManager {
 
     public Path packPkgFileNamed;
 
+    protected PackHostServer hostServer;
+
     public ResourcePackManager(Carbon main) {
         this.main   = main;
         this.logger = main.getLogger("ResourcePack");
@@ -60,9 +65,15 @@ public class ResourcePackManager {
         return logger;
     }
 
+    public PackHostServer getHostServer() {
+        return hostServer;
+    }
+
     public static final int BUILDING_THREADS = 8;
 
-    public void build() {
+    public CompletableFuture<ResourcePackManager> build() {
+
+        final CompletableFuture<ResourcePackManager> future = new CompletableFuture<>();
 
         new Thread(() -> {
 
@@ -174,6 +185,10 @@ public class ResourcePackManager {
                         // print info
                         long tms = System.currentTimeMillis() - t1.get();
                         logger.info("Built and packaged resource pack in " + tms + "ms");
+
+                        // call future
+                        future.complete(this);
+
                     })
             );
 
@@ -190,6 +205,20 @@ public class ResourcePackManager {
             tickLoop.run();
 
         }, "Carbon.ResourcePackBuilder").start();
+
+        return future;
+
+    }
+
+    public ResourcePackManager startHost() {
+
+        // start HTTP server
+        logger.info("Starting HTTP resource pack host server.");
+
+        hostServer = new PackHostServer(this);
+        hostServer.start();
+
+        return this;
 
     }
 

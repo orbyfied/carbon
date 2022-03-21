@@ -1,8 +1,12 @@
 package com.github.orbyfied.carbon.bootstrap;
 
 import com.github.orbyfied.carbon.Carbon;
+import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
+import com.github.orbyfied.carbon.element.ModElementRegistry;
+import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
+import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.TextFormatting;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -15,6 +19,7 @@ import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.awt.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The server bootstrap class for
@@ -93,12 +98,21 @@ public abstract class CarbonBootstrap
      */
     public void initialize() {
 
+        // initialize registries
+        Registry<CarbonItem<?>> items = new Registry<>("minecraft:items");
+        items.addComponent(new ModElementRegistry<>(items, CarbonItem.class))
+                .addService(new CMDRegistryService<>(items));
+
+        main.getRegistries().register(items);
+
         // initialize all mods
         ModLoader loader = main.getModLoader();
         loader.initializeAll();
 
-        // build resource pack
-        main.getResourcePackManager().build();
+        // build and host resource pack
+        main.getResourcePackManager()
+                .build()
+                .whenComplete((mgr, _t) -> mgr.startHost());
 
     }
 

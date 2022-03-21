@@ -5,11 +5,9 @@ import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.Task;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class ParallelTask<T, P extends Process<T>> extends Task<T, P> {
 

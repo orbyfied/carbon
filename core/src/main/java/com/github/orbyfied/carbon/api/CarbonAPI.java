@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.api;
 
 import com.github.orbyfied.carbon.registry.Registry;
+import com.github.orbyfied.carbon.registry.RegistryItem;
 
 /**
  * The abstract Carbon API.
@@ -15,6 +16,6 @@ public interface CarbonAPI {
      * registries are for content.
      * @return The registry of registries.
      */
-    Registry<Registry<?>> getRegistries();
+    Registry<Registry<? extends RegistryItem>> getRegistries();
 
 }

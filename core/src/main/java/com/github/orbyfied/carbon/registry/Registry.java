@@ -126,8 +126,9 @@ public class Registry<T extends RegistryItem>
      * @param id The identifier as string.
      * @return The item.
      */
-    public T getByIdentifier(String id) {
-        return getByIdentifier(Identifier.of(id));
+    @SuppressWarnings("unchecked")
+    public <R extends T> R getByIdentifier(String id) {
+        return (R) getByIdentifier(Identifier.of(id));
     }
 
     /**

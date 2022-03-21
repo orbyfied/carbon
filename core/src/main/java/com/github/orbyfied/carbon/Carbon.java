@@ -10,6 +10,7 @@ import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.process.ProcessManager;
 import com.github.orbyfied.carbon.process.impl.CarbonProcessManager;
 import com.github.orbyfied.carbon.registry.Registry;
+import com.github.orbyfied.carbon.registry.RegistryItem;
 
 import java.nio.file.Path;
 
@@ -61,7 +62,7 @@ public class Carbon {
     /**
      * The registered registries. (I know it sounds crazy)
      */
-    protected final Registry<Registry<?>> registries = new Registry<>("carbon:registries");
+    protected final Registry<Registry<? extends RegistryItem>> registries = new Registry<>("carbon:registries");
 
     /**
      * The main mod loader.
@@ -82,7 +83,7 @@ public class Carbon {
         return api;
     }
 
-    public Registry<Registry<?>> getRegistries() {
+    public Registry<Registry<? extends RegistryItem>> getRegistries() {
         return registries;
     }
 
