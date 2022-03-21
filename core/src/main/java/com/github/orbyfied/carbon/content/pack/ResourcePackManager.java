@@ -3,21 +3,17 @@ package com.github.orbyfied.carbon.content.pack;
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
 import com.github.orbyfied.carbon.content.AssetPreparingService;
+import com.github.orbyfied.carbon.content.pack.host.PackHostProvider;
 import com.github.orbyfied.carbon.content.pack.host.PackHostServer;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
 import com.github.orbyfied.carbon.process.Process;
-import com.github.orbyfied.carbon.process.Task;
 import com.github.orbyfied.carbon.process.impl.ParallelTask;
 import com.github.orbyfied.carbon.process.impl.QueuedTickExecutionService;
 import com.github.orbyfied.carbon.process.impl.SyncTask;
 import com.github.orbyfied.carbon.registry.Registry;
 import net.md_5.bungee.api.ChatColor;
-import org.apache.commons.io.file.StandardDeleteOption;
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.C;
+import org.bukkit.Bukkit;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.*;
@@ -47,7 +43,7 @@ public class ResourcePackManager {
 
     public Path packPkgFileNamed;
 
-    protected PackHostServer hostServer;
+    protected PackHostProvider hostServer;
 
     public ResourcePackManager(Carbon main) {
         this.main   = main;
@@ -65,7 +61,7 @@ public class ResourcePackManager {
         return logger;
     }
 
-    public PackHostServer getHostServer() {
+    public PackHostProvider getHostServer() {
         return hostServer;
     }
 
@@ -215,8 +211,7 @@ public class ResourcePackManager {
         // start HTTP server
         logger.info("Starting HTTP resource pack host server.");
 
-        hostServer = new PackHostServer(this);
-        hostServer.start();
+        // TODO: implement provider creation
 
         return this;
 
