@@ -51,6 +51,12 @@ public class Registry<T extends RegistryItem>
      */
     private final HashMap<Class<? extends RegistryComponent<Registry<T>, T, ?, ?>>, RegistryComponent<Registry<T>, T, ?, ?>> componentsMapped = new HashMap<>();
 
+    /**
+     * Stores all components mapped to
+     * their runtime key type.
+     */
+    private final HashMap<Class<?>, RegistryComponent<Registry<T>, T, ?, ?>> componentsByKeyType = new HashMap<>();
+
     /* ---- SERVICES ---- */
 
     /**
@@ -198,6 +204,16 @@ public class Registry<T extends RegistryItem>
     }
 
     @SuppressWarnings("unchecked")
+    public <K, R> R getValue(K key) {
+        Class<?> klass = key.getClass();
+        RegistryComponent<Registry<T>, T, K, ?> component;
+        if ((component = (RegistryComponent<Registry<T>, T, K, R>)
+                componentsByKeyType.get(klass)) == null)
+            return null;
+        return (R) component.getMapped((K) key);
+    }
+
+    @SuppressWarnings("unchecked")
     public <K, V, M extends RegistryComponent<Registry<T>, T, K, V>> M getComponent(int index) {
         return (M) componentsLinear.get(index);
     }
@@ -212,6 +228,7 @@ public class Registry<T extends RegistryItem>
         Objects.requireNonNull(module, "module cannot be null");
         componentsLinear.add(module);
         componentsMapped.put((Class<? extends RegistryComponent<Registry<T>, T, ?, ?>>) module.getClass(), module);
+        componentsByKeyType.put(module.getKeyType(), module);
         return this;
     }
 
@@ -249,6 +266,7 @@ public class Registry<T extends RegistryItem>
             return this;
         componentsMapped.remove(module.getClass(), module);
         componentsLinear.remove(module);
+        componentsByKeyType.remove(module.getKeyType(), module);
         return this;
     }
 

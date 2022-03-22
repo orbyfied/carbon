@@ -6,30 +6,66 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 
+/**
+ * Represents the state and data of
+ * an item stack. Can be serialized to
+ * and deserialized from NBT.
+ * @param <I> The item type.
+ */
 public class CarbonItemState<I extends CarbonItem<?>> {
 
+    /**
+     * The item type of this state.
+     */
     protected I item;
 
+    /** Constructor. */
     public CarbonItemState(I item) {
         this.item = item;
     }
 
+    /**
+     * Get the item type of
+     * the state.
+     * @return The item type.
+     */
     public I getItem() {
         return item;
     }
 
+    /*
+    Core NBT Storage Design
+      -  tag  = { CarbonItemState: ... }
+      -  item = { CarbonItemId: ... } and { CarbonItemState: { ItemId: ... } }
+     */
+
+    /**
+     * Saves the current item state
+     * into the NBT tag. The tag is
+     * { CarbonItemState: ... } (the ...)
+     * @param stack The item stack.
+     * @param meta The Bukkit item meta.
+     * @param tag The CarbonItemState NBT tag.
+     */
     public void save(ItemStack stack,
                      ItemMeta meta,
                      CompoundTag tag) {
+        // save item type
         tag.putInt("ItemId", item.getId());
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Loads the dat from the NBT
+     * tag into this item state.
+     * @param stack The item stack.
+     * @param meta The Bukkit item meta.
+     * @param tag The CarbonItemState NBT tag.
+     */
     public void load(ItemStack stack,
                      ItemMeta meta,
                      CompoundTag tag) {
-        item = (I) item.getRegistry().getComponent(ModElementRegistry.class)
-                .getLinear(tag.getInt("ItemId"));
+        // load item type
+        item = item.getRegistry().getValue(tag.getInt("ItemId"));
     }
 
 }
