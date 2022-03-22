@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.content.pack.host;
 
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
+import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
+import com.google.common.graph.Network;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
@@ -15,6 +17,7 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +29,7 @@ import java.util.concurrent.Executors;
  * Class for hosting and sending
  * the resource pack.
  */
-public class PackHostServer implements Listener {
+public class PackHostServer extends PackHostProvider {
 
     /**
      * The port for the server.
@@ -37,10 +40,10 @@ public class PackHostServer implements Listener {
         PORT = Bukkit.getServer().getPort() + 1;
     }
 
-    /**
-     * The parent resource pack manager.
-     */
-    final ResourcePackManager manager;
+    /** Constructor. */
+    public PackHostServer(ResourcePackManager manager) {
+        super(manager, true);
+    }
 
     /**
      * The HTTP server instance.
@@ -51,11 +54,6 @@ public class PackHostServer implements Listener {
      * The server executor pool.
      */
     Executor exec = Executors.newFixedThreadPool(1);
-
-    /** Constructor. */
-    public PackHostServer(ResourcePackManager manager) {
-        this.manager = manager;
-    }
 
     /**
      * The URL assigned to the created
@@ -70,33 +68,17 @@ public class PackHostServer implements Listener {
     byte[] hash;
 
     /**
-     * If the players should be forced
-     * to download the resource pack.
+     * The pack file.
      */
-    boolean forcePack = true;
-
-    public String getLocalPackDownloadUrl() {
-        return "127.0.0.1:" + PORT + packDownloadLoc;
-    }
-
-    public String getPackDownloadFor(Player player) {
-        String s = getLocalPackDownloadUrl();
-        return s;
-    }
+    Path packFile;
 
     /**
      * Creates, assigns and starts the server.
      */
+    @Override
     public void start() {
 
-        // get resource pack (renamed)
-        final Path resourcePack = manager.packPkgFileNamed;
-
         try {
-            // create hash
-            hash = MessageDigest
-                    .getInstance("sha-1")
-                    .digest(Files.newInputStream(resourcePack).readAllBytes());
 
             // create and set up server
             server = HttpServer.create();
@@ -104,7 +86,7 @@ public class PackHostServer implements Listener {
             server.bind(new InetSocketAddress(PORT), 0);
 
             // create and bind download url
-            packDownloadLoc = "/carbon/rp_d/" + resourcePack.getFileName().toString().split("\\.")[0] +
+            packDownloadLoc = "/carbon/rp_d/" + packFile.getFileName().toString().split("\\.")[0] +
                         "-" + toHexString(hash[0]) + toHexString(hash[1]) + toHexString(hash[3]) + toHexString(hash[4]) + ".zip";
             server.createContext(packDownloadLoc, exchange -> {
                 // check request method for GET
@@ -117,8 +99,8 @@ public class PackHostServer implements Listener {
 
                 // write file
                 OutputStream out = exchange.getResponseBody();
-                exchange.sendResponseHeaders(200, Files.size(resourcePack));
-                InputStream fis = Files.newInputStream(resourcePack);
+                exchange.sendResponseHeaders(200, Files.size(packFile));
+                InputStream fis = Files.newInputStream(packFile);
                 fis.transferTo(out);
                 out.flush();
                 out.close();
@@ -129,7 +111,7 @@ public class PackHostServer implements Listener {
 
             // log
             manager.getLogger().ok("Successfully started HTTP server on " +
-                    "127.0.0.1:" + PORT + " (pack url: " + getLocalPackDownloadUrl() + ")");
+                    "127.0.0.1:" + PORT + " (pack url: " + getLocalDownloadUrl(0) + ")");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,52 +121,54 @@ public class PackHostServer implements Listener {
     /**
      * Stops the HTTP server.
      */
+    @Override
     public void stop() {
         // stop lol
         server.stop(0);
     }
 
-    /**
-     * Sends the resource pack to the
-     * player with a fancy message.
-     * @param player The player to send it to.
-     * @return If it was accepted.
-     */
-    public void sendPackToPlayer(Player player) {
-        // create prompt
-        int modCount = manager.getMain().getModLoader().getMods().size();
-        String prompt = ChatColor.GOLD + "" + ChatColor.BOLD + "⚠ " +
-            CarbonBranding.PREFIX + ChatColor.DARK_GRAY + " mod resources. " +
-            ChatColor.GOLD + "" + ChatColor.BOLD + "⚠ \n" +
-            ChatColor.GRAY + "This resource pack contains the resources of " +
-            ChatColor.YELLOW + modCount + ChatColor.GRAY + " mods.";
-        if (!forcePack)
-            prompt += ChatColor.RED + "\n⚠ By declining you will miss out on unique and " +
-                    "engaging content.";
-        else
-            prompt += ChatColor.RED + "\n⚠ This resource pack is required to play on this server.";
-
-        // send resource pack
-        player.setResourcePack(
-                getPackDownloadFor(player),
-                null,
-                prompt,
-                forcePack
-        );
-
+    @Override
+    public int host(Path pack, int id) {
+        packFile = pack;
+        try {
+            // create hash
+            hash = MessageDigest
+                    .getInstance("sha-1")
+                    .digest(Files.newInputStream(packFile).readAllBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
-    /* ---- PLAYERS ---- */
-
-    @EventHandler
-    void onJoin(PlayerJoinEvent event) {
-        // send pack
-        sendPackToPlayer(event.getPlayer());
+    @Override
+    public byte[] getHashOf(int artifactId) {
+        if (artifactId != 0)
+            throw new UnsupportedOperationException("only one artifact supported");
+        return hash;
     }
 
-    public void sendPackToAllPlayers() {
-        for (Player p : Bukkit.getOnlinePlayers())
-            sendPackToPlayer(p);
+    @Override
+    public String getLocalDownloadUrl(int artifactId) {
+        if (artifactId != 0)
+            throw new UnsupportedOperationException("only one artifact supported");
+        return "127.0.0.1:" + PORT + packDownloadLoc;
+    }
+
+    @Override
+    public String getDownloadUrlFor(int artifactId, Player player) {
+        if (artifactId != 0)
+            throw new UnsupportedOperationException("only one artifact supported");
+        try {
+            NetworkInterface ni = NetworkInterface.getByInetAddress(
+                    manager.getMain().getPlatform().getNetworkProxy().getConnectionOf(player).virtualHost.getAddress()
+            );
+            System.out.println(ni);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     ////////////////////////////////////////

@@ -13,4 +13,6 @@ public interface PlatformProxy {
 
     ResourcePackProxy getResourcePackProxy();
 
+    NetworkProxy getNetworkProxy();
+
 }

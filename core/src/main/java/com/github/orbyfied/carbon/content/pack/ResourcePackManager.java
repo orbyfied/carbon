@@ -211,7 +211,10 @@ public class ResourcePackManager {
         // start HTTP server
         logger.info("Starting HTTP resource pack host server.");
 
-        // TODO: implement provider creation
+        hostServer = new PackHostServer(this);
+        hostServer.host(packPkgFileNamed, 0);
+        hostServer.start();
+        hostServer.sendPackToAllPlayers(0, true);
 
         return this;
 

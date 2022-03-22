@@ -66,7 +66,7 @@ public class LoadedMod {
         Objects.requireNonNull(carbon, "carbon reference cannot be null");
         Objects.requireNonNull(plugin, "plugin reference cannot be null");
         this.main     = carbon;
-        this.plugin = plugin;
+        this.plugin   = plugin;
         this.modClass = this.plugin.getClass();
     }
 
@@ -141,9 +141,13 @@ public class LoadedMod {
 
     public LoadedMod initialize() {
         // construct mod API if needed
-        if (api != null) {
+        if (api == null) {
             api = modApiFactory.create(main, this);
         }
+
+        // check api
+        if (api == null)
+            throw new ModLoaderException(this, "mod api cannot be null");
 
         // link, ready or modify the
         // API if it is accepted
@@ -155,7 +159,7 @@ public class LoadedMod {
             modInitializer.modInitialize(api);
         } catch (Exception e) {
             // catch exceptions in there
-            throw new ModLoaderException(this, "exception occurred in initialization handler ("
+            throw new ModLoaderException(this, "exception occurred in initialization handler "
                     + modInitializerClass.getName() + ".modInitialize(...)", e);
         }
 

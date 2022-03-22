@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon.platform.impl;
+package com.github.orbyfied.carbon.content.pack;
 
 import com.github.orbyfied.carbon.platform.ResourcePackProxy;
 

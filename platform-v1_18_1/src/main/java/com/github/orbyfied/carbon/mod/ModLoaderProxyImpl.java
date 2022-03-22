@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon.platform.impl;
+package com.github.orbyfied.carbon.mod;
 
 import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.platform.ModLoaderProxy;
