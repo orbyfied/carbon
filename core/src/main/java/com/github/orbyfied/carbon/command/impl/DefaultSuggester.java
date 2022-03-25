@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.*;
+import com.github.orbyfied.carbon.command.parameter.Parameter;
 
 public class DefaultSuggester
         extends AbstractNodeComponent

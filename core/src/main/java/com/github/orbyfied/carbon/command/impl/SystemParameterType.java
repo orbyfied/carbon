@@ -1,8 +1,11 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.ParameterType;
+import com.github.orbyfied.carbon.command.parameter.GenericParameterType;
+import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
+import com.github.orbyfied.carbon.command.parameter.TypeParameter;
 import com.github.orbyfied.carbon.util.StringReader;
 import com.github.orbyfied.carbon.util.TriConsumer;
 import com.github.orbyfied.carbon.util.math.Vec3i;
@@ -24,10 +27,17 @@ public class SystemParameterType {
     private SystemParameterType() { }
 
     static <T> ParameterType<T> of(final Class<T> klass,
+                                   final String baseId,
                                    final BiPredicate<Context, StringReader> acceptor,
                                    final BiFunction<Context, StringReader, T> parser,
                                    final TriConsumer<Context, StringBuilder, T> writer) {
+        final TypeIdentifier bid = TypeIdentifier.of(baseId);
         return new ParameterType<T>() {
+            @Override
+            public TypeIdentifier getBaseIdentifier() {
+                return bid;
+            }
+
             @Override
             public Class<T> getType() {
                 return klass;
@@ -89,43 +99,43 @@ public class SystemParameterType {
 
     /* ----------------------------------------------- */
 
-    public static final ParameterType<Byte> BYTE = of(Byte.class,
+    public static final ParameterType<Byte> BYTE = of(Byte.class, "system:byte",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Byte::parseByte),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<Short> SHORT = of(Short.class,
+    public static final ParameterType<Short> SHORT = of(Short.class, "system:short",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Short::parseShort),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<Integer> INT = of(Integer.class,
+    public static final ParameterType<Integer> INT = of(Integer.class, "system:int",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Integer::parseInt),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<Long> LONG = of(Long.class,
-            (context, reader) -> isDigit(reader.current(), 10) || reader.current() == '.',
+    public static final ParameterType<Long> LONG = of(Long.class, "system:long",
+            (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Long::parseLong),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<Float> FLOAT = of(Float.class,
-            (context, reader) -> isDigit(reader.current(), 10) || reader.current() == '.',
+    public static final ParameterType<Float> FLOAT = of(Float.class, "system:float",
+            (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumberFloat(reader, Float::parseFloat),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<Double> DOUBLE = of(Double.class,
+    public static final ParameterType<Double> DOUBLE = of(Double.class, "system:double",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumberFloat(reader, Double::parseDouble),
             (context, builder, value) -> builder.append(value)
     );
 
-    public static final ParameterType<String> STRING = of(String.class,
+    public static final ParameterType<String> STRING = of(String.class, "system:string",
             (context, reader) -> true,
             ((context, reader) -> {
                 if (reader.current() == '"') {
@@ -134,10 +144,10 @@ public class SystemParameterType {
                 }
                 return reader.collect(c -> c != ' ');
             }),
-            (context, builder, s) -> builder.append("\"" + s + "\"")
+            (context, builder, s) -> builder.append("\"").append(s).append("\"")
     );
 
-    public static final ParameterType<Character> CHAR = of(Character.class,
+    public static final ParameterType<Character> CHAR = of(Character.class, "system:char",
             (context, reader) -> true,
             ((context, reader) -> {
                 if (reader.current() == '\'') {
@@ -146,10 +156,10 @@ public class SystemParameterType {
                 }
                 return reader.collect(c -> c != ' ').charAt(0);
             }),
-            (context, builder, s) -> builder.append("\"" + s + "\"")
+            (context, builder, s) -> builder.append("'").append(s).append("'")
     );
 
-    public static final ParameterType<Vec3i> VEC_3_INT = of(Vec3i.class,
+    public static final ParameterType<Vec3i> VEC_3_INT = of(Vec3i.class, "system:vec3i",
             (context, reader) -> true,
             ((context, reader) -> {
                 boolean bracketed = false;
@@ -173,7 +183,13 @@ public class SystemParameterType {
     );
 
     public static <T> ParameterType<List<T>> listOf(ParameterType<T> type) {
-        return new ParameterType<>() {
+        final TypeIdentifier listBaseIdent = TypeIdentifier.of("system:list");
+        return new GenericParameterType<>(new TypeParameter("T").setType(type)) {
+            @Override
+            public TypeIdentifier getBaseIdentifier() {
+                return listBaseIdent;
+            }
+
             @Override
             public Class<?> getType() {
                 return List.class;
@@ -212,7 +228,8 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, Suggestions suggestions) { }
+            public void suggest(Context context, Suggestions suggestions) {
+            }
         };
     }
 

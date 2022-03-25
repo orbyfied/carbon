@@ -50,8 +50,8 @@ public class StringReader {
     }
 
     public char current() {
-        if (len == 0) return DONE;
-        return str.charAt(clamp(index));
+        if (index < 0 || index >= len) return DONE;
+        return str.charAt(index);
     }
 
     private static final Predicate<Character> ONPRED = c -> true;
@@ -63,14 +63,7 @@ public class StringReader {
     }
 
     public String collect(Predicate<Character> pred) {
-        if (pred == null)
-            pred = ONPRED;
-        StringBuilder b = new StringBuilder();
-        prev();
-        char c;
-        while ((c = next()) != DONE && pred.test(c))
-            b.append(c);
-        return b.toString();
+        return collect(pred, null);
     }
 
     public String collect(Predicate<Character> pred, Predicate<Character> skip, int offEnd) {
@@ -86,7 +79,7 @@ public class StringReader {
         prev();
         char c;
         while ((c = next()) != DONE && pred.test(c))
-            if (!skip.test(c))
+            if (skip == null || !skip.test(c))
                 b.append(c);
         return b.toString();
     }

@@ -1,6 +1,6 @@
 package com.github.orbyfied.carbon_core.test.command;
 
-import com.github.orbyfied.carbon.command.ParameterType;
+import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.util.StringReader;
 import org.junit.jupiter.api.Test;

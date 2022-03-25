@@ -1,8 +1,12 @@
-package com.github.orbyfied.carbon.command;
+package com.github.orbyfied.carbon.command.parameter;
 
+import com.github.orbyfied.carbon.command.Context;
+import com.github.orbyfied.carbon.command.Suggestions;
 import com.github.orbyfied.carbon.util.StringReader;
 
 public interface ParameterType<T> {
+
+    TypeIdentifier getBaseIdentifier();
 
     Class<?> getType();
 
