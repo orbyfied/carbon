@@ -22,8 +22,12 @@ public class Node {
 
     protected final String name;
 
-    public Node(final String name) {
-        this.name = name;
+    protected final Node parent;
+
+    public Node(final String name,
+                final Node parent) {
+        this.name   = name;
+        this.parent = parent;
     }
 
     /* Getters. */
@@ -42,6 +46,14 @@ public class Node {
 
     public Map<Class<?>, AbstractNodeComponent> getComponentsByClass() {
         return Collections.unmodifiableMap(componentsByClass);
+    }
+
+    public Node getParent() {
+        return parent;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /* Components. */
@@ -78,6 +90,10 @@ public class Node {
     @SuppressWarnings("unchecked")
     public <T extends AbstractNodeComponent> T getComponent(Class<T> klass) {
         return (T) componentsByClass.get(klass);
+    }
+
+    public boolean hasComponentOf(Class<?> klass) {
+        return componentsByClass.containsKey(klass);
     }
 
     /* Children. */

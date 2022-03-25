@@ -4,8 +4,8 @@ import com.github.orbyfied.carbon.util.StringReader;
 
 public interface Functional extends NodeComponent {
 
-    void walked(Invocation ctx, StringReader reader);
+    void walked(Context ctx, StringReader reader);
 
-    void execute(Invocation ctx);
+    void execute(Context ctx);
 
 }

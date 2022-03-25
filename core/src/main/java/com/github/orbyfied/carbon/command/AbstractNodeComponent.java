@@ -17,6 +17,8 @@ public abstract class AbstractNodeComponent implements NodeComponent {
      */
     public AbstractNodeComponent(Node node) {
         this.node = node;
+        if (!node.hasComponentOf(this.getClass()))
+            node.addComponent(this);
     }
 
     /**

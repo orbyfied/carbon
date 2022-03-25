@@ -25,7 +25,10 @@ public class StringReader {
     }
 
     public char peek(int i) {
-        return str.charAt(clamp(index + i));
+        int idx = index + i;
+        if (idx < 0 || idx >= len)
+            return DONE;
+        return str.charAt(idx);
     }
 
     public char next() {

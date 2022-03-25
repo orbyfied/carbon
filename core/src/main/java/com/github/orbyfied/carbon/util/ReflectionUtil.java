@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.util;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ReflectionUtil {
@@ -20,12 +21,23 @@ public class ReflectionUtil {
 
     public static void walkParents(Class<?> klass,
                                    Consumer<Class<?>> consumer) {
+        walkParents(klass, (depth, c) -> consumer.accept(c));
+    }
+
+    public static void walkParents(Class<?> klass,
+                                   BiConsumer<Integer, Class<?>> consumer) {
+        internalWalkParents(klass, consumer, 0);
+    }
+
+    public static void internalWalkParents(Class<?> klass,
+                                           BiConsumer<Integer, Class<?>> consumer,
+                                           int depth) {
         try {
-            consumer.accept(klass);
-            if (klass.getSuperclass() != Object.class)
-                walkParents(klass.getSuperclass(), consumer);
+            consumer.accept(depth, klass);
+            if (klass.getSuperclass() != Object.class && klass.getSuperclass() != null)
+                internalWalkParents(klass.getSuperclass(), consumer, depth + 1);
             for (Class<?> c : klass.getInterfaces())
-                walkParents(c, consumer);
+                internalWalkParents(c, consumer, depth + 1);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.command;
 
+import com.github.orbyfied.carbon.command.impl.CommandNodeExecutor;
 import com.github.orbyfied.carbon.util.StringReader;
 
 public class Executable
@@ -10,19 +11,34 @@ public class Executable
         super(node);
     }
 
+    private CommandNodeExecutor walkExecutor;
+    private CommandNodeExecutor executor;
+
+    public Executable setWalkExecutor(CommandNodeExecutor e) {
+        this.walkExecutor = e;
+        return this;
+    }
+
+    public Executable setExecutor(CommandNodeExecutor e) {
+        this.executor = e;
+        return this;
+    }
+
     @Override
     public boolean selects(StringReader reader) {
-        return false;
+        return true;
     }
 
     @Override
-    public void walked(Invocation ctx, StringReader reader) {
-
+    public void walked(Context ctx, StringReader reader) {
+        if (walkExecutor != null)
+            executor.execute(ctx, node);
     }
 
     @Override
-    public void execute(Invocation ctx) {
-
+    public void execute(Context ctx) {
+        if (executor != null)
+            executor.execute(ctx, node);
     }
 
 }
