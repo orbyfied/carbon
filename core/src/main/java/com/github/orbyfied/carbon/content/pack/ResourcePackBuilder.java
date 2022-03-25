@@ -39,6 +39,14 @@ public class ResourcePackBuilder {
     }
 
     public <T extends PackAssetBuilder> T asset(
+            T asset
+            ) {
+        assets.add(asset);
+        assetsByResource.put(asset.getResource(), asset);
+        return asset;
+    }
+
+    public <T extends PackAssetBuilder> T asset(
             BiFunction<ResourcePackBuilder, PackResource, T> constructor,
             PackResource resource
             ) {
@@ -64,23 +72,6 @@ public class ResourcePackBuilder {
             Consumer<T> consumer
     ) {
         consumer.accept(asset(constructor, resource));
-        return this;
-    }
-
-    public ResourcePackBuilder build() {
-        try {
-
-            // create directory
-            if (!Files.exists(srcDir))
-                Files.createDirectories(srcDir);
-
-            //
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // return
         return this;
     }
 

@@ -11,6 +11,7 @@ import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import org.bukkit.Material;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class CMDRegistryService<T extends RegistrableElement>
         extends RegistryService<Registry<T>, T>
@@ -60,7 +61,7 @@ public class CMDRegistryService<T extends RegistrableElement>
                 for (SourcedAsset modelAsset : modelHolder.getModels()) {
                     off++;
                     // build actual model
-                    builder.asset((b) ->
+                    builder.asset((Function<ResourcePackBuilder, CopyAssetBuilder>) (b) ->
                             new CopyAssetBuilder(b, modelAsset.getResource())
                     ).setSource(modelAsset.getSource());
                 }

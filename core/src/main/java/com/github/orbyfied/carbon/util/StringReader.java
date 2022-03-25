@@ -107,4 +107,8 @@ public class StringReader {
         return reader;
     }
 
+    public StringReader branch() {
+        return new StringReader(str, index);
+    }
+
 }
