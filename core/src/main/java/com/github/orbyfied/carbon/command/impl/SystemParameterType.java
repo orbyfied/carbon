@@ -7,8 +7,18 @@ import com.github.orbyfied.carbon.util.StringReader;
 import com.github.orbyfied.carbon.util.TriConsumer;
 import com.github.orbyfied.carbon.util.math.Vec3i;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.*;
 
+/**
+ * Standard, 'system' parameter types that
+ * can be applied to Java and common values
+ * as a whole. This includes things like
+ * integers, floats, strings, vectors, etc.
+ * Also contains methods for creating variable
+ * type lists and maps.
+ */
 public class SystemParameterType {
 
     private SystemParameterType() { }
@@ -44,17 +54,11 @@ public class SystemParameterType {
     }
 
     private static boolean isDigit(char c, int radix) {
-        return (c >= '0' && c <= digits[radix]) || c == '.' || c == '_';
+        return (c >= '0' && c <= '9')  ||
+                (c >= 'A' && c <= 'Z') ||
+                (c >= 'a' && c <= 'z') ||
+                c == '.' || c == '_';
     }
-
-    static final char[] digits = {
-            '0' , '1' , '2' , '3' , '4' , '5' ,
-            '6' , '7' , '8' , '9' , 'a' , 'b' ,
-            'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
-            'i' , 'j' , 'k' , 'l' , 'm' , 'n' ,
-            'o' , 'p' , 'q' , 'r' , 's' , 't' ,
-            'u' , 'v' , 'w' , 'x' , 'y' , 'z'
-    };
 
     private static <T extends Number> T parseNumberFloat(StringReader reader,
                                                          Function<String, T> parser) {
@@ -163,12 +167,53 @@ public class SystemParameterType {
                         reader.collect(c1 -> c1 != ',' && c1 != ')', 1);
                 }
 
-                if (bracketed)
-                    reader.collect(c1 -> c1 != ')');
-
                 return new Vec3i(c);
             }),
             (context, builder, v) -> builder.append(v.toString())
     );
+
+    public static <T> ParameterType<List<T>> listOf(ParameterType<T> type) {
+        return new ParameterType<>() {
+            @Override
+            public Class<?> getType() {
+                return List.class;
+            }
+
+            @Override
+            public boolean accepts(Context context, StringReader reader) {
+                return true; // TODO
+            }
+
+            @Override
+            public List<T> parse(Context context, StringReader reader) {
+                List<T> list = new ArrayList<>();
+                char c1;
+                while ((c1 = reader.next()) != ']' && c1 != StringReader.DONE) { // already skips over first [
+//                    System.out.println("b" + reader.index() + ": '" + reader.current() + "'");
+                    reader.collect(c -> c == ' ');
+                    list.add(type.parse(context, reader));
+//                    System.out.println("a" + reader.index() + ": '" + reader.current() + "'");
+//                    System.out.println("l: " + list);
+                }
+
+                return list;
+            }
+
+            @Override
+            public void write(Context context, StringBuilder builder, List<T> v) {
+                builder.append("[");
+                int l = v.size();
+                for (int i = 0; i < l; i++) {
+                    if (i != 0)
+                        builder.append(", ");
+                    type.write(context, builder, v.get(i));
+                }
+                builder.append("]");
+            }
+
+            @Override
+            public void suggest(Context context, Suggestions suggestions) { }
+        };
+    }
 
 }

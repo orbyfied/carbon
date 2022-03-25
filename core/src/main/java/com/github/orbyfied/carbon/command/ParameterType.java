@@ -4,7 +4,7 @@ import com.github.orbyfied.carbon.util.StringReader;
 
 public interface ParameterType<T> {
 
-    Class<T> getType();
+    Class<?> getType();
 
     boolean accepts(Context context, StringReader reader);
 

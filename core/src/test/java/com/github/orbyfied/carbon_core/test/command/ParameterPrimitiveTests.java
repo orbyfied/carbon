@@ -15,13 +15,14 @@ public class ParameterPrimitiveTests {
     @Test
     public void testParameterTypesPrimitive() {
 
-        final String myString = "a \"bob sus\" 0b1011001101 (1, 2, 3)";
+        final String myString = "a \"bob sus\" 0b1011001101 (1, 2, 3) [(1, 2, 3), (4, 5, 6), (7, 8, 9)]";
 
         final ParameterType<?>[] types = new ParameterType[] {
                 SystemParameterType.CHAR,
                 SystemParameterType.STRING,
                 SystemParameterType.INT,
-                SystemParameterType.VEC_3_INT
+                SystemParameterType.VEC_3_INT,
+                SystemParameterType.listOf(SystemParameterType.VEC_3_INT)
         };
 
         /* code */
@@ -32,6 +33,8 @@ public class ParameterPrimitiveTests {
         for (ParameterType<?> type : types) {
             results.add(type.parse(null,  reader));
             reader.next();
+
+            System.out.println(results + ", idx: " + reader.index() + " = '" + reader.current() + "'");
         }
 
         System.out.println("results: " + results);
