@@ -349,4 +349,16 @@ public class SystemParameterType {
         };
     }
 
+    public static final ParameterType<TypeIdentifier> TYPE_IDENTIFIER = of(TypeIdentifier.class, "system:type_identifer",
+            (context, reader) -> true,
+            (context, reader) -> TypeIdentifier.of(reader.collect(c -> c != ' ')),
+            (context, builder, identifier) -> builder.append(identifier)
+    );
+
+    public static final ParameterType<ParameterType> TYPE = of(ParameterType.class, "system:type",
+            (context, reader) -> true,
+            (context, reader) -> context.getEngine().getTypeResolver().compile(TYPE_IDENTIFIER.parse(context, reader)),
+            (context, builder, o) -> builder.append(o.getIdentifier())
+    );
+
 }

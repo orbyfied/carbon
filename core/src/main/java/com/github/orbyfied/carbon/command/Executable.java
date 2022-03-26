@@ -25,7 +25,7 @@ public class Executable
     }
 
     @Override
-    public boolean selects(StringReader reader) {
+    public boolean selects(Context ctx, StringReader reader) {
         return true;
     }
 

@@ -18,6 +18,8 @@ public class Context {
 
     protected Destiny destiny;
 
+    protected Node rootCommand;
+
     protected final HashMap<Identifier, Object> args = new HashMap<>();
 
     protected final CommandEngine engine;
@@ -39,8 +41,21 @@ public class Context {
         return this;
     }
 
+    public Node getRootCommand() {
+        return rootCommand;
+    }
+
     public HashMap<Identifier, Object> getArgs() {
         return args;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getArg(Identifier identifier) {
+        return (T) args.get(identifier);
+    }
+
+    public <T> T getArg(String id) {
+        return getArg(Identifier.of(id));
     }
 
     @SuppressWarnings("unchecked")
@@ -50,6 +65,11 @@ public class Context {
 
     public <T> T getArg(String id, Class<T> tClass) {
         return getArg(Identifier.of(id), tClass);
+    }
+
+    public Context setArg(Identifier id, Object o) {
+        args.put(id, o);
+        return this;
     }
 
     public enum Destiny {

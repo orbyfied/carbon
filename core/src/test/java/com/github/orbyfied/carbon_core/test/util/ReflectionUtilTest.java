@@ -10,7 +10,7 @@ public class ReflectionUtilTest {
 
     @Test
     public void testWalkParents() {
-        ReflectionUtil.walkParents(CarbonJavaModAPI.class, (d, c) -> {
+        ReflectionUtil.walkParents(CarbonJavaModAPI.class, null, (d, c) -> {
             System.out.println("@ depth " + d + ": " + "  ".repeat(d) + "|- " + c);
         });
     }

@@ -8,6 +8,10 @@ public interface ParameterType<T> {
 
     TypeIdentifier getBaseIdentifier();
 
+    default TypeIdentifier getIdentifier() {
+        return getBaseIdentifier();
+    }
+
     Class<?> getType();
 
     boolean accepts(Context context, StringReader reader);

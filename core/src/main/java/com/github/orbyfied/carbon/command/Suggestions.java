@@ -1,34 +1,16 @@
 package com.github.orbyfied.carbon.command;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Suggestions {
+public interface Suggestions {
 
-    protected final ArrayList<String> suggestions = new ArrayList<>();
+    Suggestions suggest(Object o);
 
-    public Suggestions suggest(Object o) {
-        if (o == null)
-            return this;
-        suggestions.add(o.toString());
-        return this;
-    }
+    Suggestions unsuggest(Object o);
 
-    public Suggestions unsuggest(Object o) {
-        if (o == null)
-            return this;
-        suggestions.remove(o.toString());
-        return this;
-    }
+    List<String> getSuggestions();
 
-    public List<String> getSuggestions() {
-        return Collections.unmodifiableList(suggestions);
-    }
-
-    public Stream<String> streamSuggestions() {
-        return suggestions.stream();
-    }
+    Stream<String> streamSuggestions();
 
 }

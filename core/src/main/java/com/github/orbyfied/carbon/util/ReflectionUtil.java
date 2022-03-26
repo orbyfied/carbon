@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon.util;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ReflectionUtil {
 
@@ -20,24 +21,28 @@ public class ReflectionUtil {
     }
 
     public static void walkParents(Class<?> klass,
+                                   Predicate<Class<?>> pred,
                                    Consumer<Class<?>> consumer) {
-        walkParents(klass, (depth, c) -> consumer.accept(c));
+        walkParents(klass, pred, (depth, c) -> consumer.accept(c));
     }
 
     public static void walkParents(Class<?> klass,
+                                   Predicate<Class<?>> pred,
                                    BiConsumer<Integer, Class<?>> consumer) {
-        internalWalkParents(klass, consumer, 0);
+        internalWalkParents(klass, pred, consumer, 0);
     }
 
     public static void internalWalkParents(Class<?> klass,
+                                           Predicate<Class<?>> pred,
                                            BiConsumer<Integer, Class<?>> consumer,
                                            int depth) {
         try {
+            if (pred != null && !pred.test(klass)) return;
             consumer.accept(depth, klass);
             if (klass.getSuperclass() != Object.class && klass.getSuperclass() != null)
-                internalWalkParents(klass.getSuperclass(), consumer, depth + 1);
+                internalWalkParents(klass.getSuperclass(), pred, consumer, depth + 1);
             for (Class<?> c : klass.getInterfaces())
-                internalWalkParents(c, consumer, depth + 1);
+                internalWalkParents(c, pred, consumer, depth + 1);
         } catch (Exception e) {
             e.printStackTrace();
         }

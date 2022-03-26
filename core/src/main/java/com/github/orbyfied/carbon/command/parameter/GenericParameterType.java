@@ -31,6 +31,11 @@ public abstract class GenericParameterType<B> implements ParameterType<B> {
         return id;
     }
 
+    @Override
+    public TypeIdentifier getIdentifier() {
+        return getGenericIdentifier();
+    }
+
     public GenericParameterType<B> setTypeParameter(String s, ParameterType<?> type) {
         parametersByName.get(s).setType(type);
         return this;
