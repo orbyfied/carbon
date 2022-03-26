@@ -1,14 +1,17 @@
 package com.github.orbyfied.carbon.command;
 
+import com.github.orbyfied.carbon.command.impl.CommandNodeExecutor;
 import com.github.orbyfied.carbon.command.impl.DefaultSuggester;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.util.ReflectionUtil;
 import com.github.orbyfied.carbon.util.StringReader;
+import org.checkerframework.checker.units.qual.N;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Represents a command node in the
@@ -20,7 +23,7 @@ public class Node {
     /**
      * The components stored in a linear list.
      */
-    protected final ArrayList<AbstractNodeComponent> components = new ArrayList<>();
+    protected final ArrayList<NodeComponent> components = new ArrayList<>();
 
     /**
      * The components mapped by class.
@@ -28,7 +31,7 @@ public class Node {
      * component which are not annotated
      * with {@link NonComponent}
      */
-    protected final HashMap<Class<?>, AbstractNodeComponent> componentsByClass = new HashMap<>();
+    protected final HashMap<Class<?>, NodeComponent> componentsByClass = new HashMap<>();
 
     /**
      * The children (subnodes/subcommands) of this node.
@@ -56,11 +59,18 @@ public class Node {
      */
     protected final Node parent;
 
+    /**
+     * The root node of this tree.
+     */
+    protected final Node root;
+
     /** Constructor. */
     public Node(final String name,
-                final Node parent) {
+                final Node parent,
+                final Node root) {
         this.name   = name;
         this.parent = parent;
+        this.root = Objects.requireNonNullElse(root, this);
         addComponent(new DefaultSuggester(this));
     }
 
@@ -74,11 +84,11 @@ public class Node {
         return Collections.unmodifiableMap(fastMappedChildren);
     }
 
-    public List<AbstractNodeComponent> getComponents() {
+    public List<NodeComponent> getComponents() {
         return Collections.unmodifiableList(components);
     }
 
-    public Map<Class<?>, AbstractNodeComponent> getComponentsByClass() {
+    public Map<Class<?>, NodeComponent> getComponentsByClass() {
         return Collections.unmodifiableMap(componentsByClass);
     }
 
@@ -92,6 +102,10 @@ public class Node {
 
     public List<String> getAliases() {
         return Collections.unmodifiableList(aliases);
+    }
+
+    public Node getRoot() {
+        return root;
     }
 
     /* Aliases. */
@@ -108,7 +122,19 @@ public class Node {
 
     /* Components. */
 
-    public <T extends AbstractNodeComponent> T addComponent(T component) {
+    public <T extends NodeComponent> T makeComponent(Function<Node, T> constructor) {
+        return addComponent(constructor.apply(this));
+    }
+
+    public <T extends NodeComponent> Node makeComponent(Function<Node, T> constructor,
+                                                       Consumer<T> consumer) {
+        T it = addComponent(constructor.apply(this));
+        if (consumer != null)
+            consumer.accept(it);
+        return this;
+    }
+
+    public <T extends NodeComponent> T addComponent(T component) {
         Objects.requireNonNull(component, "component cannot be null");
         components.add(component);
         ReflectionUtil.walkParents(component.getClass(),
@@ -117,14 +143,14 @@ public class Node {
         return component;
     }
 
-    public <T extends AbstractNodeComponent> Node addComponent(T component, Consumer<T> consumer) {
+    public <T extends NodeComponent> Node addComponent(T component, Consumer<T> consumer) {
         T c = addComponent(component);
         if (consumer != null)
             consumer.accept(c);
         return this;
     }
 
-    public Node removeComponent(AbstractNodeComponent component) {
+    public Node removeComponent(NodeComponent component) {
         components.remove(component);
         ReflectionUtil.walkParents(component.getClass(),
                 c -> !c.isAssignableFrom(NonComponent.class),
@@ -165,23 +191,6 @@ public class Node {
         return this;
     }
 
-    public Node addParameterChild(String name,
-                                  ParameterType<?> type) {
-        Node node = new Node(name, this);
-        node.addComponent(new Parameter(node)).setType(type);
-        this.addChild(node);
-        return node;
-    }
-
-    public Node addParameterChild(String name,
-                                  ParameterType<?> type,
-                                  BiConsumer<Node, Parameter> consumer) {
-        Node node = addParameterChild(name, type);
-        if (consumer != null)
-            consumer.accept(node, node.getComponent(Parameter.class));
-        return this;
-    }
-
     public Node removeChild(Node node) {
         children.remove(node);
         if (node.componentsByClass.containsKey(Executable.class))
@@ -194,6 +203,8 @@ public class Node {
     }
 
     public Selecting getSubnode(Context ctx, StringReader reader) {
+        if (reader.current() == StringReader.DONE)
+            return null;
         Node node;
         if ((node = fastMappedChildren.get(reader.branch().collect(c -> c != ' '))) != null)
             return node.getComponentOf(Selecting.class);
@@ -202,6 +213,54 @@ public class Node {
             if ((sel = child.getComponentOf(Selecting.class)).selects(ctx, reader.branch()))
                 return sel;
         return null;
+    }
+
+    /* QOL Methods. */
+
+    public Node makeExecutable(CommandNodeExecutor executor) {
+        addComponent(new Executable(this)).setExecutor(executor);
+        return this;
+    }
+
+    public Node makeExecutable(CommandNodeExecutor executor, CommandNodeExecutor walked) {
+        addComponent(new Executable(this)).setExecutor(executor).setWalkExecutor(walked);
+        return this;
+    }
+
+    public Node makeParameter(ParameterType<?> type) {
+        addComponent(new Parameter(this)).setType(type);
+        return this;
+    }
+
+    public Node childParameter(String name,
+                               ParameterType<?> type) {
+        Node node = new Node(name, this, root);
+        node.makeParameter(type);
+        this.addChild(node);
+        return node;
+    }
+
+    public Node childParameter(String name,
+                               ParameterType<?> type,
+                               BiConsumer<Node, Parameter> consumer) {
+        Node node = childParameter(name, type);
+        if (consumer != null)
+            consumer.accept(node, node.getComponent(Parameter.class));
+        return this;
+    }
+
+    public Node childExecutable(String name, CommandNodeExecutor executor) {
+        Node node = new Node(name, this, root);
+        node.makeExecutable(executor);
+        this.addChild(node);
+        return this;
+    }
+
+    public Node childExecutable(String name, CommandNodeExecutor executor, CommandNodeExecutor walked) {
+        Node node = new Node(name, this, root);
+        node.makeExecutable(executor, walked);
+        this.addChild(node);
+        return this;
     }
 
 }

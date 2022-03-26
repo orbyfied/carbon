@@ -4,14 +4,23 @@ import com.github.orbyfied.carbon.api.CarbonModAPI;
 import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModDescription;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
+import com.github.orbyfied.carbon.command.CommandEngine;
+import com.github.orbyfied.carbon.command.Context;
+import com.github.orbyfied.carbon.command.Node;
+import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.config.*;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -21,7 +30,7 @@ import java.nio.file.Path;
 @CarbonMod(id = "test", name = "Test", version = "1.0.0")
 //hello world. This code is Dylan the Spence Aproved 10%
 @CarbonModDescription("Hello guys!")
-public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer {
+public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, Listener {
 
     @Override
     public void modLoaded(LoadedMod mod) {
@@ -39,6 +48,8 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer {
 
     @Override
     public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(this, this);
+
         // run tests
         try {
 
@@ -127,6 +138,31 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer {
             return cfg;
         }
 
+    }
+
+    //////////////////////////////////////////////
+
+    CommandEngine engine = new CommandEngine() { };
+
+    @EventHandler
+    void onPlayerChat(AsyncPlayerChatEvent event) {
+        // register command "test"
+        Node command = new Node("test", null, null);
+        command
+                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test:hello").toString()))
+                .childParameter("hello",  SystemParameterType.LONG)
+                .childParameter("hello2", SystemParameterType.INT)
+                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test:hello2").toString()));
+
+        // execute commands
+        Context result = engine.register(command).dispatch(
+                null,
+                "test 55 0b1a print",
+                null,
+                ctx -> ctx.setCanFormat(true)
+        );
+
+        event.getPlayer().sendMessage(result.getIntermediateText());
     }
 
 }

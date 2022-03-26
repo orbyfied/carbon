@@ -1,12 +1,15 @@
 package com.github.orbyfied.carbon.command;
 
+import com.github.orbyfied.carbon.command.exception.CommandException;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * The engine of the command system.
@@ -71,11 +74,13 @@ public abstract class CommandEngine {
      * @param suggestions The suggestion builder.
      *                    If this is null, the request is invocation,
      *                    otherwise the request will be set to suggestion.
+     * @param ctxConsumer A consumer for configuring the context.
      * @return The context for optional further use.
      */
     public Context dispatch(CommandSender sender,
-                         String str,
-                         Suggestions suggestions) {
+                            String str,
+                            Suggestions suggestions,
+                            Consumer<Context> ctxConsumer) {
 
         // get mode (execute or suggest)
         boolean isSuggesting    = suggestions != null;
@@ -95,6 +100,9 @@ public abstract class CommandEngine {
         // create context
         Context context = new Context(this, sender);
         context.setDestiny(destiny);
+        if (ctxConsumer != null)
+            ctxConsumer.accept(context);
+        context.setSuccessful(true);
 
         // walk root
         Executable lastExecutable = null; // the executable to execute at the end
@@ -110,7 +118,15 @@ public abstract class CommandEngine {
 
                 // is parameter
             } else if (mainc instanceof Parameter param) {
-                param.walked(context, reader);
+                try {
+                    // parse and save parameter
+                    param.walked(context, reader);
+                } catch (CommandException e) {
+                    // handle exception
+                    context.setIntermediateText(ChatColor.DARK_RED + "ERROR: " + e.getFormattedString());
+                    context.setSuccessful(false); // fail
+                    break;
+                }
             }
 
             // suggest
@@ -135,7 +151,7 @@ public abstract class CommandEngine {
         }
 
         // execute
-        if (lastExecutable != null && !isSuggesting)
+        if (lastExecutable != null && !isSuggesting && context.isSuccessful())
             lastExecutable.execute(context);
 
         // return

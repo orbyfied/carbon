@@ -32,13 +32,13 @@ public class StringReader {
     }
 
     public char next() {
-        if (index >= len - 1) return DONE;
-        return str.charAt(clamp(index += 1));
+        if ((index += 1) >= len) return DONE;
+        return str.charAt(index);
     }
 
     public char next(int a) {
-        if (index >= len - 1) return DONE;
-        return str.charAt(clamp(index += a));
+        if ((index += a) >= len) return DONE;
+        return str.charAt(index);
     }
 
     public char prev() {
@@ -78,9 +78,11 @@ public class StringReader {
         StringBuilder b = new StringBuilder();
         prev();
         char c;
-        while ((c = next()) != DONE && pred.test(c))
-            if (skip == null || !skip.test(c))
+        while ((c = next()) != DONE && pred.test(c)) {
+            if (skip == null || !skip.test(c)) {
                 b.append(c);
+            }
+        }
         return b.toString();
     }
 

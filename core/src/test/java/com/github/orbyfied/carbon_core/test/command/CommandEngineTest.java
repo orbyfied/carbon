@@ -1,10 +1,13 @@
 package com.github.orbyfied.carbon_core.test.command;
 
 import com.github.orbyfied.carbon.command.CommandEngine;
+import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Executable;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 public class CommandEngineTest {
 
@@ -15,21 +18,19 @@ public class CommandEngineTest {
     @Test
     public void testSimpleOnlyExecuteCommand() {
         // register command "test"
-        Node command = new Node("test", null);
+        Node command = new Node("test", null, null);
         command
-                .addComponent(new Executable(command)
-                        .setExecutor((ctx, cmd) -> {
-                            System.out.println(
-                                    ctx.getArg("test:hello").toString() + " " +
-                                    ctx.getArg("test:hello2")
-                            );
-                        }), null
-                )
-                .addParameterChild("hello",  SystemParameterType.LONG)
-                .addParameterChild("hello2", SystemParameterType.INT);
+                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test:hello").toString()))
+                .childParameter("hello",  SystemParameterType.LONG)
+                .childParameter("hello2", SystemParameterType.INT)
+                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test:hello2").toString()));
 
         // execute commands
-        engine.register(command).dispatch(null, "test 55 0b1", null);
+        Context result = engine.register(command).dispatch(null,
+                "test 55 0b10 print",
+                null,
+                null
+        );
     }
 
 }

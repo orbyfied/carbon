@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.command;
 
 import com.github.orbyfied.carbon.registry.Identifier;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -24,6 +25,17 @@ public class Context {
 
     protected final CommandEngine engine;
 
+    protected String intermediateText;
+
+    protected boolean canFormat;
+
+    protected boolean successful;
+
+    public Context setCanFormat(boolean canFormat) {
+        this.canFormat = canFormat;
+        return this;
+    }
+
     public CommandEngine getEngine() {
         return engine;
     }
@@ -34,6 +46,26 @@ public class Context {
 
     public Destiny getDestiny() {
         return destiny;
+    }
+
+    public String getIntermediateText() {
+        return intermediateText;
+    }
+
+    public Context setIntermediateText(String text) {
+        if (!canFormat)
+            text = ChatColor.stripColor(text);
+        this.intermediateText = text;
+        return this;
+    }
+
+    public Context setSuccessful(boolean b) {
+        this.successful = b;
+        return this;
+    }
+
+    public boolean isSuccessful() {
+        return successful;
     }
 
     public Context setDestiny(Destiny destiny) {

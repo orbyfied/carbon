@@ -7,17 +7,36 @@ import java.util.function.Predicate;
 public class ReflectionUtil {
 
     public static Class<?> getCallerClass(int off) {
+        try {
+            return Class.forName(getCallerFrame(off).getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static StackTraceElement getCallerFrame(int off) {
         StackTraceElement[] elem;
         try {
             throw new Exception();
         } catch (Exception e) {
             elem = e.getStackTrace();
         }
+        return elem[1 + off];
+    }
+
+    public static StackTraceElement getCallerFrame(int off, Predicate<StackTraceElement> pred) {
+        StackTraceElement[] elems;
         try {
-            return Class.forName(elem[1 + off].getClassName());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new Exception();
+        } catch (Exception e) {
+            elems = e.getStackTrace();
         }
+        int l = elems.length;
+        StackTraceElement element;
+        for (int i = 1 + off; i < l; i++)
+            if (pred.test(element = elems[i]))
+                return element;
+        return elems[elems.length - 1];
     }
 
     public static void walkParents(Class<?> klass,
