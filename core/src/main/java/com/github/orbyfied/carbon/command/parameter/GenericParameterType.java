@@ -1,9 +1,6 @@
 package com.github.orbyfied.carbon.command.parameter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public abstract class GenericParameterType<B> implements ParameterType<B> {
 
@@ -50,6 +47,15 @@ public abstract class GenericParameterType<B> implements ParameterType<B> {
 
     public TypeParameter getTypeParameter(int i) {
         return parameters.get(i);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", GenericParameterType.class.getSimpleName() + "[", "]")
+                .add("parametersByName=" + parametersByName)
+                .add("parameters=" + parameters)
+                .add("identifier=" + getGenericIdentifier())
+                .toString();
     }
 
 }

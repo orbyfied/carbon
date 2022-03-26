@@ -1,16 +1,15 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.parameter.GenericParameterType;
-import com.github.orbyfied.carbon.command.parameter.ParameterType;
+import com.github.orbyfied.carbon.command.parameter.*;
 import com.github.orbyfied.carbon.command.Suggestions;
-import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
-import com.github.orbyfied.carbon.command.parameter.TypeParameter;
+import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
 import com.github.orbyfied.carbon.util.TriConsumer;
 import com.github.orbyfied.carbon.util.math.Vec3i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.*;
 
@@ -24,15 +23,48 @@ import java.util.function.*;
  */
 public class SystemParameterType {
 
+    /**
+     * Class for safely resolving system types.
+     */
+    public static final class SystemTypeResolver implements TypeResolver {
+
+        protected HashMap<String, ParameterType<?>> types = new HashMap<>();
+
+        @Override
+        public ParameterType<?> resolve(Identifier identifier) {
+            return types.get(identifier.getPath());
+        }
+
+        @Override
+        public ParameterType<?> compile(TypeIdentifier identifier) {
+            throw new UnsupportedOperationException();
+        }
+
+    }
+
+    /** UTILITY CLASS */
     private SystemParameterType() { }
 
+    /**
+     * The singleton type resolver.
+     */
+    public static final SystemTypeResolver TYPE_RESOLVER = new SystemTypeResolver();
+
+    /**
+     * Function to quickly create simple
+     * parameter types with lambdas.
+     * @see ParameterType
+     */
     static <T> ParameterType<T> of(final Class<T> klass,
                                    final String baseId,
                                    final BiPredicate<Context, StringReader> acceptor,
                                    final BiFunction<Context, StringReader, T> parser,
                                    final TriConsumer<Context, StringBuilder, T> writer) {
+        // parse identifier
         final TypeIdentifier bid = TypeIdentifier.of(baseId);
-        return new ParameterType<T>() {
+
+        // create type
+        ParameterType<T> type = new ParameterType<>() {
             @Override
             public TypeIdentifier getBaseIdentifier() {
                 return bid;
@@ -60,9 +92,27 @@ public class SystemParameterType {
 
             @Override
             public void suggest(Context context, Suggestions suggestions) { }
+
+            @Override
+            public String toString() {
+                return bid.toString();
+            }
         };
+
+        // register type
+        TYPE_RESOLVER.types.put(bid.getPath(), type);
+
+        // return
+        return type;
     }
 
+    /**
+     * Checks if a character is a digit.
+     * TODO: account for radix
+     * @param c The character to check.
+     * @param radix The radix (TODO)
+     * @return If the number is a digit.
+     */
     private static boolean isDigit(char c, int radix) {
         return (c >= '0' && c <= '9')  ||
                 (c >= 'A' && c <= 'Z') ||
@@ -70,11 +120,29 @@ public class SystemParameterType {
                 c == '.' || c == '_';
     }
 
+    /**
+     * Parses a floating point number.
+     * @see SystemParameterType#parseNumber(StringReader, BiFunction)
+     * @param reader The string reader.
+     * @param parser The number parser.
+     * @param <T> The number type.
+     * @return The number/value.
+     */
     private static <T extends Number> T parseNumberFloat(StringReader reader,
                                                          Function<String, T> parser) {
         return parseNumber(reader, (str, __) -> parser.apply(str));
     }
 
+    /**
+     * Parses a floating or non-floating point
+     * number. For non-floating point numbers
+     * the parser needs to be configured to
+     * not accept any radix specifications.
+     * @param reader The string reader.
+     * @param parser The number parser.
+     * @param <T> The number type.
+     * @return The number/value.
+     */
     private static <T extends Number> T parseNumber(StringReader reader,
                                                     BiFunction<String, Integer, T> parser) {
         reader.collect(c -> c == ' ');
@@ -99,42 +167,87 @@ public class SystemParameterType {
 
     /* ----------------------------------------------- */
 
+    /**
+     * Accepts formats as:
+     * - {@code 14}
+     * - {@code 0x06}
+     * - {@code 0o93}
+     * - {@code 0b101101}
+     * {@link Byte}
+     */
     public static final ParameterType<Byte> BYTE = of(Byte.class, "system:byte",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Byte::parseByte),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * Accepts formats as:
+     * - {@code 14}
+     * - {@code 0x06}
+     * - {@code 0o93}
+     * - {@code 0b101101}
+     * {@link Short}
+     */
     public static final ParameterType<Short> SHORT = of(Short.class, "system:short",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Short::parseShort),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * Accepts formats as:
+     * - {@code 14}
+     * - {@code 0x06}
+     * - {@code 0o93}
+     * - {@code 0b101101}
+     * {@link Integer}
+     */
     public static final ParameterType<Integer> INT = of(Integer.class, "system:int",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Integer::parseInt),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * Accepts formats as:
+     * - {@code 14}
+     * - {@code 0x06}
+     * - {@code 0o93}
+     * - {@code 0b101101}
+     * {@link Long}
+     */
     public static final ParameterType<Long> LONG = of(Long.class, "system:long",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumber(reader, Long::parseLong),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * {@link Float}
+     */
     public static final ParameterType<Float> FLOAT = of(Float.class, "system:float",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumberFloat(reader, Float::parseFloat),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * {@link Double}
+     */
     public static final ParameterType<Double> DOUBLE = of(Double.class, "system:double",
             (context, reader) -> isDigit(reader.current(), 10),
             (context, reader) -> parseNumberFloat(reader, Double::parseDouble),
             (context, builder, value) -> builder.append(value)
     );
 
+    /**
+     * {@link String}
+     * Either parses the string until it is
+     * met with a space, or if the string starts
+     * with a {@code "}, it parses until the end
+     * of the string. (the closing quote)
+     */
     public static final ParameterType<String> STRING = of(String.class, "system:string",
             (context, reader) -> true,
             ((context, reader) -> {
@@ -147,6 +260,9 @@ public class SystemParameterType {
             (context, builder, s) -> builder.append("\"").append(s).append("\"")
     );
 
+    /**
+     * {@link Character}
+     */
     public static final ParameterType<Character> CHAR = of(Character.class, "system:char",
             (context, reader) -> true,
             ((context, reader) -> {
@@ -202,7 +318,8 @@ public class SystemParameterType {
 
             @Override
             public List<T> parse(Context context, StringReader reader) {
-                List<T> list = new ArrayList<>();
+                ParameterType<?> type = getTypeParameter("T").getType();
+                List<Object> list = new ArrayList<>();
                 char c1;
                 while ((c1 = reader.next()) != ']' && c1 != StringReader.DONE) { // already skips over first [
 //                    System.out.println("b" + reader.index() + ": '" + reader.current() + "'");
@@ -212,7 +329,7 @@ public class SystemParameterType {
 //                    System.out.println("l: " + list);
                 }
 
-                return list;
+                return (List<T>) list;
             }
 
             @Override
@@ -228,8 +345,7 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, Suggestions suggestions) {
-            }
+            public void suggest(Context context, Suggestions suggestions) { }
         };
     }
 

@@ -4,6 +4,8 @@ import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class TypeIdentifier extends Identifier implements Cloneable {
 
@@ -55,6 +57,35 @@ public class TypeIdentifier extends Identifier implements Cloneable {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(super.toString());
+        if (typeParams.size() == 0) return b.toString();
+        b.append("<");
+        int l = typeParams.size();
+        for (int i = 0; i < l; i++) {
+            if (i != 0)
+                b.append(", ");
+            TypeIdentifier param = typeParams.get(i);
+            b.append(param);
+        }
+        return b.append(">").toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TypeIdentifier that = (TypeIdentifier) o;
+        return Objects.equals(typeParams, that.typeParams);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), typeParams);
     }
 
 }

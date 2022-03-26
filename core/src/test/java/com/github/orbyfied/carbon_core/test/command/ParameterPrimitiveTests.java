@@ -25,6 +25,8 @@ public class ParameterPrimitiveTests {
                 SystemParameterType.listOf(SystemParameterType.VEC_3_INT)
         };
 
+        System.out.println(SystemParameterType.INT);
+
         /* code */
 
         List<Object> results = new ArrayList<>();

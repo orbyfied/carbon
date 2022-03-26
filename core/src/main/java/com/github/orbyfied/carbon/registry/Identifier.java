@@ -70,7 +70,7 @@ public class Identifier implements Cloneable {
 
     @Override
     public String toString() {
-        return (namespace != null ? namespace : "") + path;
+        return (namespace != null ? namespace : "") + ":" + path;
     }
 
     @Override
