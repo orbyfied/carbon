@@ -76,8 +76,19 @@ public abstract class CommandEngine {
         return typeResolver;
     }
 
+    /**
+     * Should do whatever it needs to do when
+     * a node gets registered to make it work.
+     * @param root The command node.
+     */
     protected abstract void registerPlatform(Node root);
 
+    /**
+     * Should do whatever it needs to do when
+     * a node gets unregistered to make it work.
+     * @param root The command node.
+     * @implNote Optional. Unregistration won't be used much.
+     */
     protected abstract void unregisterPlatform(Node root);
 
     /**

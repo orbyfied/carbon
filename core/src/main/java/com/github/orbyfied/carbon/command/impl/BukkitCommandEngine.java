@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.Suggestions;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -14,6 +15,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Uses the Bukkit command system to register
+ * and execute/tab-complete commands.
+ * TODO: find a way to get the message above the textbox
+ */
 public class BukkitCommandEngine extends CommandEngine {
 
     private static final SimpleCommandMap commandMap = (SimpleCommandMap) Bukkit.getCommandMap();
@@ -79,7 +85,7 @@ public class BukkitCommandEngine extends CommandEngine {
         }
 
         @Override
-        public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+        public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, Location location) throws IllegalArgumentException {
             List<String> list = new ArrayList<>();
             String str = stitchArgs(alias, args);
             Context ctx = engine.dispatch(sender, str, createSuggestions(list), null);

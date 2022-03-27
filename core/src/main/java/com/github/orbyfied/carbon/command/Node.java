@@ -6,6 +6,7 @@ import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.util.ReflectionUtil;
 import com.github.orbyfied.carbon.util.StringReader;
+import com.mojang.datafixers.types.Func;
 import org.checkerframework.checker.units.qual.N;
 
 import java.util.*;
@@ -37,6 +38,12 @@ public class Node {
      * The children (subnodes/subcommands) of this node.
      */
     protected final ArrayList<Node> children = new ArrayList<>();
+
+    /**
+     * The children (subnodes/subcommands) of this node
+     * mapped by name.
+     */
+    protected final HashMap<String, Node> childrenByName = new HashMap<>();
 
     /**
      * NOTE: Only subcommands will be stored here, no
@@ -181,6 +188,7 @@ public class Node {
     public Node addChild(Node node) {
         Objects.requireNonNull(node, "node cannot be null");
         children.add(node);
+        childrenByName.put(node.getName(), node);
         if (node.componentsByClass.containsKey(Executable.class))
             fastMappedChildren.put(node.name, node);
         return node;
@@ -193,13 +201,23 @@ public class Node {
 
     public Node removeChild(Node node) {
         children.remove(node);
+        childrenByName.remove(node.getName());
         if (node.componentsByClass.containsKey(Executable.class))
             fastMappedChildren.remove(node.name);
         return this;
     }
 
-    public Node getSubcommandByName(String str) {
-        return fastMappedChildren.get(str);
+    public Node getSubnode(String name) {
+        return childrenByName.get(name);
+    }
+
+    public Node getOrCreateSubnode(String name, Function<Node, Node> constructor) {
+        Node node;
+        if ((node = getSubnode(name)) != null)
+            return node;
+        node = constructor.apply(this);
+        addChild(node);
+        return node;
     }
 
     public Selecting getSubnode(Context ctx, StringReader reader) {
