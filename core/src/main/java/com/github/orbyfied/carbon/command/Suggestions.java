@@ -9,8 +9,4 @@ public interface Suggestions {
 
     Suggestions unsuggest(Object o);
 
-    List<String> getSuggestions();
-
-    Stream<String> streamSuggestions();
-
 }

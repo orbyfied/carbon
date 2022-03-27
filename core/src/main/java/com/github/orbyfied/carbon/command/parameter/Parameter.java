@@ -8,7 +8,7 @@ import org.bukkit.event.Event;
 
 public class Parameter
         extends AbstractNodeComponent
-        implements Functional, Suggester, Selecting {
+        implements Functional, Selecting, Completer {
 
     protected Identifier identifier;
 
@@ -52,7 +52,6 @@ public class Parameter
                     node.getRoot(),
                     node,
                     new ErrorLocation(reader, startIndex, endIndex),
-                    "internal exception",
                     e
             );
 
@@ -62,16 +61,16 @@ public class Parameter
     }
 
     @Override
-    public void suggest(Context ctx, Suggestions builder) {
-        type.suggest(ctx, builder);
-    }
-
-    @Override
     public void execute(Context ctx) { }
 
     @Override
     public boolean selects(Context ctx, StringReader reader) {
         return type.accepts(ctx, reader);
+    }
+
+    @Override
+    public void completeSelf(Context context, Node from, Suggestions suggestions) {
+        type.suggest(context, suggestions);
     }
 
 }

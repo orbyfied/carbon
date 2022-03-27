@@ -28,6 +28,11 @@ public class NodeParseException extends CommandParseException {
     }
 
     @Override
+    public String getErrorName() {
+        return "node parse error";
+    }
+
+    @Override
     public String getFormattedPrefix() {
         return super.getFormattedPrefix() + ChatColor.GRAY + " @ " + node.getName();
     }

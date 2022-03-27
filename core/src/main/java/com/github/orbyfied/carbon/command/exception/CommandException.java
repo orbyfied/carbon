@@ -28,18 +28,23 @@ public class CommandException extends RuntimeException {
         return rootCommand;
     }
 
+    public String getErrorName() {
+        return getClass().getSimpleName();
+    }
+
     public String getFormattedPrefix() {
         boolean isWarning = this instanceof Warning;
         ChatColor c = ChatColor.RED;
         if (isWarning)
             c = ChatColor.GOLD;
-        return c + (isWarning ? "⚠" : ChatColor.BOLD + "×") + " " + getClass().getSimpleName() +
+        return c + (isWarning ? "⚠" : ChatColor.BOLD + "×") + " " + getErrorName() +
                 (getCause() != null ? "(" + getCause().getClass().getSimpleName() + ")" : "")
                 + ChatColor.DARK_GRAY + " in command(" + rootCommand.getName() + ")";
     }
 
     public String getFormattedSuffix() {
-        return ": " + ChatColor.YELLOW + getMessage() + (getCause() != null ? ": " + getCause().getMessage() : "");
+        return ChatColor.YELLOW + (getMessage() != null ? ": " + getMessage() : "") +
+                (getCause() != null ? ": " + getCause().getMessage() : "");
     }
 
     public String getFormattedString() {

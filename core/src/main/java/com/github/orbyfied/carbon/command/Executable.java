@@ -5,7 +5,7 @@ import com.github.orbyfied.carbon.util.StringReader;
 
 public class Executable
         extends AbstractNodeComponent
-        implements Selecting, Functional {
+        implements Selecting, Functional, Completer {
 
     public Executable(Node node) {
         super(node);
@@ -39,6 +39,11 @@ public class Executable
     public void execute(Context ctx) {
         if (executor != null)
             executor.execute(ctx, node);
+    }
+
+    @Override
+    public void completeSelf(Context context, Node from, Suggestions suggestions) {
+        suggestions.suggest(node.getName());
     }
 
 }

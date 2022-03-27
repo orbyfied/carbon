@@ -28,6 +28,11 @@ public class CommandParseException extends CommandException {
     }
 
     @Override
+    public String getErrorName() {
+        return "command parse error";
+    }
+
+    @Override
     public String getFormattedString() {
         return super.getFormattedPrefix() + ChatColor.WHITE + " at " + getLocationString(location) + getFormattedSuffix();
     }

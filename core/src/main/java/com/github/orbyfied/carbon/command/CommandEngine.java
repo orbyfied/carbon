@@ -1,6 +1,8 @@
 package com.github.orbyfied.carbon.command;
 
 import com.github.orbyfied.carbon.command.exception.CommandException;
+import com.github.orbyfied.carbon.command.exception.CommandExecutionException;
+import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
@@ -89,6 +91,13 @@ public abstract class CommandEngine {
         // create string reader
         StringReader reader = new StringReader(str, 0);
 
+        // create context
+        Context context = new Context(this, sender);
+        context.setDestiny(destiny);
+        if (ctxConsumer != null)
+            ctxConsumer.accept(context);
+        context.setSuccessful(true);
+
         // parse alias and get command
         String alias = reader.collect(c -> c != ' ', 0);
         final Node root = aliases.get(alias);
@@ -97,62 +106,83 @@ public abstract class CommandEngine {
             return null;
         }
 
-        // create context
-        Context context = new Context(this, sender);
-        context.setDestiny(destiny);
-        if (ctxConsumer != null)
-            ctxConsumer.accept(context);
-        context.setSuccessful(true);
+        context.rootCommand = root;
 
-        // walk root
-        Executable lastExecutable = null; // the executable to execute at the end
-        Selecting mainc = root.getComponentOf(Selecting.class); // bring out to walk root too
-        Suggester suggester;
-        Node current = root;
-        while (true) {
+        // error handling
+        try {
+
+            // walk root
+            Executable lastExecutable = null; // the executable to execute at the end
+            Selecting mainc = root.getComponentOf(Selecting.class); // bring out to walk root too
+            Suggester suggester = null; // last suggester
+            Node current = root;
+            while (true) {
 
                 // is executable
-            if (mainc instanceof Executable exec) {
-                lastExecutable = exec;
-                exec.walked(context, reader); // execute walked
+                if (mainc instanceof Executable exec) {
+                    lastExecutable = exec;
+                    try {
+                        exec.walked(context, reader); // execute walked
+                    } catch (Exception e) {
+                        // throw the execution exception
+                        throw new NodeExecutionException(root, current, e);
+                    }
 
-                // is parameter
-            } else if (mainc instanceof Parameter param) {
-                try {
+                    // is parameter
+                } else if (mainc instanceof Parameter param) {
                     // parse and save parameter
                     param.walked(context, reader);
-                } catch (CommandException e) {
-                    // handle exception
-                    context.setIntermediateText(ChatColor.DARK_RED + "ERROR: " + e.getFormattedString());
-                    context.setSuccessful(false); // fail
+                }
+
+                // suggest
+                Suggester tempSuggester;
+                if (isSuggesting && (tempSuggester = current.getComponentOf(Suggester.class)) != null)
+                    suggester = tempSuggester;
+
+                // skip to next character
+                reader.next();
+
+                // get main functional component
+                // and set current to new node
+                mainc = current.getSubnode(context, reader);
+
+                // break if we ended
+                if (reader.current() == StringReader.DONE ||
+                        mainc == null) {
+                    current = null;
                     break;
                 }
+
+                // get current node
+                current = mainc.getNode();
+
             }
 
             // suggest
-            if (isSuggesting && (suggester = current.getComponentOf(Suggester.class)) != null)
-                suggester.suggest(context, suggestions);
+            System.out.println(suggester);
+            if (isSuggesting && suggester != null)
+                suggester.suggestNext(
+                        context,
+                        suggestions,
+                        reader,
+                        current
+                );
 
-            // skip to next character
-            reader.next();
+            // execute
+            if (lastExecutable != null && !isSuggesting && context.isSuccessful()) {
+                try {
+                    lastExecutable.execute(context); // execute walked
+                } catch (Exception e) {
+                    // throw the execution exception
+                    throw new NodeExecutionException(root, lastExecutable.node, e);
+                }
+            }
 
-            // get main functional component
-            // and set current to new node
-            mainc = current.getSubnode(context, reader);
-
-            // break if we ended
-            if (reader.current() == StringReader.DONE ||
-                    mainc == null)
-                break;
-
-            // get current node
-            current = mainc.getNode();
-
+        } catch (CommandException e) {
+            // handle exception
+            context.setIntermediateText(ChatColor.DARK_RED + "ERROR: " + e.getFormattedString());
+            context.setSuccessful(false); // fail
         }
-
-        // execute
-        if (lastExecutable != null && !isSuggesting && context.isSuccessful())
-            lastExecutable.execute(context);
 
         // return
         return context;
