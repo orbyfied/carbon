@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.minecraft.MinecraftParameterType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -26,6 +27,9 @@ public class BukkitCommandEngine extends CommandEngine {
 
     public BukkitCommandEngine() {
         super();
+
+        ((DelegatingNamespacedTypeResolver)getTypeResolver())
+                .namespace("minecraft", MinecraftParameterType.typeResolver);
     }
 
     @Override

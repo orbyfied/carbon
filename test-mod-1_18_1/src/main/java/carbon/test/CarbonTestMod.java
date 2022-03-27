@@ -148,17 +148,10 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
 
     @Test
     public void commandTest1() {
-        // register command "test"
-        Node command = new Node("test2", null, null);
-        command
-                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test2:hello").toString()))
-                .childParameter("hello",  SystemParameterType.LONG)
-                .childParameter("hello2", SystemParameterType.INT)
-                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test2:hello2").toString()));
-        engine.register(command);
 
         // register command "sussy"
         new BaseAnnotationProcessor(engine, new MyCommand()).compile().register();
+
     }
 
     @EventHandler

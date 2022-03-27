@@ -1,8 +1,8 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.parameter.*;
 import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.parameter.*;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
 import com.github.orbyfied.carbon.util.TriConsumer;
@@ -11,7 +11,10 @@ import com.github.orbyfied.carbon.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.*;
+import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 /**
  * Standard, 'system' parameter types that
@@ -359,6 +362,25 @@ public class SystemParameterType {
             (context, reader) -> true,
             (context, reader) -> context.getEngine().getTypeResolver().compile(TYPE_IDENTIFIER.parse(context, reader)),
             (context, builder, o) -> builder.append(o.getIdentifier())
+    );
+
+    public static final ParameterType<UUID> UUID = of(java.util.UUID.class, "system:uuid",
+            (context, reader) -> true,
+            (context, reader) -> java.util.UUID.fromString(reader.collect(c -> c != ' ')),
+            (context, builder, uuid) -> builder.append(uuid)
+    );
+
+    public static final ParameterType<Class> CLASS = of(Class.class, "system:class",
+            (context, reader) -> true,
+            ((context, reader) -> {
+                String n = reader.collect(c -> c != ' ');
+                try {
+                    return Class.forName(n);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }),
+            (context, builder, aClass) -> builder.append(aClass.getName())
     );
 
 }

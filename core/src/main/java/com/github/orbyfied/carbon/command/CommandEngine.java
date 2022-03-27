@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.command.exception.CommandException;
 import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
 import com.github.orbyfied.carbon.command.impl.DelegatingNamespacedTypeResolver;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
+import com.github.orbyfied.carbon.command.minecraft.MinecraftParameterType;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
@@ -36,7 +37,7 @@ public abstract class CommandEngine {
 
     public CommandEngine() {
         typeResolver = new DelegatingNamespacedTypeResolver()
-                .namespace("system", SystemParameterType.typeResolver);
+                .namespace("system",    SystemParameterType.typeResolver);
     }
 
     public CommandEngine register(Node command) {

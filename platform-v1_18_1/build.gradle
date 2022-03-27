@@ -21,9 +21,17 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
+task 'buildShade' {
+    group 'BUILD'
+}
+
 tasks {
     // Configure reobfJar to run when invoking the build task
     assemble {
+        dependsOn(reobfJar)
+    }
+
+    build {
         dependsOn(reobfJar)
     }
 

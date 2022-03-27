@@ -2,6 +2,8 @@ package com.github.orbyfied.carbon;
 
 import com.github.orbyfied.carbon.api.util.Version;
 import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
+import com.github.orbyfied.carbon.command.CommandEngine;
+import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
@@ -79,6 +81,11 @@ public class Carbon {
      */
     protected final ResourcePackManager resourcePackManager = new ResourcePackManager(this);
 
+    /**
+     * The main command engine.
+     */
+    protected final CommandEngine commandEngine = new BukkitCommandEngine();
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -105,6 +112,10 @@ public class Carbon {
 
     public BukkitLogger getLogger(String id) {
         return new BukkitLogger("Carbon" + id);
+    }
+
+    public CommandEngine getCommandEngine() {
+        return commandEngine;
     }
 
     public Path getDirectory() { return directory; }

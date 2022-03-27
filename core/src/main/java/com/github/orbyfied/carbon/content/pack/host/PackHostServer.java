@@ -160,10 +160,10 @@ public class PackHostServer extends PackHostProvider {
         if (artifactId != 0)
             throw new UnsupportedOperationException("only one artifact supported");
         try {
-            NetworkInterface ni = NetworkInterface.getByInetAddress(
-                    manager.getMain().getPlatform().getNetworkProxy().getConnectionOf(player).virtualHost.getAddress()
-            );
-            System.out.println(ni);
+            return getLocalDownloadUrl(artifactId);
+//            NetworkInterface ni = NetworkInterface.getByInetAddress(
+//                    manager.getMain().getPlatform().getNetworkProxy().getConnectionOf(player).virtualHost.getAddress()
+//            );
         } catch (Exception e) {
             e.printStackTrace();
         }

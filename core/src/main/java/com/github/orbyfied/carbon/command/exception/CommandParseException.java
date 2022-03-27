@@ -52,10 +52,10 @@ public class CommandParseException extends CommandException {
         String str = loc.getReader().getString();
         String subPrefix = str.substring(Math.max(0, loc.getStartIndex() - 4), loc.getStartIndex());
         String sub       = str.substring(loc.getStartIndex(), loc.getEndIndex());
-        String subSuffix = str.substring(loc.getEndIndex(), Math.min(str.length() - 1, loc.getEndIndex()));
+        String subSuffix = str.substring(Math.min(str.length() - 1, loc.getEndIndex()), Math.min(str.length() - 1, loc.getEndIndex() + 4));
         b.append(ChatColor.GREEN).append(subPrefix);
         b.append(ChatColor.RED).append(ChatColor.UNDERLINE).append(sub);
-        b.append(ChatColor.GREEN).append(subSuffix);;
+        b.append(ChatColor.GREEN).append(subSuffix);
 
         // append suffix
         b.append(ChatColor.GREEN).append("...");

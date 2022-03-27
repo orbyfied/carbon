@@ -40,7 +40,7 @@ public class Platform1181 implements PlatformProxy {
 
     private NetworkProxy networkProxy = new NetworkProxyImpl();
     @Override public NetworkProxy getNetworkProxy() {
-        return null;
+        return networkProxy;
     }
 
 }

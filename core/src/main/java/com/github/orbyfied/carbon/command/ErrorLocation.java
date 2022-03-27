@@ -13,8 +13,12 @@ public class ErrorLocation {
                          int fromIndex,
                          int toIndex) {
         this.reader = reader;
-        this.fromIndex = fromIndex;
-        this.toIndex = toIndex;
+        if (fromIndex > toIndex) {
+            fromIndex = toIndex;
+            toIndex   = fromIndex;
+        }
+        this.fromIndex = Math.min(reader.getString().length() - 1, fromIndex);
+        this.toIndex   = Math.max(reader.getString().length() - 1, toIndex);
     }
 
     public int getStartIndex() {
