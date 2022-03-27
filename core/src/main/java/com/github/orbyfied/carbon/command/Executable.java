@@ -39,6 +39,7 @@ public class Executable
 
     @Override
     public void walked(Context ctx, StringReader reader) {
+        reader.collect(c -> c != ' ');
         if (walkExecutor != null)
             executor.execute(ctx, node);
     }

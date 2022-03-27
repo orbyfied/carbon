@@ -7,7 +7,6 @@ import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -202,7 +201,7 @@ public abstract class CommandEngine {
 
         } catch (CommandException e) {
             // handle exception
-            context.setIntermediateText(ChatColor.DARK_RED + "ERROR: " + e.getFormattedString());
+            context.setIntermediateText(e.getFormattedString());
             context.setSuccessful(false); // fail
         }
 

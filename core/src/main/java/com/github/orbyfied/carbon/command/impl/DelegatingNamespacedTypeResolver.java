@@ -42,7 +42,9 @@ public class DelegatingNamespacedTypeResolver implements TypeResolver {
         TypeResolver namespacedResolver = namespaces.get(identifier.getNamespace());
         if (namespacedResolver != null)
             return namespacedResolver.resolve(identifier);
-        return miscDelegate.resolve(identifier);
+        if (miscDelegate != null)
+            return miscDelegate.resolve(identifier);
+        return null;
     }
 
     @Override

@@ -21,6 +21,11 @@ public class Parameter
         identifier = new Identifier(parent.getName(), node.getName());
     }
 
+    public Parameter setIdentifier(Identifier id) {
+        this.identifier = id;
+        return this;
+    }
+
     public Identifier getIdentifier() {
         return identifier;
     }

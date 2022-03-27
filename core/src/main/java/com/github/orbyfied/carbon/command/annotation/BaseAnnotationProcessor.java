@@ -1,18 +1,14 @@
 package com.github.orbyfied.carbon.command.annotation;
 
 import com.github.orbyfied.carbon.command.CommandEngine;
-import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Executable;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
-import com.github.orbyfied.carbon.command.impl.CommandNodeExecutor;
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.N;
+import com.github.orbyfied.carbon.registry.Identifier;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class BaseAnnotationProcessor {
 
@@ -54,18 +50,35 @@ public class BaseAnnotationProcessor {
         // and the parameters for them
         for (Method m : klass.getDeclaredMethods()) {
             if (!m.isAnnotationPresent(Subcommand.class)) continue;
+            m.setAccessible(true);
             Subcommand desc = m.getAnnotation(Subcommand.class);
             SubcommandParser parser = new SubcommandParser(engine, root, desc.value());
             Node sub = parser.parse();
 
             // parse parameters
             final ArrayList<String> paramNames = new ArrayList<>(m.getParameterCount());
-            for (Parameter param : m.getParameters()) {
+            Parameter[] parameters = m.getParameters();
+            int l = parameters.length;
+            for (int i = 2; i < l; i++) {
+                Parameter param = parameters[i];
                 if (!param.isAnnotationPresent(CommandParameter.class)) continue;
                 String name = param.getAnnotation(CommandParameter.class).value();
                 if (name.equals(""))
                     name = param.getName();
                 paramNames.add(name);
+            }
+
+            // get initializer
+            try {
+                Method initializerSub = klass.getDeclaredMethod(m.getName(), Node.class);
+                if (initializerSub.isAnnotationPresent(SubInitializer.class)) {
+                    initializerSub.setAccessible(true);
+                    initializerSub.invoke(obj, sub);
+                }
+            } catch (NoSuchMethodException e) {
+                // ignore
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             sub.getComponent(Executable.class).setExecutor((ctx, cmd) -> {
@@ -74,8 +87,11 @@ public class BaseAnnotationProcessor {
                     args.add(ctx);
                     args.add(cmd);
                     for (String paramn : paramNames) {
-                        args.add(ctx.getArg(paramn));
+                        Identifier pid = new Identifier(null, paramn);
+                        args.add(ctx.getArg(pid));
                     }
+
+//                    System.out.println("ctx.args: " + ctx.getArgs() + ", methodargs: " + args);
 
                     m.invoke(obj, args.toArray());
                 } catch (Exception e) {

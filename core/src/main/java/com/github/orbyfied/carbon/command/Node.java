@@ -271,14 +271,14 @@ public class Node {
         Node node = new Node(name, this, root);
         node.makeExecutable(executor);
         this.addChild(node);
-        return this;
+        return node;
     }
 
     public Node childExecutable(String name, CommandNodeExecutor executor, CommandNodeExecutor walked) {
         Node node = new Node(name, this, root);
         node.makeExecutable(executor, walked);
         this.addChild(node);
-        return this;
+        return node;
     }
 
 }

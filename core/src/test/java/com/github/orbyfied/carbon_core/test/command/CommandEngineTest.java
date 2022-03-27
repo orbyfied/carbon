@@ -1,9 +1,6 @@
 package com.github.orbyfied.carbon_core.test.command;
 
-import com.github.orbyfied.carbon.command.CommandEngine;
-import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.Node;
-import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.*;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import org.junit.jupiter.api.Test;
 
@@ -37,17 +34,23 @@ public class CommandEngineTest {
         // register command "test"
         Node command = new Node("test", null, null);
         command
-                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test:hello").toString()))
+                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("ghello:hello").toString()))
+                .childExecutable("ghello", (ctx, cmd) -> System.out.println(ctx.getArgs()))
                 .childParameter("hello",  SystemParameterType.LONG)
                 .childParameter("hello2", SystemParameterType.INT)
-                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test:hello2").toString()));
+                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("ghello:hello2").toString()));
+
+        CommandDebug.traverseAndPrintChildren(command, 0);
 
         // execute commands
-        Context result = engine.register(command).dispatch(null,
-                "test 55 0b10 ",
-                suggestions,
+        Context result = engine.register(command).dispatch(
+                null,
+                "test ghello 55 0b10 print",
+                null,
                 null
         );
+
+        System.out.println("+ MESSAGE: " + result.getIntermediateText());
     }
 
 }

@@ -7,6 +7,7 @@ import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
+import com.github.orbyfied.carbon.command.annotation.BaseAnnotationProcessor;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.config.*;
@@ -148,13 +149,16 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
     @Test
     public void commandTest1() {
         // register command "test"
-        Node command = new Node("test", null, null);
+        Node command = new Node("test2", null, null);
         command
-                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test:hello").toString()))
+                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("test2:hello").toString()))
                 .childParameter("hello",  SystemParameterType.LONG)
                 .childParameter("hello2", SystemParameterType.INT)
-                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test:hello2").toString()));
+                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test2:hello2").toString()));
         engine.register(command);
+
+        // register command "sussy"
+        new BaseAnnotationProcessor(engine, new MyCommand()).compile().register();
     }
 
     @EventHandler
