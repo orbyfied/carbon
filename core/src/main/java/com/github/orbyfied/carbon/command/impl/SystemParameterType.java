@@ -48,7 +48,7 @@ public class SystemParameterType {
     /**
      * The singleton type resolver.
      */
-    public static final SystemTypeResolver TYPE_RESOLVER = new SystemTypeResolver();
+    public static final SystemTypeResolver typeResolver = new SystemTypeResolver();
 
     /**
      * Function to quickly create simple
@@ -100,7 +100,7 @@ public class SystemParameterType {
         };
 
         // register type
-        TYPE_RESOLVER.types.put(bid.getPath(), type);
+        typeResolver.types.put(bid.getPath(), type);
 
         // return
         return type;

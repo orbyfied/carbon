@@ -27,7 +27,7 @@ public class Context {
 
     protected String intermediateText;
 
-    protected boolean canFormat;
+    protected boolean canFormat = true;
 
     protected boolean successful;
 

@@ -1,8 +1,9 @@
 package com.github.orbyfied.carbon.command;
 
 import com.github.orbyfied.carbon.command.exception.CommandException;
-import com.github.orbyfied.carbon.command.exception.CommandExecutionException;
 import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
+import com.github.orbyfied.carbon.command.impl.DelegatingNamespacedTypeResolver;
+import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
@@ -34,11 +35,17 @@ public abstract class CommandEngine {
      */
     HashMap<String, Node> aliases = new HashMap<>();
 
+    public CommandEngine() {
+        typeResolver = new DelegatingNamespacedTypeResolver()
+                .namespace("system", SystemParameterType.typeResolver);
+    }
+
     public CommandEngine register(Node command) {
         commands.add(command);
         aliases.put(command.getName(), command);
         for (String alias : command.aliases)
             aliases.put(alias, command);
+        registerPlatform(command);
         return this;
     }
 
@@ -47,6 +54,7 @@ public abstract class CommandEngine {
         aliases.remove(command.getName(), command);
         for (String alias : command.aliases)
             aliases.remove(alias, command);
+        unregisterPlatform(command);
         return this;
     }
 
@@ -67,6 +75,10 @@ public abstract class CommandEngine {
     public TypeResolver getTypeResolver() {
         return typeResolver;
     }
+
+    protected abstract void registerPlatform(Node root);
+
+    protected abstract void unregisterPlatform(Node root);
 
     /**
      * Dispatches a suggestion or invocation
@@ -159,7 +171,6 @@ public abstract class CommandEngine {
             }
 
             // suggest
-            System.out.println(suggester);
             if (isSuggesting && suggester != null)
                 suggester.suggestNext(
                         context,

@@ -9,7 +9,13 @@ import org.junit.jupiter.api.Test;
 
 public class CommandEngineTest {
 
-    final CommandEngine engine = new CommandEngine() { };
+    final CommandEngine engine = new CommandEngine() {
+        @Override
+        protected void registerPlatform(Node root) { }
+
+        @Override
+        protected void unregisterPlatform(Node root) { }
+    };
 
     final Suggestions suggestions = new Suggestions() {
         @Override

@@ -7,6 +7,7 @@ import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
+import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.config.*;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
@@ -142,10 +143,10 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
 
     //////////////////////////////////////////////
 
-    CommandEngine engine = new CommandEngine() { };
+    CommandEngine engine = new BukkitCommandEngine();
 
-    @EventHandler
-    void onPlayerChat(AsyncPlayerChatEvent event) {
+    @Test
+    public void commandTest1() {
         // register command "test"
         Node command = new Node("test", null, null);
         command
@@ -153,9 +154,14 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
                 .childParameter("hello",  SystemParameterType.LONG)
                 .childParameter("hello2", SystemParameterType.INT)
                 .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("test:hello2").toString()));
+        engine.register(command);
+    }
+
+    @EventHandler
+    void onPlayerChat(AsyncPlayerChatEvent event) {
 
         // execute commands
-        Context result = engine.register(command).dispatch(
+        Context result = engine.dispatch(
                 null,
                 "test 55 0b1a print",
                 null,
