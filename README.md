@@ -14,4 +14,4 @@ a dynamically built resource pack containing all textures
 and models and using packets and events for behaviour and 
 interaction.
 
-
+>### [Documentation](https://github.com/orbyfied/carbon/wiki)
