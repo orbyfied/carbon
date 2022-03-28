@@ -17,3 +17,6 @@ and models and using packets and events for behaviour and
 interaction.
 
 >### [📚 Documentation](https://github.com/orbyfied/carbon/wiki)
+
+## Branding
+![Main Color Palette](project/color_palette.png)
