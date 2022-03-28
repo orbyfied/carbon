@@ -77,7 +77,7 @@ public interface JsonValueSpec<T> {
                 reader.next();
                 JsonArray array = new JsonArray();
                 while (reader.current() != ']') {
-                    reader.collect(c -> c != ']' && (c == ' ' || c == '\n' || c == '\t'));
+                    reader.collect(c -> c == ' ' || c == '\n' || c == '\t');
                     if (reader.current() == ']')
                         break;
                     System.out.println("[a] " + reader.index() + ": '" + reader.current() + "', prog: " + array);

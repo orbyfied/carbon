@@ -7,19 +7,11 @@ import com.github.orbyfied.carbon.element.ModElementRegistry;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.util.TextFormatting;
-import net.md_5.bungee.api.ChatColor;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.awt.*;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * The server bootstrap class for
@@ -44,10 +36,21 @@ public abstract class CarbonBootstrap
      */
     protected final PlatformProxy platformProxy;
 
+    /**
+     * The BStats metrics.
+     */
+    protected Metrics metrics;
+
+    /**
+     * The BStats plugin ID.
+     */
+    public final int bStatsPluginId = 14783;
+
     /** Constructor. */
     public CarbonBootstrap() {
         this.platformProxy = newPlatformProxy();
         this.main          = new Carbon(this, platformProxy);
+        this.metrics       = new Metrics(this, bStatsPluginId);
     }
 
     /**
@@ -64,6 +67,14 @@ public abstract class CarbonBootstrap
      */
     public PlatformProxy getPlatformProxy() {
         return platformProxy;
+    }
+
+    /**
+     * Get the BStats plugin metrics.
+     * @return The metrics object.
+     */
+    public Metrics getMetrics() {
+        return metrics;
     }
 
     /**
