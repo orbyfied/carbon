@@ -1,3 +1,5 @@
+![Logo](project/logo_full_no_border.png)
+
 # Carbon
 #### by [orbyfied](https://github.com/orbyfied)
 
