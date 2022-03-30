@@ -53,12 +53,8 @@ public class ItemUtil {
     // TODO: replace with better method
     // this works for now though
     public static ItemStack getHandle(org.bukkit.inventory.ItemStack itemStack) {
-        // check if the item is a CraftItemStack
-        if (!craftItemStackClass.isAssignableFrom(itemStack.getClass()))
-            throw new IllegalArgumentException();
-
-        // get field
         try {
+            // get field
             return (ItemStack) craftItemStackHandleField.get(itemStack);
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,9 +76,13 @@ public class ItemUtil {
             int theIndex = -1;
             int i = 0;
             for (Tag t : enchantmentList) {
-                if (t instanceof CompoundTag ench)
-                    if (ench.getString("id").equals(GLINT_FAKE_ENCH_ID))
+                if (t instanceof CompoundTag ench) {
+                    if (ench.getString("id").equals(GLINT_FAKE_ENCH_ID)) {
                         theIndex = i;
+                        break;
+                    }
+                }
+
                 i++;
             }
             if (theIndex != -1)

@@ -1,6 +1,6 @@
 package com.github.orbyfied.carbon.registry;
 
-import org.checkerframework.checker.units.qual.A;
+import com.github.orbyfied.carbon.command.Functional;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -18,10 +18,10 @@ import java.util.function.Function;
  * But most importantly, it allows for the addition of
  * mapping and listing modules and services to add functionality.
  * @param <T> The type of registry item.
- *            Restricted to <? extends RegistryItem>
+ *            Restricted to <? extends Identifiable>
  */
-public class Registry<T extends RegistryItem>
-        implements RegistryItem, Iterable<T> {
+public class Registry<T extends Identifiable>
+        implements Identifiable, Iterable<T> {
 
     /* ---- ITEMS ---- */
 
@@ -51,23 +51,25 @@ public class Registry<T extends RegistryItem>
      */
     private final HashMap<Class<? extends RegistryComponent<Registry<T>, T, ?, ?>>, RegistryComponent<Registry<T>, T, ?, ?>> componentsMapped = new HashMap<>();
 
-    /**
-     * Stores all components mapped to
-     * their runtime key type.
-     */
-    private final HashMap<Class<?>, RegistryComponent<Registry<T>, T, ?, ?>> componentsByKeyType = new HashMap<>();
-
     /* ---- SERVICES ---- */
 
     /**
      * The linear service storage.
      */
-    private final ArrayList<RegistryService<Registry<T>, T>> servicesLinear = new ArrayList<>();
+    private final ArrayList<RegistryService<Registry<T>, T>> servicesLinear = new ArrayList<RegistryService<Registry<T>, T>>();
 
     /**
      * The mapped service storage.
      */
-    private final HashMap<Class<? extends RegistryService<Registry<T>, T>>, RegistryService<Registry<T>, T>> servicesMapped = new HashMap<>();
+    private final HashMap<Class<? extends RegistryService<Registry<T>, T>>, RegistryService<Registry<T>, T>> servicesMapped = new HashMap<Class<? extends RegistryService<Registry<T>, T>>, RegistryService<Registry<T>, T>>();
+
+    /* ---- MISC ---- */
+
+    /**
+     * Stores all components and services mapped to
+     * their runtime key type.
+     */
+    private final HashMap<Class<?>, Object> suppliersByKeyType = new HashMap<>();
 
     /* ---- THIS ---- */
 
@@ -93,7 +95,7 @@ public class Registry<T extends RegistryItem>
     }
 
     /**
-     * @see RegistryItem#getIdentifier()
+     * @see Identifiable#getIdentifier()
      * @return The unique identifier of this registry.
      */
     @Override
@@ -143,14 +145,28 @@ public class Registry<T extends RegistryItem>
      * @return This.
      */
     public Registry<T> register(T item) {
+        // add to list and map
         mapped.put(item.getIdentifier(), item);
         linear.add(item);
+
         {
+            int l;
+
             // go over all modules and apply
-            int l = componentsLinear.size();
+            l = componentsLinear.size();
             for (int i = 0; i < l; i++)
                 componentsLinear.get(i).register(item);
+
+            // go over functional services and apply
+            l = servicesLinear.size();
+            for (int i = 0; i < l; i++) {
+                RegistryService<Registry<T>, T> service = servicesLinear.get(i);
+                if (service instanceof FunctionalService<Registry<T>, T> fs)
+                    fs.unregistered(item);
+            }
         }
+
+        // return
         return this;
     }
 
@@ -160,14 +176,28 @@ public class Registry<T extends RegistryItem>
      * @return This.
      */
     public Registry<T> unregister(T item) {
+        // remove from list and map
         mapped.remove(item.getIdentifier());
         linear.remove(item);
+
         {
+            int l;
+
             // go over all modules and apply
-            int l = componentsLinear.size();
+            l = componentsLinear.size();
             for (int i = 0; i < l; i++)
                 componentsLinear.get(i).unregister(item);
+
+            // go over functional services and apply
+            l = servicesLinear.size();
+            for (int i = 0; i < l; i++) {
+                RegistryService<Registry<T>, T> service = servicesLinear.get(i);
+                if (service instanceof FunctionalService<Registry<T>, T> fs)
+                    fs.unregistered(item);
+            }
         }
+
+        // return
         return this;
     }
 
@@ -205,12 +235,22 @@ public class Registry<T extends RegistryItem>
 
     @SuppressWarnings("unchecked")
     public <K, R> R getValue(K key) {
+        // get key type
         Class<?> klass = key.getClass();
-        RegistryComponent<Registry<T>, T, K, ?> component;
-        if ((component = (RegistryComponent<Registry<T>, T, K, R>)
-                componentsByKeyType.get(klass)) == null)
+
+        // get component
+        Object o = suppliersByKeyType.get(klass);
+
+        if (o == null)
             return null;
-        return (R) component.getMapped((K) key);
+
+        if (o instanceof RegistryComponent component)
+            return (R) component.getMapped(key);
+
+        if (o instanceof MappingService service)
+            return (R) service.getByKey(key);
+
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -228,7 +268,7 @@ public class Registry<T extends RegistryItem>
         Objects.requireNonNull(module, "module cannot be null");
         componentsLinear.add(module);
         componentsMapped.put((Class<? extends RegistryComponent<Registry<T>, T, ?, ?>>) module.getClass(), module);
-        componentsByKeyType.put(module.getKeyType(), module);
+        suppliersByKeyType.put(module.getKeyType(), module);
         return this;
     }
 
@@ -266,7 +306,7 @@ public class Registry<T extends RegistryItem>
             return this;
         componentsMapped.remove(module.getClass(), module);
         componentsLinear.remove(module);
-        componentsByKeyType.remove(module.getKeyType(), module);
+        suppliersByKeyType.remove(module.getKeyType(), module);
         return this;
     }
 
@@ -291,6 +331,8 @@ public class Registry<T extends RegistryItem>
         Objects.requireNonNull(service, "service cannot be null");
         servicesLinear.add(service);
         servicesMapped.put((Class<? extends RegistryService<Registry<T>, T>>) service.getClass(), service);
+        if (service instanceof MappingService ms)
+            suppliersByKeyType.put(ms.getKeyType(), ms);
         return this;
     }
 
@@ -328,6 +370,8 @@ public class Registry<T extends RegistryItem>
             return this;
         servicesMapped.remove(service.getClass(), service);
         servicesLinear.remove(service);
+        if (service instanceof MappingService ms)
+            suppliersByKeyType.remove(ms.getKeyType(), ms);
         return this;
     }
 

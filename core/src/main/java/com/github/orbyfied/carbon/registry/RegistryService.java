@@ -1,15 +1,7 @@
 package com.github.orbyfied.carbon.registry;
 
-public abstract class RegistryService<R extends Registry<T>, T extends RegistryItem> {
+public interface RegistryService<R extends Registry<T>, T extends Identifiable> {
 
-    protected final R registry;
+    R getRegistry();
 
-    public RegistryService(R registry) {
-        this.registry = registry;
-    }
-
-    public R getRegistry() {
-        return registry;
-    }
-    
 }

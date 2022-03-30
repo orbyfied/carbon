@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @param <K> The keys it stores (for mapping).
  * @param <V> The values it stores (mapping and linear).
  */
-public abstract class RegistryComponent<R extends Registry<T>, T extends RegistryItem, K, V> {
+public abstract class RegistryComponent<R extends Registry<T>, T extends Identifiable, K, V> {
 
     /**
      * The registry this module is

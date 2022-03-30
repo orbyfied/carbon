@@ -9,4 +9,8 @@ public interface StateAllocator<S extends CarbonItemState> {
 
     StateAllocator<CarbonItemState> GENERIC = CarbonItemState::new;
 
+    static <S extends CarbonItemState> StateAllocator<S> blank(CarbonItem<S> item) {
+        return CarbonItem::newState;
+    }
+
 }

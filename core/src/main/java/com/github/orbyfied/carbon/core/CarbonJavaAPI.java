@@ -3,7 +3,7 @@ package com.github.orbyfied.carbon.core;
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.api.CarbonAPI;
 import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.registry.RegistryItem;
+import com.github.orbyfied.carbon.registry.Identifiable;
 
 /**
  * The Java plugin Carbon API implementation.
@@ -25,7 +25,7 @@ public class CarbonJavaAPI implements CarbonAPI {
         this.plugin = plugin;
     }
 
-    public Registry<Registry<? extends RegistryItem>> getRegistries() {
+    public Registry<Registry<? extends Identifiable>> getRegistries() {
         return plugin.getRegistries();
     }
 

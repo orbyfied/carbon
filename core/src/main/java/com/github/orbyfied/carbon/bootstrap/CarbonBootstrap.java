@@ -114,7 +114,7 @@ public abstract class CarbonBootstrap
 
         // initialize registries
         Registry<CarbonItem<?>> items = new Registry<>("minecraft:items");
-        items.addComponent(new ModElementRegistry<>(items, CarbonItem.class))
+        items.addService(new ModElementRegistry<>(items))
                 .addService(new CMDRegistryService<>(items));
 
         main.getRegistries().register(items);

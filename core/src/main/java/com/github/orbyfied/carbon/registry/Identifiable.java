@@ -5,11 +5,11 @@ package com.github.orbyfied.carbon.registry;
  * registered in an {@link Registry}.
  * Provides a method to get the unique
  * identifier of the item.
- * @see RegistryItem#getIdentifier()
+ * @see Identifiable#getIdentifier()
  * @see Registry
  * @see Identifier
  */
-public interface RegistryItem {
+public interface Identifiable {
 
     /**
      * Gets the unique identifier of

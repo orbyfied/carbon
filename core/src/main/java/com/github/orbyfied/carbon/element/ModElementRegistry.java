@@ -1,84 +1,30 @@
 package com.github.orbyfied.carbon.element;
 
-import com.github.orbyfied.carbon.item.CarbonItem;
-import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.registry.RegistryComponent;
-import com.github.orbyfied.carbon.registry.RegistryItem;
+import com.github.orbyfied.carbon.registry.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 /**
  * Registry for IDable mod elements.
  * @param <T> The type of mod element.
  */
-public class ModElementRegistry<T extends RegistrableElement> extends RegistryComponent<Registry<T>, T, Integer, T> {
+public class ModElementRegistry<T extends RegistrableElement>
+        extends AbstractRegistryService<Registry<T>, T>
+        implements FunctionalService<Registry<T>, T>, MappingService<Integer, Registry<T>, T> {
 
-    private Class<T> valType;
-
-    public ModElementRegistry(Registry<T> registry, Class<? extends RegistrableElement> valType) {
-        this(registry);
-        this.valType = (Class<T>) valType;
-
-        // init factories
-        this.keyFactory   = RegistrableElement::getId;
-        this.valFactory = item -> item;
-        this.valKeyFactory = RegistrableElement::getId;
-    }
-
-    /**
-     * Constructor.
-     */
     public ModElementRegistry(Registry<T> registry) {
         super(registry);
-        valType = (Class<T>) RegistrableElement.class;
-    }
-
-    private final ArrayList<T> list = new ArrayList<>();
-
-    @Override
-    public Class<Integer> getKeyType() {
-        return Integer.class;
     }
 
     @Override
-    public Class<T> getValueType() {
-        return valType;
+    public void registered(T val) {
+        setIdFieldOn(val, registry.size() - 1);
     }
 
     @Override
-    public boolean isLinear() {
-        return true;
-    }
-
-    @Override
-    public boolean isMapped() {
-        return true;
-    }
-
-    @Override
-    public T getLinear(int index) {
-        return list.get(index);
-    }
-
-    @Override
-    public T getMapped(Integer key) {
-        return list.get(key);
-    }
-
-    @Override
-    public RegistryComponent<Registry<T>, T, Integer, T> register(T item) {
-        int index = list.size();
-        list.add(item);
-        setIdFieldOn(item, index);
-        return this;
-    }
-
-    @Override
-    public RegistryComponent<Registry<T>, T, Integer, T> unregister(Integer key) {
-        list.remove((int) key);
-        return this;
+    public void unregistered(T val) {
+        setIdFieldOn(val, -1);
     }
 
     private static void setIdFieldOn(RegistrableElement elem, int to) {
@@ -102,4 +48,13 @@ public class ModElementRegistry<T extends RegistrableElement> extends RegistryCo
         idField = idF;
     }
 
+    @Override
+    public Class<Integer> getKeyType() {
+        return Integer.class;
+    }
+
+    @Override
+    public T getByKey(Integer key) {
+        return registry.getByIndex(key);
+    }
 }

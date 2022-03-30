@@ -1,10 +1,9 @@
 package com.github.orbyfied.carbon.item;
 
 import com.github.orbyfied.carbon.element.RegistrableElement;
+import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Identifier;
-import com.github.orbyfied.carbon.registry.RegistryItem;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
-import com.github.orbyfied.carbon.util.mc.NmsHelper;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -66,7 +65,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     }
 
     /**
-     * @see RegistryItem#getIdentifier()
+     * @see Identifiable#getIdentifier()
      */
     @Override
     public Identifier getIdentifier() {
@@ -130,7 +129,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         if (baseMaterial == null)
             throw new IllegalArgumentException("base material is null");
         if (stateAllocator == null)
-            throw new IllegalArgumentException("state allocator is null");
+            stateAllocator = StateAllocator.blank(this);
 
         // set built
         isBuilt = true;
@@ -141,7 +140,9 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     /**
      * Creates a new, empty state for
-     * an item.
+     * an item. Should be overridden
+     * to create a new item state for
+     * this item.
      * @return The new state.
      */
     @SuppressWarnings("unchecked")

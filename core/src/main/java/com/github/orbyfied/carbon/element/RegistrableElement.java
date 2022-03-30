@@ -1,9 +1,9 @@
 package com.github.orbyfied.carbon.element;
 
 import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.registry.RegistryItem;
+import com.github.orbyfied.carbon.registry.Identifiable;
 
-public abstract class RegistrableElement implements RegistryItem {
+public abstract class RegistrableElement implements Identifiable {
 
     private Registry<? extends RegistrableElement> registry;
     private int id;

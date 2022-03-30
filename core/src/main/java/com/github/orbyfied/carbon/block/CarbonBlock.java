@@ -1,8 +1,8 @@
 package com.github.orbyfied.carbon.block;
 
 import com.github.orbyfied.carbon.element.RegistrableElement;
+import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Identifier;
-import com.github.orbyfied.carbon.registry.RegistryItem;
 
 
 public class CarbonBlock extends RegistrableElement {
@@ -26,7 +26,7 @@ public class CarbonBlock extends RegistrableElement {
     }
 
     /**
-     * @see RegistryItem#getIdentifier()
+     * @see Identifiable#getIdentifier()
      */
     @Override
     public Identifier getIdentifier() {

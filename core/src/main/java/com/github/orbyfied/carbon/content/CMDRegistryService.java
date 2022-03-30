@@ -1,20 +1,18 @@
 package com.github.orbyfied.carbon.content;
 
 import com.github.orbyfied.carbon.content.pack.CopyAssetBuilder;
-import com.github.orbyfied.carbon.content.pack.PackResource;
 import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.RegistrableElement;
 import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.registry.RegistryService;
-import com.github.orbyfied.carbon.util.resource.ResourceHandle;
+import com.github.orbyfied.carbon.registry.AbstractRegistryService;
 import org.bukkit.Material;
 
 import java.util.*;
 import java.util.function.Function;
 
 public class CMDRegistryService<T extends RegistrableElement>
-        extends RegistryService<Registry<T>, T>
+        extends AbstractRegistryService<Registry<T>, T>
         implements AssetPreparingService {
 
     public CMDRegistryService(Registry<T> registry) {

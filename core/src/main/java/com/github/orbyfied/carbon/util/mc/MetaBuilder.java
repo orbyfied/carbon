@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.util.mc;
 
+import com.github.orbyfied.carbon.util.TextFormatting;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -82,7 +83,7 @@ public class MetaBuilder<V extends ItemMeta, Self extends MetaBuilder<V, ?>> {
 
     public V get() { return it; }
 
-    public Self set(String name, Object o) {
+    public Self setProperty(String name, Object o) {
         try {
             Field f = it.getClass().getDeclaredField(name);
             f.setAccessible(true);
@@ -91,7 +92,7 @@ public class MetaBuilder<V extends ItemMeta, Self extends MetaBuilder<V, ?>> {
         return (Self) this;
     }
 
-    public <T> T get(String name) {
+    public <T> T getProperty(String name) {
         try {
             Field f = it.getClass().getDeclaredField(name);
             f.setAccessible(true);
@@ -101,7 +102,7 @@ public class MetaBuilder<V extends ItemMeta, Self extends MetaBuilder<V, ?>> {
     }
 
     public Self setDisplayName(String name) {
-        return self(() -> it.setDisplayName(ChatColor.translateAlternateColorCodes('&', name)));
+        return self(() -> it.setDisplayName(TextFormatting.translate(name, "&", "&#")));
     }
 
     public String getDisplayName() {
