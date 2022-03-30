@@ -18,4 +18,6 @@ public class Strategy<T extends RegistrableElement> {
         return item;
     }
 
+    public void build() { }
+
 }

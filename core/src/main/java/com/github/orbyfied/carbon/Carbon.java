@@ -13,6 +13,7 @@ import com.github.orbyfied.carbon.process.ProcessManager;
 import com.github.orbyfied.carbon.process.impl.CarbonProcessManager;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.registry.RegistryItem;
+import com.github.orbyfied.carbon.user.CarbonUserEnvironment;
 
 import java.nio.file.Path;
 
@@ -42,6 +43,16 @@ public class Carbon {
     public Carbon(CarbonBootstrap plugin, PlatformProxy platform) {
         this.plugin   = plugin;
         this.platform = platform;
+
+        /* initialize */
+        this.api = new CarbonJavaAPI(this);
+        this.registries = new Registry<>("carbon:registries");
+        this.modLoader = new ModLoader(this);
+        this.processManager = new CarbonProcessManager(this);
+        this.resourcePackManager = new ResourcePackManager(this);
+        this.commandEngine = new BukkitCommandEngine();
+        this.userEnvironment = new CarbonUserEnvironment(this);
+
     }
 
     public CarbonBootstrap getPlugin() {
@@ -59,32 +70,37 @@ public class Carbon {
     /**
      * The environment API instance.
      */
-    protected final CarbonJavaAPI api = new CarbonJavaAPI(this);
+    protected final CarbonJavaAPI api;
 
     /**
      * The registered registries. (I know it sounds crazy)
      */
-    protected final Registry<Registry<? extends RegistryItem>> registries = new Registry<>("carbon:registries");
+    protected final Registry<Registry<? extends RegistryItem>> registries;
 
     /**
      * The main mod loader.
      */
-    protected final ModLoader modLoader = new ModLoader(this);
+    protected final ModLoader modLoader;
 
     /**
      * The main process manager.
      */
-    protected final ProcessManager processManager = new CarbonProcessManager(this);
+    protected final ProcessManager processManager;
 
     /**
      * The resource pack manager.
      */
-    protected final ResourcePackManager resourcePackManager = new ResourcePackManager(this);
+    protected final ResourcePackManager resourcePackManager;
 
     /**
      * The main command engine.
      */
-    protected final CommandEngine commandEngine = new BukkitCommandEngine();
+    protected final CommandEngine commandEngine;
+
+    /**
+     * The Carbon user environment.
+     */
+    protected final CarbonUserEnvironment userEnvironment;
 
     public CarbonJavaAPI getAPI() {
         return api;
@@ -116,6 +132,10 @@ public class Carbon {
 
     public CommandEngine getCommandEngine() {
         return commandEngine;
+    }
+
+    public CarbonUserEnvironment getUserEnvironment() {
+        return userEnvironment;
     }
 
     public Path getDirectory() { return directory; }

@@ -202,6 +202,7 @@ public abstract class CommandEngine {
 
         } catch (CommandException e) {
             // handle exception
+            e.printStackTrace();
             context.setIntermediateText(e.getFormattedString());
             context.setSuccessful(false); // fail
         }

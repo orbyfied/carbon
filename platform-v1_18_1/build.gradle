@@ -21,8 +21,8 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
-task 'buildShade' {
-    group 'BUILD'
+shadowJar {
+    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
 }
 
 tasks {

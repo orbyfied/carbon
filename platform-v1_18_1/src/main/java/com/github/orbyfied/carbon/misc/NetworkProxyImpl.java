@@ -1,17 +1,16 @@
 package com.github.orbyfied.carbon.misc;
 
 import com.github.orbyfied.carbon.platform.NetworkProxy;
-import com.github.orbyfied.carbon.util.mc.NMSHelper;
+import com.github.orbyfied.carbon.util.mc.NmsHelper;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
 
 public class NetworkProxyImpl implements NetworkProxy {
 
-    private static final Class<?> craftEntityClass = NMSHelper.getCraftBukkitClass("entity.CraftEntity");
+    private static final Class<?> craftEntityClass = NmsHelper.getCraftBukkitClass("entity.CraftEntity");
     private static final Field    craftEntityHandleField;
 
     static {

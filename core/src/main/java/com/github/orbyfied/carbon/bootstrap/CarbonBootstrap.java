@@ -99,6 +99,9 @@ public abstract class CarbonBootstrap
         ModLoader loader = main.getModLoader();
         loader.loadAll();
 
+        // load user environment
+        main.getUserEnvironment().getCreativeInventoryFactory().enable();
+
         // prepare to run initialize
         Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
 

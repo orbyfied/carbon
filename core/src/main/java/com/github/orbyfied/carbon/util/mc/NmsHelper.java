@@ -2,7 +2,7 @@ package com.github.orbyfied.carbon.util.mc;
 
 import org.bukkit.Bukkit;
 
-public class NMSHelper {
+public class NmsHelper {
 
     private static final String VERSION;
     private static final String CRAFT_BUKKIT_PACKAGE;

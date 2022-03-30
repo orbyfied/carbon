@@ -14,9 +14,12 @@ import com.github.orbyfied.carbon.config.*;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.StateAllocator;
+import com.github.orbyfied.carbon.item.display.ModelItemDisplayStrategy;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -41,7 +44,15 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
 
     @Override
     public void modInitialize(CarbonModAPI api) {
-        CarbonItem<CarbonItemState<?>> item = new CarbonItem<>(Identifier.of("among:us"));
+        CarbonItem<CarbonItemState> item = new CarbonItem<>(
+                Identifier.of("among:us"),
+                CarbonItemState.class
+        )
+                .setBaseMaterial(Material.BARRIER)
+                .setStateAllocator(StateAllocator.GENERIC)
+                .setDisplayStrategy(ModelItemDisplayStrategy::new, (item1, s) ->
+                        s.setDisplayName("Among Us").setGlinting(true)
+                ).build();
 
         api.getEnvironmentAPI().getRegistries()
                 .<Registry<CarbonItem<?>>>getByIdentifier("minecraft:items")

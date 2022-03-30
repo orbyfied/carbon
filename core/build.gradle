@@ -14,11 +14,15 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
+shadowJar {
+    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
+}
+
 tasks {
 
     // Configure reobfJar to run when invoking the build task
     assemble {
-        dependsOn(reobfJar)
+        dependsOn(shadowJar, reobfJar)
     }
 
     compileJava {
