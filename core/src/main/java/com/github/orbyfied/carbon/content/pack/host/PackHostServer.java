@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.content.pack.host;
 
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
+import com.github.orbyfied.carbon.config.AbstractConfiguration;
 import com.github.orbyfied.carbon.config.Configurable;
+import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.google.common.graph.Network;
 import com.sun.net.httpserver.Headers;
@@ -29,20 +31,15 @@ import java.util.concurrent.Executors;
  * Class for hosting and sending
  * the resource pack.
  */
-public class PackHostServer extends PackHostProvider {
-
-    /**
-     * The port for the server.
-     */
-    private static int PORT;
-
-    static {
-        PORT = Bukkit.getServer().getPort() + 1;
-    }
+public class PackHostServer extends PackHostProvider
+        implements Configurable<PackHostServer.Config> {
 
     /** Constructor. */
     public PackHostServer(ResourcePackManager manager) {
         super(manager, true);
+        manager.getMain().getConfigurationHelper()
+                .addConfigurable(this);
+        manager.getMain().getConfigurationHelper().loadOne(this);
     }
 
     /**
@@ -80,10 +77,12 @@ public class PackHostServer extends PackHostProvider {
 
         try {
 
+            manager.getLogger().debugc("Starting HTTP host server on port " + config.port);
+
             // create and set up server
             server = HttpServer.create();
             server.setExecutor(exec);
-            server.bind(new InetSocketAddress(PORT), 0);
+            server.bind(new InetSocketAddress(config.port), 0);
 
             // create and bind download url
             packDownloadLoc = "/carbon/rp_d/" + packFile.getFileName().toString().split("\\.")[0] +
@@ -111,7 +110,7 @@ public class PackHostServer extends PackHostProvider {
 
             // log
             manager.getLogger().ok("Successfully started HTTP server on " +
-                    "127.0.0.1:" + PORT + " (pack url: " + getLocalDownloadUrl(0) + ")");
+                    "127.0.0.1:" + config.port + " (pack url: " + getLocalDownloadUrl(0) + ")");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,7 +151,7 @@ public class PackHostServer extends PackHostProvider {
     public String getLocalDownloadUrl(int artifactId) {
         if (artifactId != 0)
             throw new UnsupportedOperationException("only one artifact supported");
-        return "127.0.0.1:" + PORT + packDownloadLoc;
+        return "127.0.0.1:" + config.port + packDownloadLoc;
     }
 
     @Override
@@ -169,6 +168,31 @@ public class PackHostServer extends PackHostProvider {
         }
 
         return null;
+    }
+
+    protected Config config = new Config(this);
+
+    @Override
+    public Config getConfiguration() {
+        return config;
+    }
+
+    @Override
+    public String getConfigurationPath() {
+        return "resource-pack-host.settings";
+    }
+
+    /* ---------------- */
+
+    class Config extends AbstractConfiguration {
+
+        public Config(Configurable<?> configurable) {
+            super(configurable);
+        }
+
+        @Configure
+        public int port;
+
     }
 
     ////////////////////////////////////////

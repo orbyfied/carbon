@@ -1,6 +1,9 @@
 package com.github.orbyfied.carbon.content.pack.host;
 
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
+import com.github.orbyfied.carbon.config.AbstractConfiguration;
+import com.github.orbyfied.carbon.config.Configurable;
+import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

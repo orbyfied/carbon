@@ -6,13 +6,9 @@ import com.github.orbyfied.carbon.api.mod.CarbonModDescription;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.annotation.BaseAnnotationProcessor;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
-import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.config.*;
-import com.github.orbyfied.carbon.core.CarbonJavaAPI;
-import com.github.orbyfied.carbon.core.mod.CarbonJavaModAPI;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
@@ -22,12 +18,10 @@ import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -56,7 +50,7 @@ public class CarbonTestMod extends JavaPlugin implements CarbonModInitializer, L
                         s.setDisplayName("Among Us").setGlinting(true)
                 ).build();
 
-        api.getEnvironmentAPI().getRegistries()
+        api.getMainAPI().getRegistries()
                 .<Registry<CarbonItem<?>>>getByIdentifier("minecraft:items")
                 .register(item);
     }

@@ -50,6 +50,10 @@ public class Carbon
         this.platform = platform;
 
         /* initialize core */
+        this.configurationHelper = ConfigurationHelper.newYamlFileConfiguration(directory.resolve("config.yml"), "/carbon/config/config.yml");
+        this.configuration = new CarbonConfiguration(this);
+        configurationHelper.addConfigurable(this);
+
         this.api = new CarbonJavaAPI(this);
         this.registries = new Registry<>("carbon:registries");
         this.modLoader = new ModLoader(this);
@@ -57,11 +61,6 @@ public class Carbon
         this.resourcePackManager = new ResourcePackManager(this);
         this.commandEngine = new BukkitCommandEngine();
         this.userEnvironment = new CarbonUserEnvironment(this);
-        this.configurationHelper = ConfigurationHelper.newYamlFileConfiguration(directory.resolve("config.yml"), "/carbon/config/config.yml");
-
-        /* config shit */
-        this.configuration = new CarbonConfiguration(this);
-        configurationHelper.addConfigurable(this);
 
     }
 

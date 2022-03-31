@@ -196,7 +196,35 @@ public class ConfigurationHelper<S extends ConfigurationSection> {
     }
 
     /**
-     * Loads all configurables from a given
+     * Loads one configurable from the
+     * configuration section.
+     * @return This.
+     */
+    public ConfigurationHelper<S> loadOne(Configurable<?> c) {
+        // path split
+        String[] ps = c.getConfigurationPath().split("/");
+        // parse path
+        ConfigurationHelper<?> helper;
+        String path;
+        if (ps.length == 1) {
+            // this is root
+            helper = getChild(null);
+            path = ps[0];
+        } else {
+            // child is root
+            helper = getChild(ps[0]);
+            path = ps[1];
+        }
+
+        // actually load
+        c.getConfiguration().load(getOrCreateSection(helper.section, path));
+
+        // return
+        return this;
+    }
+
+    /**
+     * Loads all configurables from the
      * configuration section.
      * @return This.
      */
@@ -208,24 +236,8 @@ public class ConfigurationHelper<S extends ConfigurationSection> {
         for (var ch : children.values())
             ch.load();
 
-        for (Configurable<?> c : configurables) {
-            // path split
-            String[] ps = c.getConfigurationPath().split("/");
-            // parse path
-            ConfigurationHelper<?> helper;
-            String path;
-            if (ps.length == 1) {
-                // this is root
-                helper = getChild(null);
-                path = ps[0];
-            } else {
-                // child is root
-                helper = getChild(ps[0]);
-                path = ps[1];
-            }
-
-            c.getConfiguration().load(getOrCreateSection(helper.section, path));
-        }
+        for (Configurable<?> c : configurables)
+            loadOne(c);
 
         return this;
     }
@@ -355,14 +367,16 @@ public class ConfigurationHelper<S extends ConfigurationSection> {
         ConfigurationHelper<YamlConfiguration> helper = new ConfigurationHelper<>();
         helper.section(new YamlConfiguration())
                 .beforeLoad(sect -> {
-                    if (defaults != null)
+                    if (defaults != null) {
                         saveDefaults(resolver, defaults, file, false);
+                    }
                     loadFromFile(sect, file);
                 })
                 .afterSave(sect -> {
                     saveToFile(sect, file);
                 }
         );
+
         return helper;
     }
 

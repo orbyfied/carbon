@@ -2,6 +2,9 @@ package com.github.orbyfied.carbon.api;
 
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
+import com.github.orbyfied.carbon.registry.Identifiable;
+import com.github.orbyfied.carbon.registry.Identifier;
+import com.github.orbyfied.carbon.registry.Registry;
 
 import java.util.Objects;
 
@@ -35,8 +38,26 @@ public abstract class CarbonModAPI {
      * Gets the environment API {@link CarbonAPI}
      * @return The API object.
      */
-    public CarbonAPI getEnvironmentAPI() {
+    public CarbonAPI getMainAPI() {
         return main.getAPI();
+    }
+
+    /**
+     * Get all registries.
+     * @return The registry of registries.
+     * @see CarbonAPI#getRegistries()
+     */
+    public Registry<Registry<?>> getRegistries() {
+        return main.getRegistries();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R extends Registry<T>, T extends Identifiable> R getRegistry(Identifier id) {
+        return (R) main.getRegistries().getByIdentifier(id);
+    }
+
+    public <R extends Registry<T>, T extends Identifiable> R getRegistry(String id) {
+        return getRegistry(Identifier.of(id));
     }
 
     /**

@@ -2,6 +2,9 @@ package com.github.orbyfied.carbon.content.pack;
 
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
+import com.github.orbyfied.carbon.config.AbstractConfiguration;
+import com.github.orbyfied.carbon.config.Configurable;
+import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.AssetPreparingService;
 import com.github.orbyfied.carbon.content.pack.host.PackHostProvider;
 import com.github.orbyfied.carbon.content.pack.host.PackHostServer;
@@ -13,7 +16,6 @@ import com.github.orbyfied.carbon.process.impl.SyncTask;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,12 +49,20 @@ public class ResourcePackManager {
 
     protected PackHostProvider hostServer;
 
+    protected Configurable<HostConfig> hostConfig = Configurable.of("resource-pack-host", HostConfig::new);
+
+    protected Configurable<BuilderConfig> builderConfig = Configurable.of("resource-pack-builder", BuilderConfig::new);
+
     public ResourcePackManager(Carbon main) {
         this.main   = main;
         this.logger = main.getLogger("ResourcePack");
         this.packSrcDirectory = main.getFileInDirectory("resource_pack/src/");
         this.packPkgFile      = main.getFileInDirectory("resource_pack/pack.zip");
         packPkgFileNamed      = main.getFileInDirectory("resource_pack/Carbon Mod Resources.zip");
+
+        main.getConfigurationHelper()
+                .addConfigurable(hostConfig)
+                .addConfigurable(builderConfig);
     }
 
     public Carbon getMain() {
@@ -66,8 +76,6 @@ public class ResourcePackManager {
     public PackHostProvider getHostServer() {
         return hostServer;
     }
-
-    public static final int BUILDING_THREADS = 8;
 
     public CompletableFuture<ResourcePackManager> build() {
 
@@ -93,6 +101,9 @@ public class ResourcePackManager {
                 e.printStackTrace();
                 return;
             }
+
+            // prepare assets
+            logger.stage("Prepare");
 
             // create pack builder
             ResourcePackBuilder b = new ResourcePackBuilder(this, packSrcDirectory);
@@ -124,7 +135,7 @@ public class ResourcePackManager {
 
 
             logger.debugc("Prepared " + b.assets.size() + " assets.");
-            logger.debugc("Building pack on " + BUILDING_THREADS + " threads.");
+            logger.debugc("Building pack on " + builderConfig.getConfiguration().threads + " threads.");
 
             BiConsumer<Process<PackAssetBuilder>, PackAssetBuilder> worker =
                     (proc, builder) -> {
@@ -164,7 +175,7 @@ public class ResourcePackManager {
 
                     // build all assets using worker
                     new ParallelTask<PackAssetBuilder, Process<PackAssetBuilder>>()
-                            .threads(BUILDING_THREADS)
+                            .threads(builderConfig.getConfiguration().threads)
                             .joined(true)
                             .addWork(b.assets),
 
@@ -200,6 +211,7 @@ public class ResourcePackManager {
             QueuedTickExecutionService.TickLoop tickLoop = service.tickLoop(true, null);
 
             // set up and run process
+            logger.stage("Build");
             process
                     .whenDone(tickLoop::end) // end tick loop when finished
                     .run(service);
@@ -215,15 +227,57 @@ public class ResourcePackManager {
 
     public ResourcePackManager startHost() {
 
-        // start HTTP server
-        logger.info("Starting HTTP resource pack host server.");
+        // start server
+        logger.stage("Host");
+        logger.info("Starting resource pack host provider.");
 
-        hostServer = new PackHostServer(this);
-        hostServer.host(packPkgFileNamed, 0);
-        hostServer.start();
-        hostServer.sendPackToAllPlayers(0, true);
+        try {
+
+            String method = hostConfig.getConfiguration().strategy.toLowerCase();
+            switch (method) {
+                case "http" -> hostServer = new PackHostServer(this);
+                default -> {
+                    logger.err("Invalid host provider method: " + method.toUpperCase());
+                    return this;
+                }
+            }
+
+            logger.debugc("Using host provider method: " + method.toUpperCase());
+
+            hostServer.host(packPkgFileNamed, 0);
+            hostServer.start();
+            hostServer.sendPackToAllPlayers(0, true);
+
+        } catch (Exception e) {
+            logger.err("Error occurred while starting pack host: " + e);
+            e.printStackTrace();
+        }
 
         return this;
+
+    }
+
+    ///////////////////////////////////////////////////
+
+    class BuilderConfig extends AbstractConfiguration {
+
+        public BuilderConfig(Configurable<?> configurable) {
+            super(configurable);
+        }
+
+        @Configure
+        public int threads;
+
+    }
+
+    class HostConfig extends AbstractConfiguration {
+
+        public HostConfig(Configurable<?> configurable) {
+            super(configurable);
+        }
+
+        @Configure
+        public String strategy;
 
     }
 

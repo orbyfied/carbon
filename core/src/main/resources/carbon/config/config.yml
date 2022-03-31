@@ -11,7 +11,30 @@
 
 # Carbon by orbyfied <https://github.com/orbyfied/carbon>, under the Apache License 2.0
 # Root configuration file. Sorry for the big text lol it looks cool
+--config-version: 1
 
 # ------------------------------------------------------------------------------------------
 
-# ======== CORE ========= */
+# ======== RESOURCES ======= */
+
+# Resource pack building properties
+resource-pack-builder:
+
+  # The number of threads to use for building
+  # Default = 8
+  threads: 8
+
+# Resource pack hosting properties
+resource-pack-host:
+
+  # The strategy to use for pack hosting
+  # Default = HTTP
+  strategy: http
+
+  # The settings for the host
+  settings:
+
+    # ONLY FOR HTTP
+    # The port to host it on
+    port: 25566
+
