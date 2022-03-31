@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.element.ModElementRegistry;
 import com.github.orbyfied.carbon.item.CarbonItem;
+import com.github.orbyfied.carbon.item.interact.EventItemInteractStrategyService;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bstats.bukkit.Metrics;
@@ -86,6 +87,7 @@ public abstract class CarbonBootstrap
 
     @Override
     public void onEnable() {
+
         // send fancy message
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
         sender.sendMessage("");
@@ -94,6 +96,10 @@ public abstract class CarbonBootstrap
                 (n, l) -> sender.sendMessage("  " + l + (n == 3 || n == 4 ? "   " + CarbonBranding.BRAND_MESSAGE_FORMATTED : ""))
         );
         sender.sendMessage("");
+
+        // load configuration
+        main.getConfigurationHelper()
+                .load();
 
         // start loading mods
         ModLoader loader = main.getModLoader();
@@ -104,6 +110,13 @@ public abstract class CarbonBootstrap
 
         // prepare to run initialize
         Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
+
+    }
+
+    @Override
+    public void onDisable() {
+
+        // TODO
 
     }
 
@@ -122,6 +135,10 @@ public abstract class CarbonBootstrap
         // initialize all mods
         ModLoader loader = main.getModLoader();
         loader.initializeAll();
+
+        // initialize strategies
+        EventItemInteractStrategyService eventItemInteractStrategyService =
+                new EventItemInteractStrategyService(main).enable();
 
         // build and host resource pack
         main.getResourcePackManager()

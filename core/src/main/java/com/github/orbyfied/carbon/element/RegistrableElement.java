@@ -16,4 +16,12 @@ public abstract class RegistrableElement implements Identifiable {
         return registry;
     }
 
+    void setId(int id) {
+        this.id = id;
+    }
+
+    void setRegistry(Registry<? extends RegistrableElement> reg) {
+        this.registry = reg;
+    }
+
 }

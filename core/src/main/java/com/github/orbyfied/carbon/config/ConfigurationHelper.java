@@ -358,9 +358,11 @@ public class ConfigurationHelper<S extends ConfigurationSection> {
                     if (defaults != null)
                         saveDefaults(resolver, defaults, file, false);
                     loadFromFile(sect, file);
-                }).afterSave(sect -> {
-            saveToFile(sect, file);
-        });
+                })
+                .afterSave(sect -> {
+                    saveToFile(sect, file);
+                }
+        );
         return helper;
     }
 

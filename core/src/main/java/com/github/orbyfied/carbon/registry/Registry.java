@@ -162,7 +162,7 @@ public class Registry<T extends Identifiable>
             for (int i = 0; i < l; i++) {
                 RegistryService<Registry<T>, T> service = servicesLinear.get(i);
                 if (service instanceof FunctionalService<Registry<T>, T> fs)
-                    fs.unregistered(item);
+                    fs.registered(item);
             }
         }
 

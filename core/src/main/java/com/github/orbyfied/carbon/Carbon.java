@@ -2,8 +2,11 @@ package com.github.orbyfied.carbon;
 
 import com.github.orbyfied.carbon.api.util.Version;
 import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
+import com.github.orbyfied.carbon.bootstrap.CarbonConfiguration;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
+import com.github.orbyfied.carbon.config.Configurable;
+import com.github.orbyfied.carbon.config.ConfigurationHelper;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
@@ -14,13 +17,15 @@ import com.github.orbyfied.carbon.process.impl.CarbonProcessManager;
 import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.user.CarbonUserEnvironment;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.nio.file.Path;
 
 /**
  * The carbon plugin and main class.
  */
-public class Carbon {
+public class Carbon
+        implements Configurable<CarbonConfiguration> {
 
     public static final Version VERSION = Version.of("0.1.0");
 
@@ -29,7 +34,7 @@ public class Carbon {
     /**
      * The data folder for Carbon.
      */
-    protected final Path directory = Path.of("./.carbon");
+    protected final Path directory = Path.of("./carbon");
 
     /**
      * The Carbon plugin instance.
@@ -44,7 +49,7 @@ public class Carbon {
         this.plugin   = plugin;
         this.platform = platform;
 
-        /* initialize */
+        /* initialize core */
         this.api = new CarbonJavaAPI(this);
         this.registries = new Registry<>("carbon:registries");
         this.modLoader = new ModLoader(this);
@@ -52,6 +57,11 @@ public class Carbon {
         this.resourcePackManager = new ResourcePackManager(this);
         this.commandEngine = new BukkitCommandEngine();
         this.userEnvironment = new CarbonUserEnvironment(this);
+        this.configurationHelper = ConfigurationHelper.newYamlFileConfiguration(directory.resolve("config.yml"), "/carbon/config/config.yml");
+
+        /* config shit */
+        this.configuration = new CarbonConfiguration(this);
+        configurationHelper.addConfigurable(this);
 
     }
 
@@ -102,6 +112,16 @@ public class Carbon {
      */
     protected final CarbonUserEnvironment userEnvironment;
 
+    /**
+     * The configuration helper.
+     */
+    protected final ConfigurationHelper<YamlConfiguration> configurationHelper;
+
+    /**
+     * The Carbon root configuration.
+     */
+    protected CarbonConfiguration configuration;
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -138,10 +158,24 @@ public class Carbon {
         return userEnvironment;
     }
 
+    public ConfigurationHelper<YamlConfiguration> getConfigurationHelper() {
+        return configurationHelper;
+    }
+
     public Path getDirectory() { return directory; }
 
     public Path getFileInDirectory(String n) {
         return directory.resolve(n);
+    }
+
+    @Override
+    public String getConfigurationPath() {
+        return "";
+    }
+
+    @Override
+    public CarbonConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

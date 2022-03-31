@@ -3,6 +3,9 @@ package com.github.orbyfied.carbon.item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 /**
  * Represents the state and data of
  * an item stack. Can be serialized to
@@ -59,6 +62,30 @@ public class CarbonItemState<I extends CarbonItem<?>> {
                      CompoundTag tag) {
         // load item type
         item = item.getRegistry().getValue(tag.getInt("ItemId"));
+    }
+
+    ////////////////////////////////////////
+
+    public String propertiesToString() {
+        return "";
+    }
+
+    @Override
+    public String toString() {
+        return "state of " + item + ": " + propertiesToString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CarbonItemState<?> that = (CarbonItemState<?>) o;
+        return Objects.equals(item, that.item);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(item);
     }
 
 }

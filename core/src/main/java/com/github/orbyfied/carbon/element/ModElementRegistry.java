@@ -19,33 +19,14 @@ public class ModElementRegistry<T extends RegistrableElement>
 
     @Override
     public void registered(T val) {
-        setIdFieldOn(val, registry.size() - 1);
+        val.setId(registry.size() - 1);
+        val.setRegistry(registry);
     }
 
     @Override
     public void unregistered(T val) {
-        setIdFieldOn(val, -1);
-    }
-
-    private static void setIdFieldOn(RegistrableElement elem, int to) {
-        try {
-            idField.set(elem, to);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static final Field idField;
-
-    static {
-        Field idF = null;
-        try {
-            idF = RegistrableElement.class.getDeclaredField("id");
-            idF.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        idField = idF;
+        val.setId(-1);
+        val.setRegistry(null);
     }
 
     @Override

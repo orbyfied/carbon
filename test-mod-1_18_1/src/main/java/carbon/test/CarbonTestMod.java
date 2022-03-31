@@ -11,6 +11,8 @@ import com.github.orbyfied.carbon.command.annotation.BaseAnnotationProcessor;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
 import com.github.orbyfied.carbon.config.*;
+import com.github.orbyfied.carbon.core.CarbonJavaAPI;
+import com.github.orbyfied.carbon.core.mod.CarbonJavaModAPI;
 import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;

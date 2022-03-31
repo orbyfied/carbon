@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import static com.github.orbyfied.carbon.util.mc.Nbt.getOrCreateCompound;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -201,9 +202,31 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return stack;
     }
 
+    /* ------ Internal ------- */
+
     private void checkBuilt() {
         if (!isBuilt)
             throw new IllegalStateException("item " + identifier + " has not been built yet!");
     }
 
+     /////////////////////////////
+
+    @Override
+    public String toString() {
+        return identifier.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CarbonItem<?> item = (CarbonItem<?>) o;
+        return Objects.equals(item.identifier, identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier);
+    }
+    
 }
