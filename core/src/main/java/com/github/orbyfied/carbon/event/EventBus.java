@@ -19,7 +19,7 @@ public class EventBus {
     /**
      * Listeners mapped by class.
      */
-    private final HashMap<Class<? extends Listener>, RegisteredListener> listenersByClass = new HashMap<>();
+    private final HashMap<Class<? extends EventListener>, RegisteredListener> listenersByClass = new HashMap<>();
 
     /**
      * Listeners stored linearly.
@@ -38,7 +38,7 @@ public class EventBus {
      * @param listener The listener instance.
      * @return The new {@link RegisteredListener} instance.
      */
-    public RegisteredListener register(Listener listener) {
+    public RegisteredListener register(EventListener listener) {
         // create and add registered listener
         RegisteredListener rl = new RegisteredListener(this, listener);
         listeners.add(rl);
@@ -57,7 +57,7 @@ public class EventBus {
      * @param listener The listener object.
      * @return True/false.
      */
-    public boolean isRegistered(Listener listener) {
+    public boolean isRegistered(EventListener listener) {
         return listenersByClass.containsKey(listener.getClass());
     }
 
@@ -67,7 +67,7 @@ public class EventBus {
      * @param listener The listener object.
      * @return True/false.
      */
-    public boolean isRegistered(Class<? extends Listener> listener) {
+    public boolean isRegistered(Class<? extends EventListener> listener) {
         return listenersByClass.containsKey(listener);
     }
 
@@ -77,7 +77,7 @@ public class EventBus {
      * @param klass The class.
      * @return The last registered listener.
      */
-    public RegisteredListener getRegistered(Class<? extends Listener> klass) {
+    public RegisteredListener getRegistered(Class<? extends EventListener> klass) {
         return listenersByClass.get(klass);
     }
 
@@ -87,7 +87,7 @@ public class EventBus {
      * @param klass The class.
      * @return An unmodifiable list of listeners.
      */
-    public List<RegisteredListener> getAllRegistered(Class<? extends Listener> klass) {
+    public List<RegisteredListener> getAllRegistered(Class<? extends EventListener> klass) {
         List<RegisteredListener> list = new ArrayList<>();
         for (RegisteredListener l : listeners)
             if (l.klass == klass) list.add(l);
@@ -123,7 +123,7 @@ public class EventBus {
      * the listeners type.
      * @param listener The listener.
      */
-    public void unregisterLast(Listener listener) {
+    public void unregisterLast(EventListener listener) {
         unregister(listenersByClass.get(listener.getClass()));
     }
 
@@ -132,7 +132,7 @@ public class EventBus {
      * the specified type.
      * @param klass The listener class.
      */
-    public void unregisterLast(Class<? extends Listener> klass) {
+    public void unregisterLast(Class<? extends EventListener> klass) {
         unregister(listenersByClass.get(klass));
     }
 
@@ -141,7 +141,7 @@ public class EventBus {
      * of the specified type.
      * @param klass The type.
      */
-    public void unregisterAll(Class<? extends Listener> klass) {
+    public void unregisterAll(Class<? extends EventListener> klass) {
         for (RegisteredListener rl : listeners)
             if (rl.klass == klass) unregister(rl);
     }

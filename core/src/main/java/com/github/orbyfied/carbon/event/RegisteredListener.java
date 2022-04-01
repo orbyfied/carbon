@@ -25,14 +25,14 @@ public class RegisteredListener {
     /**
      * The listener object.
      */
-    final Listener obj;
+    final EventListener obj;
 
     /**
      * The listener objects class.
      */
-    final Class<? extends Listener> klass;
+    final Class<? extends EventListener> klass;
 
-    public RegisteredListener(EventBus bus, Listener obj) {
+    public RegisteredListener(EventBus bus, EventListener obj) {
         Objects.requireNonNull(bus, "the event bus cannot be null");
         Objects.requireNonNull(obj, "the object cannot be null");
         this.bus = bus;

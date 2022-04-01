@@ -11,6 +11,8 @@ import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.EventListener;
+
 // indicate that this is a Carbon mod
 @CarbonMod(
         id = "example" /* the mod id */ ,

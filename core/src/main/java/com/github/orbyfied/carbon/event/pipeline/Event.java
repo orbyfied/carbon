@@ -48,7 +48,7 @@ public class Event {
      */
     @SuppressWarnings("unchecked")
     public <T> T carried(String key) {
-        setupCarries();
+        if (carrys == null) return null;
         return (T) carrys.get(key);
     }
 
@@ -62,7 +62,7 @@ public class Event {
      */
     @SuppressWarnings("unchecked")
     public <T> T carried(String key, Class<T> tClass) {
-        setupCarries();
+        if (carrys == null) return null;
         return (T) carrys.get(key);
     }
 
