@@ -1,5 +1,8 @@
 package com.github.orbyfied.carbon.event;
 
+import com.github.orbyfied.carbon.event.exception.EventInvocationException;
+import com.github.orbyfied.carbon.event.exception.InternalBusException;
+import com.github.orbyfied.carbon.event.exception.InvalidEventException;
 import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
 
 import java.lang.reflect.Method;
@@ -148,8 +151,9 @@ public class EventBus {
      * Uses the events class as the pipeline provider.
      * @param event The event.
      */
-    public void post(BusEvent event) {
-        post(event.getClass(), event);
+    @SuppressWarnings("unchecked")
+    public <E extends BusEvent> void post(E event) {
+        post((Class<E>) event.getClass(), event);
     }
 
     /**
@@ -159,8 +163,18 @@ public class EventBus {
      * @param fclass The pipeline provider class.
      * @param event The event.
      */
-    public void post(Class<? extends BusEvent> fclass, BusEvent event) {
-        getPipelineFor(fclass).push(event);
+    @SuppressWarnings("unchecked")
+    public <E extends BusEvent> void post(Class<E> fclass, E event) {
+        // get pipeline for event
+        PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
+
+        try {
+            // post event
+            acc.push(event);
+        } catch (Exception e) {
+            // throw invocation exception
+            throw new EventInvocationException(this, "error occurred in event handler", e);
+        }
     }
 
     /**
@@ -182,13 +196,18 @@ public class EventBus {
             Method getPipeline;
             try {
                 getPipeline = event.getDeclaredMethod("getPipeline", EventBus.class);
-            } catch (NoSuchMethodException e) { return null; }
+            } catch (NoSuchMethodException e) {
+                // throw exception
+                throw new InvalidEventException(this, event, "pipeline provider { PipelineAccess<E> getPipeline(EventBus); } not implemented");
+            }
+
             pipeline = (PipelineAccess<BusEvent>) getPipeline.invoke(null, this);
-            eventPipelineCache.put(event, pipeline);
+            eventPipelineCache.put(event, pipeline); // cache
             return pipeline;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            // throw internal exception
+            throw new InternalBusException(this, "internal exception while retrieving event pipeline from '" +
+                    event.getName() + "'", e);
         }
     }
 
