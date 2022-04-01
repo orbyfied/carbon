@@ -5,6 +5,8 @@ import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -194,6 +196,10 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         // write default state
         S state = newState();
         state.save(nmsStack, getOrCreateCompound(tag, ITEM_STATE_TAG));
+
+        // set default name
+        nmsStack.setHoverName(new TextComponent("item." + identifier)
+                .setStyle(Style.EMPTY.withItalic(false)));
 
         // initialize display
         displayStrategy.makeItem(nmsStack, state, tag);

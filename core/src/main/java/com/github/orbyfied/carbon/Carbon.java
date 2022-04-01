@@ -10,6 +10,7 @@ import com.github.orbyfied.carbon.config.ConfigurationHelper;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
+import com.github.orbyfied.carbon.event.EventBus;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.process.ProcessManager;
@@ -58,6 +59,7 @@ public class Carbon
         this.registries = new Registry<>("carbon:registries");
         this.modLoader = new ModLoader(this);
         this.processManager = new CarbonProcessManager(this);
+        this.coreEventBus = new EventBus();
         this.resourcePackManager = new ResourcePackManager(this);
         this.commandEngine = new BukkitCommandEngine();
         this.userEnvironment = new CarbonUserEnvironment(this);
@@ -121,6 +123,11 @@ public class Carbon
      */
     protected CarbonConfiguration configuration;
 
+    /**
+     * The base, root or core event bus.
+     */
+    protected final EventBus coreEventBus;
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -159,6 +166,10 @@ public class Carbon
 
     public ConfigurationHelper<YamlConfiguration> getConfigurationHelper() {
         return configurationHelper;
+    }
+
+    public EventBus getCoreEventBus() {
+        return coreEventBus;
     }
 
     public Path getDirectory() { return directory; }

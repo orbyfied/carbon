@@ -150,7 +150,7 @@ public class ExampleMod
         // create new item
         CarbonItem<?> ruby = new CarbonItem<>(
                 Identifier.of("example:ruby"), // use your mod id as the namespace
-                // we dont need our item to have any custom behaviour
+                // we dont need our item to have any custom data
                 // so we will just use the default item state
                 CarbonItemState.class
         )
