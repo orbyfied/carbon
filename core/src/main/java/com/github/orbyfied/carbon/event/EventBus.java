@@ -177,8 +177,6 @@ public class EventBus {
         PipelineAccess<BusEvent> pipeline = eventPipelineCache.get(event);
         if (pipeline != null) return pipeline;
 
-        System.out.println("not cached: " + event);
-
         // retrieve and cache
         try {
             Method getPipeline;
