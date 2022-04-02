@@ -63,7 +63,7 @@ public interface PackResource {
     ///////////////////////////////
 
     static PackResource of(final String name,
-                               final Function<Path, Path> pathResolver) {
+                           final Function<Path, Path> pathResolver) {
         return new PackResource() {
             @Override
             public String getName() {

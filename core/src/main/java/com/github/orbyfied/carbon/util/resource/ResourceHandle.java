@@ -87,7 +87,7 @@ public interface ResourceHandle {
     static ResourceHandle ofModuleResource(Class<?> klass, String path) {
         final ClassResourceResolver res = new ClassResourceResolver(klass);
         return new ResourceHandle() {
-            private URL url = res.getResourceFromPath(path);
+            private final URL url = res.getResourceFromPath(path);
 
             @Override
             public ResourceResolver getResolver() {

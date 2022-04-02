@@ -19,6 +19,7 @@ public class ModElementRegistry<T extends RegistrableElement>
 
     @Override
     public void registered(T val) {
+        System.out.println(val);
         val.setId(registry.size() - 1);
         val.setRegistry(registry);
     }

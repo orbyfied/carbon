@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.config.AbstractConfiguration;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
+import com.github.orbyfied.carbon.logging.BukkitLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -26,6 +27,11 @@ public abstract class PackHostProvider {
     protected final ResourcePackManager manager;
 
     /**
+     * The logger for this provider.
+     */
+    protected final BukkitLogger logger;
+
+    /**
      * The optional event listener.
      */
     protected EventListener listener;
@@ -34,6 +40,7 @@ public abstract class PackHostProvider {
     public PackHostProvider(final ResourcePackManager manager,
                             final boolean constructEvents) {
         this.manager = manager;
+        this.logger  = manager.getLogger();
         if (constructEvents)
             Bukkit.getPluginManager().registerEvents(
                     listener = new EventListener(),

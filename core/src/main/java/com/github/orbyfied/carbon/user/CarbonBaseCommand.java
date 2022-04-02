@@ -1,6 +1,5 @@
 package com.github.orbyfied.carbon.user;
 
-import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.annotation.BaseCommand;
@@ -9,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.C;
 
 @BaseCommand(name = "carbon")
 public class CarbonBaseCommand {

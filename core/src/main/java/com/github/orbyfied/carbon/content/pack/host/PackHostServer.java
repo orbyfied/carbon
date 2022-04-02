@@ -1,26 +1,16 @@
 package com.github.orbyfied.carbon.content.pack.host;
 
-import com.github.orbyfied.carbon.bootstrap.CarbonBranding;
 import com.github.orbyfied.carbon.config.AbstractConfiguration;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
-import com.google.common.graph.Network;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpServer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -85,7 +75,7 @@ public class PackHostServer extends PackHostProvider
             server.bind(new InetSocketAddress(config.port), 0);
 
             // create and bind download url
-            packDownloadLoc = "/carbon/rp_d/" + packFile.getFileName().toString().split("\\.")[0] +
+            packDownloadLoc = "/com/github/orbyfied/carbon/rp_d/" + packFile.getFileName().toString().split("\\.")[0] +
                         "-" + toHexString(hash[0]) + toHexString(hash[1]) + toHexString(hash[3]) + toHexString(hash[4]) + ".zip";
             server.createContext(packDownloadLoc, exchange -> {
                 // check request method for GET

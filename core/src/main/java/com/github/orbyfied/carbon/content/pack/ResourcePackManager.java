@@ -6,28 +6,36 @@ import com.github.orbyfied.carbon.config.AbstractConfiguration;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.AssetPreparingService;
+import com.github.orbyfied.carbon.content.pack.host.FilebinPackHost;
 import com.github.orbyfied.carbon.content.pack.host.PackHostProvider;
 import com.github.orbyfied.carbon.content.pack.host.PackHostServer;
+import com.github.orbyfied.carbon.content.pack.service.JsonPackService;
+import com.github.orbyfied.carbon.content.pack.service.MinecraftAssetService;
+import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
+import com.github.orbyfied.carbon.platform.ResourcePackProxy;
 import com.github.orbyfied.carbon.process.Process;
 import com.github.orbyfied.carbon.process.impl.ParallelTask;
 import com.github.orbyfied.carbon.process.impl.QueuedTickExecutionService;
 import com.github.orbyfied.carbon.process.impl.SyncTask;
 import com.github.orbyfied.carbon.registry.Registry;
+import com.github.orbyfied.carbon.util.IOUtil;
 import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import net.md_5.bungee.api.ChatColor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class ResourcePackManager {
 
@@ -41,11 +49,11 @@ public class ResourcePackManager {
      */
     private final BukkitLogger logger;
 
+    public final Path packDir;
+
     public final Path packSrcDirectory;
 
     public final Path packPkgFile;
-
-    public Path packPkgFileNamed;
 
     protected PackHostProvider hostServer;
 
@@ -56,9 +64,9 @@ public class ResourcePackManager {
     public ResourcePackManager(Carbon main) {
         this.main   = main;
         this.logger = main.getLogger("ResourcePack");
+        this.packDir = main.getFileInDirectory("resource_pack");
         this.packSrcDirectory = main.getFileInDirectory("resource_pack/src/");
         this.packPkgFile      = main.getFileInDirectory("resource_pack/pack.zip");
-        packPkgFileNamed      = main.getFileInDirectory("resource_pack/Carbon Mod Resources.zip");
 
         main.getConfigurationHelper()
                 .addConfigurable(hostConfig)
@@ -91,8 +99,7 @@ public class ResourcePackManager {
 
                 // delete old
                 Files.deleteIfExists(packPkgFile);
-                Files.deleteIfExists(packPkgFileNamed);
-                deleteDirectory(packSrcDirectory);
+                IOUtil.deleteDirectory(packSrcDirectory);
 
                 // create new
                 Files.createDirectories(packSrcDirectory);
@@ -108,12 +115,15 @@ public class ResourcePackManager {
             // create pack builder
             ResourcePackBuilder b = new ResourcePackBuilder(this, packSrcDirectory);
 
+            // add pack builder services
+            b.addService(new JsonPackService(b));
+            b.addService(new MinecraftAssetService(b));
+
             // collect asset building services
             ArrayList<AssetPreparingService> serviceList = new ArrayList<>();
             for (Registry<?> reg : main.getRegistries())
-                serviceList.addAll(reg.getServicesOf(
-                        AssetPreparingService.class,
-                        serviceList));
+                reg.getServicesOf(AssetPreparingService.class,
+                        serviceList);
 
             logger.debugc("Found " + serviceList.size() + " asset providing registry services.");
             logger.debugc("Preparing assets.");
@@ -122,12 +132,36 @@ public class ResourcePackManager {
             for (AssetPreparingService s : serviceList)
                 s.prepareAssets(b);
 
+            // copy assets from mods
+            for (LoadedMod mod : main.getModLoader().getMods()) {
+                // get mod class
+                Class<?> modClass = mod.getPluginClass();
+
+                // add builder
+                b.asset(new PackElementBuilder(b) {
+
+                    @Override
+                    public void write() {
+                        IOUtil.copyFromJar(
+                                modClass,
+                                "/assets/" + mod.getId(),
+                                b.srcDir.resolve("assets/" + mod.getId())
+                        );
+                    }
+
+                    @Override
+                    public void read() { }
+
+                }).setName("CopyAssets(" + mod.getId() + ")");
+            }
+
             // prepare mcmeta
-            b.asset((Function<ResourcePackBuilder, PackMetaBuilder>) PackMetaBuilder::new)
+            b.asset(new PackMetaBuilder(b))
                     .setDescription(ChatColor.DARK_GRAY + "Generated by " + CarbonBranding.PREFIX +
                             ChatColor.WHITE + " for " + ChatColor.YELLOW + modCount +
                             ChatColor.WHITE + " mods.")
-                    .setPackFormat(main.getPlatform().getResourcePackProxy().getPackFormat());
+                    .setPackFormat(main.getPlatform().getResourcePackProxy().getPackFormat()
+            );
 
             // prepare copy pack.png
             b.asset(new CopyAssetBuilder(b, PackResource.of("packpng", p -> p.resolve("pack.png"))))
@@ -137,24 +171,15 @@ public class ResourcePackManager {
             logger.debugc("Prepared " + b.assets.size() + " assets.");
             logger.debugc("Building pack on " + builderConfig.getConfiguration().threads + " threads.");
 
-            BiConsumer<Process<PackAssetBuilder>, PackAssetBuilder> worker =
+            BiConsumer<Process<PackElementBuilder>, PackElementBuilder> worker =
                     (proc, builder) -> {
                 // get file path
-                Path rp = builder.resource.getPath(b.srcDir);
-                logger.debugc(() -> prefixwt("Building resource " + builder.resource.getName() + ": " + rp));
+                logger.debugc(() -> prefixwt("Building resource " + ChatColor.RED + builder.getName()));
                 try {
-                    // create file
-                    if (!Files.exists(rp))
-                        Files.createFile(rp);
-
-                    // open output stream and write file, then close
-                    OutputStream s = Files.newOutputStream(rp);
-                    builder.write(s);
-                    s.close();
+                    builder.write();
                 } catch (Exception e) {
                     // log error
-                    logger.err(prefixwt("Error while building " + builder.resource.getName() + " (" +
-                            rp + "): " + e));
+                    logger.err(prefixwt("Error while building " + builder.getName() + ": " + e));
                     e.printStackTrace();
                 }
             };
@@ -163,38 +188,115 @@ public class ResourcePackManager {
             AtomicLong t1 = new AtomicLong();
 
             // create process
-            Process<PackAssetBuilder> process = main.getProcessManager()
+            Process<PackElementBuilder> process = main.getProcessManager()
                     .process(worker);
 
             // add tasks
             process.addTasks(
                     // collect the start time
-                    new SyncTask<PackAssetBuilder, Process<PackAssetBuilder>>().runnable((proc, __) -> {
+                    // download minecraft jar
+                    new SyncTask<PackElementBuilder, Process<PackElementBuilder>>().runnable((proc, __) -> {
                         t1.set(System.currentTimeMillis());
+
+                        // get resource pack proxy
+                        ResourcePackProxy rpp = main.getPlatform().getResourcePackProxy();
+
+                        // check if assets were already downloaded
+                        Path assetsFolder = rpp.getMinecraftAssetsFolder(packDir);
+                        if (Files.exists(assetsFolder) &&
+                                // check revision
+                                Objects.equals(IOUtil.readFileToUtf8(assetsFolder.resolve(".rev")), Integer.toString(rpp.getAssetsRevision())))
+                            return;
+
+                        logger.info("Downloading Minecraft assets. This only needs to run once per version.");
+
+                        try {
+                            OutputStream os;
+                            InputStream  is;
+
+                            // get minecraft jar url
+                            URL url = new URL(rpp.getMinecraftJarUrl());
+
+                            // get temp file
+                            Path tempJar = rpp.getMinecraftJarFile(packDir);
+                            if (!Files.exists(tempJar)) {
+                                if (!Files.exists(tempJar.getParent()))
+                                    Files.createDirectories(tempJar.getParent());
+                                Files.createFile(tempJar);
+
+                                // open streams and write
+                                os = Files.newOutputStream(tempJar);
+                                is = url.openStream();
+
+                                is.transferTo(os);
+
+                                os.close();
+                                is.close();
+                            }
+
+                            // create assets folder
+                            if (Files.exists(assetsFolder))
+                                IOUtil.deleteDirectory(assetsFolder);
+                            Files.createDirectories(assetsFolder);
+
+                            // assign assets folder
+                            MinecraftAssetService mcAssetService = b.getService(MinecraftAssetService.class);
+                            mcAssetService.setAssetsPath(assetsFolder);
+
+                            // write .rev file
+                            Path revFile = assetsFolder.resolve(".assetrev");
+
+                            os = Files.newOutputStream(revFile);
+                            os.write(String.valueOf(rpp.getAssetsRevision()).getBytes(StandardCharsets.UTF_8));
+                            os.close();
+
+                            // unzip assets
+                            JarInputStream jis = new JarInputStream(Files.newInputStream(tempJar));
+                            Path mcAssets = assetsFolder.resolve("assets/minecraft");
+                            Files.createDirectories(mcAssets);
+
+                            ZipEntry entry;
+                            while ((entry = jis.getNextEntry()) != null) {
+                                String n = entry.getName();
+                                if (!mcAssetService.shouldExtract(n))
+                                    continue;
+
+                                // create file on disk
+                                Path assetFile = assetsFolder.resolve(n);
+                                if (!Files.exists(assetFile.getParent()))
+                                    Files.createDirectories(assetFile.getParent());
+                                Files.createFile(assetFile);
+
+                                // read entry and write to file
+                                OutputStream afos = Files.newOutputStream(assetFile);
+                                IOUtil.extractFile(jis, afos);
+
+                            }
+
+                            jis.close();
+                        } catch (Exception e) {
+                            // TODO: better error handling
+                            e.printStackTrace();
+                            return;
+                        }
+
                     }),
 
                     // build all assets using worker
-                    new ParallelTask<PackAssetBuilder, Process<PackAssetBuilder>>()
+                    new ParallelTask<PackElementBuilder, Process<PackElementBuilder>>()
                             .threads(builderConfig.getConfiguration().threads)
                             .joined(true)
                             .addWork(b.assets),
 
                     // package and print information
-                    new SyncTask<PackAssetBuilder, Process<PackAssetBuilder>>().runnable((proc, __) -> {
+                    new SyncTask<PackElementBuilder, Process<PackElementBuilder>>().runnable((proc, __) -> {
                         // debug
                         long tms1 = System.currentTimeMillis() - t1.get();
                         logger.debugc("Built unpacked resource pack in " + tms1 + "ms");
 
                         // package resource pack
                         logger.info("Packaging resource pack");
-                        zipFilesInFolder(packSrcDirectory.toAbsolutePath().toString(), packPkgFile);
-
-                        // rename/copy resource pack to the renamed file
-                        try {
-                            Files.copy(packPkgFile, packPkgFileNamed, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        IOUtil.zipFilesInFolder(packSrcDirectory.toAbsolutePath().toString(), packPkgFile);
 
                         // print info
                         long tms = System.currentTimeMillis() - t1.get();
@@ -236,6 +338,7 @@ public class ResourcePackManager {
             String method = hostConfig.getConfiguration().strategy.toLowerCase();
             switch (method) {
                 case "http" -> hostServer = new PackHostServer(this);
+                case "filebin" -> hostServer = new FilebinPackHost(this, true);
                 default -> {
                     logger.err("Invalid host provider method: " + method.toUpperCase());
                     return this;
@@ -244,7 +347,7 @@ public class ResourcePackManager {
 
             logger.debugc("Using host provider method: " + method.toUpperCase());
 
-            hostServer.host(packPkgFileNamed, 0);
+            hostServer.host(packPkgFile, 0);
             hostServer.start();
             hostServer.sendPackToAllPlayers(0, true);
 
@@ -285,68 +388,6 @@ public class ResourcePackManager {
 
     private String prefixwt(String s) {
         return ChatColor.DARK_GRAY + "{ " + Thread.currentThread().getName() + " }" + ChatColor.WHITE + " " + s;
-    }
-
-    private void deleteDirectory(Path path) throws IOException {
-        if (!Files.exists(path))
-            return;
-
-        Files.walkFileTree(path, new SimpleFileVisitor<>() {
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-        });
-
-    }
-
-    /**
-     * From: https://www.netjstech.com/2016/06/zipping-files-in-java.html#ZipMultipleFileJava
-     */
-    private void zipFilesInFolder(String folder, Path resultFile){
-        try {
-            if (!Files.exists(resultFile))
-                Files.createFile(resultFile);
-            OutputStream fos = Files.newOutputStream(resultFile);
-            ZipOutputStream zos = new ZipOutputStream(fos);
-
-            Path sourcePath = Paths.get(folder);
-            // using WalkFileTree to traverse directory
-            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>(){
-                @Override
-                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-                    // it starts with the source folder so skipping that
-                    if(!sourcePath.equals(dir)){
-                        //System.out.println("DIR   " + dir);
-                        zos.putNextEntry(new ZipEntry(sourcePath.relativize(dir).toString() + "/"));
-                        zos.closeEntry();
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-                @Override
-                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-                    zos.putNextEntry(new ZipEntry(sourcePath.relativize(file).toString()));
-                    Files.copy(file, zos);
-                    zos.closeEntry();
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-
-            zos.close();
-            fos.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
 }

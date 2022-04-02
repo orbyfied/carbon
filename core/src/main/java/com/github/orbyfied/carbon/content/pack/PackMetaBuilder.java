@@ -1,7 +1,6 @@
 package com.github.orbyfied.carbon.content.pack;
 
-import com.github.orbyfied.carbon.util.json.JsonDocument;
-import com.github.orbyfied.carbon.util.json.JsonObject;
+import com.google.gson.JsonObject;
 
 public class PackMetaBuilder extends JsonAssetBuilder {
 
@@ -30,16 +29,18 @@ public class PackMetaBuilder extends JsonAssetBuilder {
     }
 
     @Override
-    public void writeJson(JsonDocument doc) {
-        doc.set("pack", new JsonObject()
-                .set("pack_format", packFormat)
-                .set("description", description));
+    public JsonObject writeJson(JsonObject doc) {
+        JsonObject in = new JsonObject();
+        in.addProperty("pack_format", packFormat);
+        in.addProperty("description", description);
+        doc.add("pack", in);
+        return doc;
     }
 
     @Override
-    public void readJson(JsonDocument doc) {
-        JsonObject nest = doc.getObject("pack");
-        packFormat  = nest.getInt("pack_format");
-        description = nest.getString("description");
+    public void readJson(JsonObject doc) {
+        JsonObject nest = doc.getAsJsonObject("pack");
+        packFormat  = nest.get("pack_format").getAsInt();
+        description = nest.get("description").getAsString();
     }
 }

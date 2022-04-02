@@ -1,8 +1,10 @@
 package com.github.orbyfied.carbon.item;
 
+import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.element.RegistrableElement;
 import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Identifier;
+import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
@@ -26,6 +28,11 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     public static final String ITEM_ID_TAG    = "CarbonItemId";
 
     ///////////////////////////////////////////////////////
+
+    /**
+     * The Carbon mod this is associated with.
+     */
+    protected final LoadedMod mod;
 
     /**
      * The identifier of this item.
@@ -59,10 +66,12 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      * of an item class to supply an identifier.
      * @param id The identifier of this block.
      */
-    public CarbonItem(Identifier id,
+    public CarbonItem(LoadedMod mod,
+                      Identifier id,
                       Class<S> runtimeStateType) {
         Objects.requireNonNull(id, "id cannot be null");
         Objects.requireNonNull(runtimeStateType, "runtime state type cannot be null");
+        this.mod = mod;
         this.identifier       = id;
         this.runtimeStateType = runtimeStateType;
     }
@@ -121,6 +130,15 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     public CarbonItem<S> setStateAllocator(StateAllocator<S> stateAllocator) {
         this.stateAllocator = stateAllocator;
+        return this;
+    }
+
+    public LoadedMod getMod() {
+        return mod;
+    }
+
+    public CarbonItem<S> register(Registry<CarbonItem<?>> registry) {
+        registry.register(this);
         return this;
     }
 

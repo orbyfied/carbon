@@ -1,33 +1,34 @@
 package com.github.orbyfied.carbon.content.pack;
 
-import com.github.orbyfied.carbon.util.json.JsonDocument;
-import com.github.orbyfied.carbon.util.json.JsonObject;
+import com.github.orbyfied.carbon.content.pack.service.JsonPackService;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public abstract class JsonAssetBuilder extends PackAssetBuilder {
 
+    protected Gson json;
+
     public JsonAssetBuilder(ResourcePackBuilder parent, PackResource loc) {
         super(parent, loc);
+        this.json = parent.getService(JsonPackService.class).getGson();
     }
 
-    public abstract void writeJson(JsonDocument doc);
-    public abstract void  readJson(JsonDocument doc);
+    public abstract JsonObject writeJson(JsonObject doc);
+    public abstract void readJson(JsonObject doc);
 
     @Override
     public void write(OutputStream out) throws IOException {
-        JsonDocument doc = new JsonDocument();
-        writeJson(doc);
-        out.write(doc.toJson().getBytes(StandardCharsets.UTF_8));
+        JsonObject doc = new JsonObject();
+        doc = writeJson(doc);
+        out.write(json.toJson(doc).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public void read(InputStream in) throws IOException {
-        JsonDocument doc = JsonDocument.fromJson(
-                new String(in.readAllBytes(), StandardCharsets.UTF_8));
+        JsonObject doc = json.fromJson(new InputStreamReader(in), JsonObject.class);
         readJson(doc);
     }
 

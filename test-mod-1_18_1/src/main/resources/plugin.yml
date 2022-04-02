@@ -1,5 +1,5 @@
-name: CarbonTestMod
-main: carbon.test.CarbonTestMod
+name: CarbonExampleMod
+main: carbon.test.ExampleMod
 version: 1.0
 api-version: 1.18
 depend:

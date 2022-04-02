@@ -159,7 +159,7 @@ public class LoadedMod {
             modInitializer.modInitialize(api);
         } catch (Exception e) {
             // catch exceptions in there
-            throw new ModLoaderException(this, "exception occurred in initialization handler "
+            throw new ModLoaderException(this, "Exception occurred in initialization handler "
                     + modInitializerClass.getName() + ".modInitialize(...)", e);
         }
 

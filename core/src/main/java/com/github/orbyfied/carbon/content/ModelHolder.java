@@ -7,6 +7,8 @@ import org.bukkit.Material;
 
 public interface ModelHolder<T extends RegistrableElement> {
 
+    String getNamespace();
+
     int getCustomModelDataOffset();
 
     SourcedAsset getModel(int off);
@@ -20,8 +22,8 @@ public interface ModelHolder<T extends RegistrableElement> {
             int amount) {
         if (amount == 0) return -1;
         CMDRegistryService<T>.BaseEditing edit = service.edit(base);
-        int off = 0;
         int start = edit.next(this);
+        int off = 1;
         for (; off < amount; off++)
             edit.next(this);
         return start;

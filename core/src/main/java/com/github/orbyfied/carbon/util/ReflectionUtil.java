@@ -1,5 +1,7 @@
 package com.github.orbyfied.carbon.util;
 
+import com.github.orbyfied.carbon.core.mod.CarbonJavaModAPI;
+
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -65,6 +67,24 @@ public class ReflectionUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void printParentTree(Class<?> klass) {
+        ReflectionUtil.walkParents(klass, null, (d, c) -> {
+            System.out.println("@ depth " + d + ": " + "  ".repeat(d) + "|- " + c);
+        });
+    }
+
+    public static void printCallTree() {
+        StackTraceElement[] elements;
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            elements = e.getStackTrace();
+        }
+        System.out.println("+ CALLED: " + elements[1]);
+        for (int i = 2; i < elements.length; i++)
+            System.out.println("| " + elements[i]);
     }
 
 }

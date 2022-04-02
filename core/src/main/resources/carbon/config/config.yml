@@ -38,3 +38,8 @@ resource-pack-host:
     # The port to host it on
     port: 25566
 
+    # ONLY FOR FILEBIN
+    # The bin ID to host the file on.
+    # Generate this at https://filebin.net
+    bin: 0
+

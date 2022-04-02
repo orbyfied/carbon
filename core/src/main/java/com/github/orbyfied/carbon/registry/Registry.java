@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.registry;
 
 import com.github.orbyfied.carbon.command.Functional;
+import com.github.orbyfied.carbon.util.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
 import java.util.*;

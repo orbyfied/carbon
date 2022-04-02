@@ -11,3 +11,5 @@ rootProject.name = 'carbon'
 include 'platform-v1_18_1'
 include 'core'
 include 'test-mod-1_18_1'
+include 'platform-v1_18_2'
+
