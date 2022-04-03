@@ -1,5 +1,8 @@
 package com.github.orbyfied.carbon.util;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class StringReader {
@@ -84,6 +87,18 @@ public class StringReader {
             }
         }
         return b.toString();
+    }
+
+    public List<String> split(char... chars) {
+        List<String> list = new ArrayList<>(len / 10);
+        HashSet<Character> charSet = new HashSet<>();
+        for (char c : chars)
+            charSet.add(c);
+        while (current() != DONE) {
+            list.add(collect(c -> !charSet.contains(c)));
+            next();
+        }
+        return list;
     }
 
     public int index() {

@@ -50,7 +50,7 @@ public class ItemUtil {
         }
     }
 
-    // TODO: replace with better method
+    // maybeTODO: replace with better method
     // this works for now though
     public static ItemStack getHandle(org.bukkit.inventory.ItemStack itemStack) {
         try {

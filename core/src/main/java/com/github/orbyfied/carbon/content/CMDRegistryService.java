@@ -1,20 +1,18 @@
 package com.github.orbyfied.carbon.content;
 
-import com.github.orbyfied.carbon.content.pack.CopyAssetBuilder;
 import com.github.orbyfied.carbon.content.pack.PackResource;
 import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.content.pack.asset.BaseItemModelBuilder;
 import com.github.orbyfied.carbon.content.pack.service.MinecraftAssetService;
 import com.github.orbyfied.carbon.element.RegistrableElement;
+import com.github.orbyfied.carbon.element.SpecifiedIdentifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.registry.AbstractRegistryService;
-import com.github.orbyfied.carbon.util.ReflectionUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class CMDRegistryService<T extends RegistrableElement>
         extends AbstractRegistryService<Registry<T>, T>
@@ -45,7 +43,7 @@ public class CMDRegistryService<T extends RegistrableElement>
         return holders.get(off);
     }
 
-    public SourcedAsset getModelOf(Material base, int off) {
+    public com.github.orbyfied.carbon.element.SpecifiedIdentifier getModelOf(Material base, int off) {
         ModelHolder<T> h = getHolderOf(base, off);
         return h.getModel(off - 1 - h.getCustomModelDataOffset());
     }
@@ -89,11 +87,11 @@ public class CMDRegistryService<T extends RegistrableElement>
                 int off = modelHolder.getCustomModelDataOffset();
 
                 // loop over models and build
-                for (SourcedAsset modelAsset : modelHolder.getModels()) {
+                for (SpecifiedIdentifier modelAsset : modelHolder.getModels()) {
                     // add override
                     baseModelBuilder.addOverride(
                             new BaseItemModelBuilder.PredicateOverride()
-                                .setModelName(modelHolder.getNamespace() + ":item/" + modelAsset.getName())
+                                .setModelName(modelAsset.toString())
                                 .setCustomModelData(off)
                     );
 

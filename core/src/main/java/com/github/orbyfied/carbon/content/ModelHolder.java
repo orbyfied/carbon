@@ -1,19 +1,35 @@
 package com.github.orbyfied.carbon.content;
 
-import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.RegistrableElement;
-import com.github.orbyfied.carbon.util.resource.ResourceHandle;
+import com.github.orbyfied.carbon.element.SpecifiedIdentifier;
 import org.bukkit.Material;
 
+/**
+ * Represents an object that can hold
+ * custom model data fueled models.
+ * @param <T> The mod element type.
+ */
 public interface ModelHolder<T extends RegistrableElement> {
 
-    String getNamespace();
-
+    /**
+     * Get the offset into the custom model
+     * data table of the base material.
+     * @return The offset.
+     */
     int getCustomModelDataOffset();
 
-    SourcedAsset getModel(int off);
+    /**
+     * Get the model at a specified index.
+     * @param off The index.
+     * @return The model.
+     */
+    SpecifiedIdentifier getModel(int off);
 
-    SourcedAsset[] getModels();
+    /**
+     * Get all models this holder holds.
+     * @return All the models.
+     */
+    SpecifiedIdentifier[] getModels();
 
     // utility to make life easier
     default int registerAllAndGetOffset(

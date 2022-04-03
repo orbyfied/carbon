@@ -30,11 +30,6 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     ///////////////////////////////////////////////////////
 
     /**
-     * The Carbon mod this is associated with.
-     */
-    protected final LoadedMod mod;
-
-    /**
      * The identifier of this item.
      * Storing it as a variable makes
      * implementation easier.
@@ -65,13 +60,12 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      * using {@code super(...)} inside
      * of an item class to supply an identifier.
      * @param id The identifier of this block.
+     * @param runtimeStateType The type of item state.
      */
-    public CarbonItem(LoadedMod mod,
-                      Identifier id,
+    public CarbonItem(Identifier id,
                       Class<S> runtimeStateType) {
         Objects.requireNonNull(id, "id cannot be null");
         Objects.requireNonNull(runtimeStateType, "runtime state type cannot be null");
-        this.mod = mod;
         this.identifier       = id;
         this.runtimeStateType = runtimeStateType;
     }
@@ -131,10 +125,6 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     public CarbonItem<S> setStateAllocator(StateAllocator<S> stateAllocator) {
         this.stateAllocator = stateAllocator;
         return this;
-    }
-
-    public LoadedMod getMod() {
-        return mod;
     }
 
     public CarbonItem<S> register(Registry<CarbonItem<?>> registry) {
@@ -209,7 +199,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         CompoundTag tag = nmsStack.getOrCreateTag();
 
         // set item id
-        tag.putInt(ITEM_ID_TAG, getId());
+        tag.putString(ITEM_ID_TAG, identifier.toString());
 
         // write default state
         S state = newState();

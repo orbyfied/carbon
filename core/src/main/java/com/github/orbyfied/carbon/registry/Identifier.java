@@ -22,7 +22,7 @@ public class Identifier implements Cloneable {
         Objects.requireNonNull(out, "output identifier cannot be null");
         String[] components = in.split(":");
         if (components.length < 1)
-            throw new IllegalArgumentException("invalid identifier: " + in);
+            throw new MalformedIdentifierException(in, Identifier.class);
         if (components.length < 2) {
             String[] tmp = new String[2];
             tmp[1] = components[0];
@@ -48,8 +48,8 @@ public class Identifier implements Cloneable {
 
     ///////////////////////////////
 
-    private String namespace;
-    private String path;
+    protected String namespace;
+    protected String path;
 
     private Identifier() { }
 

@@ -48,8 +48,7 @@ public class CarbonItemState<I extends CarbonItem<?>> {
      */
     public void save(ItemStack stack,
                      CompoundTag tag) {
-        // save item type
-        tag.putInt("ItemId", item.getId());
+
     }
 
     /**
@@ -60,8 +59,7 @@ public class CarbonItemState<I extends CarbonItem<?>> {
      */
     public void load(ItemStack stack,
                      CompoundTag tag) {
-        // load item type
-        item = item.getRegistry().getValue(tag.getInt("ItemId"));
+
     }
 
     ////////////////////////////////////////

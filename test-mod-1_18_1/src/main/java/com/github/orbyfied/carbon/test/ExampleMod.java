@@ -3,7 +3,6 @@ package com.github.orbyfied.carbon.test;
 import com.github.orbyfied.carbon.api.CarbonModAPI;
 import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
-import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayStrategy;
@@ -11,8 +10,6 @@ import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.EventListener;
 
 // indicate that this is a Carbon mod
 @CarbonMod(
@@ -41,7 +38,6 @@ public class ExampleMod
 
         // create new item
         CarbonItem<?> ruby = new CarbonItem<>(
-                api.getMod(), // use your mod to associate it with
                 Identifier.of("example:ruby"), // use your mod id as the namespace
                 // we dont need our item to have any custom data
                 // so we will just use the default item state
@@ -54,7 +50,6 @@ public class ExampleMod
                 )
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item
-
     }
 
 }

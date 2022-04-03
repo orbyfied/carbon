@@ -113,7 +113,7 @@ public class SystemParameterType {
      * Checks if a character is a digit.
      * TODO: account for radix
      * @param c The character to check.
-     * @param radix The radix (TODO)
+     * @param radix The radix.
      * @return If the number is a digit.
      */
     private static boolean isDigit(char c, int radix) {
