@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -89,6 +90,12 @@ public class IOUtil {
         }
     }
 
+    /**
+     * Extracts one file/entry from a ZIP stream.
+     * @param is The input stream.
+     * @param os The destination output stream.
+     * @throws IOException It does this.
+     */
     public static void extractFile(InputStream is,
                                    OutputStream os)
             throws IOException {
@@ -105,6 +112,13 @@ public class IOUtil {
         }
     }
 
+    /**
+     * Copies resources in the folder specified
+     * resolved by the class into another folder.
+     * @param klass The class to resolve from.
+     * @param source The source folder in the JAR.
+     * @param target The destination folder.
+     */
     public static void copyFromJar(Class<?> klass, String source, final Path target) {
         try {
             URI resource = klass.getResource("").toURI();
@@ -137,6 +151,28 @@ public class IOUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String escapeUchar(char c) {
+        String hex = Integer.toHexString(c).toUpperCase(Locale.ROOT);
+        if (hex.length() < 4)
+            hex = "0".repeat(4 - hex.length()) + hex;
+        return "\\u" + hex;
+    }
+
+    public static String escapeUstr(String src) {
+        StringBuilder b = new StringBuilder();
+        int l = src.length();
+        for (int i = 0; i < l; i++) {
+            char c = src.charAt(i);
+            if (c <= 128) { // not unicode
+                b.append(c);
+            } else {
+                b.append(escapeUchar(c));
+            }
+        }
+
+        return b.toString();
     }
 
 }

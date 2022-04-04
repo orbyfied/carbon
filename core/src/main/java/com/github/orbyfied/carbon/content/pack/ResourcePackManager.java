@@ -6,6 +6,7 @@ import com.github.orbyfied.carbon.config.AbstractConfiguration;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.Configure;
 import com.github.orbyfied.carbon.content.AssetPreparingService;
+import com.github.orbyfied.carbon.content.pack.asset.PackMetaBuilder;
 import com.github.orbyfied.carbon.content.pack.host.FilebinPackHost;
 import com.github.orbyfied.carbon.content.pack.host.PackHostProvider;
 import com.github.orbyfied.carbon.content.pack.host.PackHostServer;

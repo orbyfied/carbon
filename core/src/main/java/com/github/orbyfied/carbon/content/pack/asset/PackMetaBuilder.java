@@ -1,6 +1,13 @@
-package com.github.orbyfied.carbon.content.pack;
+package com.github.orbyfied.carbon.content.pack.asset;
 
+import com.github.orbyfied.carbon.content.pack.JsonAssetBuilder;
+import com.github.orbyfied.carbon.content.pack.PackResource;
+import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
 import com.google.gson.JsonObject;
+
+import static com.github.orbyfied.carbon.util.IOUtil.escapeUstr;
+
+import java.nio.charset.StandardCharsets;
 
 public class PackMetaBuilder extends JsonAssetBuilder {
 
@@ -16,6 +23,8 @@ public class PackMetaBuilder extends JsonAssetBuilder {
     public PackMetaBuilder(ResourcePackBuilder parent) {
         super(parent, MC_META_RESOURCE);
         this.parent = parent;
+
+        this.charset = StandardCharsets.US_ASCII;
     }
 
     public PackMetaBuilder setDescription(String desc) {
@@ -32,7 +41,7 @@ public class PackMetaBuilder extends JsonAssetBuilder {
     public JsonObject writeJson(JsonObject doc) {
         JsonObject in = new JsonObject();
         in.addProperty("pack_format", packFormat);
-        in.addProperty("description", description);
+        in.addProperty("description", escapeUstr(description));
         doc.add("pack", in);
         return doc;
     }

@@ -9,6 +9,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.bukkit.NamespacedKey;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class BaseItemModelBuilder extends JsonAssetBuilder {

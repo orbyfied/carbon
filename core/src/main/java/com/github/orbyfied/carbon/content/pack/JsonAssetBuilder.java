@@ -5,11 +5,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public abstract class JsonAssetBuilder extends PackAssetBuilder {
 
     protected Gson json;
+
+    protected Charset charset = StandardCharsets.UTF_8;
 
     public JsonAssetBuilder(ResourcePackBuilder parent, PackResource loc) {
         super(parent, loc);
@@ -23,7 +26,7 @@ public abstract class JsonAssetBuilder extends PackAssetBuilder {
     public void write(OutputStream out) throws IOException {
         JsonObject doc = new JsonObject();
         doc = writeJson(doc);
-        out.write(json.toJson(doc).getBytes(StandardCharsets.UTF_8));
+        out.write(json.toJson(doc).getBytes(charset));
     }
 
     @Override
