@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.StateAllocator;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayStrategy;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
@@ -33,6 +34,7 @@ public class ExampleMod
      */
     @Override
     public void modInitialize(CarbonModAPI api) {
+
         // get item registry
         final Registry<CarbonItem<?>> itemRegistry = api.getRegistry("minecraft:items");
 
@@ -50,6 +52,7 @@ public class ExampleMod
                 )
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item
+
     }
 
 }
