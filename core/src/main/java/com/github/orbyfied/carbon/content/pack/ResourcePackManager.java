@@ -23,6 +23,7 @@ import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.IOUtil;
 import com.github.orbyfied.carbon.util.resource.ResourceHandle;
 import net.md_5.bungee.api.ChatColor;
+import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -297,7 +298,11 @@ public class ResourcePackManager {
 
                         // package resource pack
                         logger.info("Packaging resource pack");
-                        IOUtil.zipFilesInFolder(packSrcDirectory.toAbsolutePath().toString(), packPkgFile);
+//                        IOUtil.zipFilesInFolder(packSrcDirectory, packPkgFile);
+                        ZipUtil.pack(
+                                packSrcDirectory.toFile(),
+                                packPkgFile.toFile()
+                        );
 
                         // print info
                         long tms = System.currentTimeMillis() - t1.get();

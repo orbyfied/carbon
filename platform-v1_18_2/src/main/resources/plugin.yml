@@ -8,3 +8,7 @@ api-version: 1.18
 
 # We want it to load as early as possible.
 load: STARTUP
+
+# Dependencies
+libraries:
+  - "org.zeroturnaround:zt-zip:1.15"

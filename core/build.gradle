@@ -58,7 +58,9 @@ def mcver(String src) {
 dependencies {
 
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
+
     implementation 'org.bstats:bstats-bukkit:3.0.0'
+    compileOnly 'org.zeroturnaround:zt-zip:1.15'
 
     // test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

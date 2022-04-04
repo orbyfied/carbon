@@ -1,9 +1,6 @@
 package com.github.orbyfied.carbon.util;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -53,36 +50,53 @@ public class IOUtil {
 
     /**
      * From: https://www.netjstech.com/2016/06/zipping-files-in-java.html#ZipMultipleFileJava
+     * TODO: fix lol
      */
-    public static void zipFilesInFolder(String folder, Path resultFile){
+    @Deprecated
+    public static void zipFilesInFolder(Path sourcePath, Path resultFile){
         try {
+            // create zip file
             if (!Files.exists(resultFile))
                 Files.createFile(resultFile);
+
+            // create output stream to zip file
             OutputStream fos = Files.newOutputStream(resultFile);
             ZipOutputStream zos = new ZipOutputStream(fos);
 
-            Path sourcePath = Paths.get(folder);
-            // using WalkFileTree to traverse directory
+            // traverse directory
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>(){
+
                 @Override
                 public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
                     // it starts with the source folder so skipping that
-                    if(!sourcePath.equals(dir)){
-                        //System.out.println("DIR   " + dir);
-                        zos.putNextEntry(new ZipEntry(sourcePath.relativize(dir).toString() + "/"));
+                    if(!sourcePath.equals(dir)) {
+                        zos.putNextEntry(new ZipEntry(sourcePath.relativize(dir) + "/"));
                         zos.closeEntry();
                     }
+
                     return FileVisitResult.CONTINUE;
                 }
                 @Override
                 public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
                     zos.putNextEntry(new ZipEntry(sourcePath.relativize(file).toString()));
-                    Files.copy(file, zos);
+
+                    // write file
+                    InputStream fis = Files.newInputStream(file);
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, len);
+                    }
+                    fis.close();
+
                     zos.closeEntry();
+
                     return FileVisitResult.CONTINUE;
                 }
+
             });
 
+            // close resources
             zos.close();
             fos.close();
         } catch (IOException e) {
