@@ -46,8 +46,6 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      */
     protected ItemDisplayStrategy displayStrategy;
 
-    protected ItemInteractStrategy interactStrategy;
-
     protected StateAllocator<S> stateAllocator;
 
     protected final Class<S> runtimeStateType;
@@ -86,10 +84,6 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return displayStrategy;
     }
 
-    public ItemInteractStrategy getInteractStrategy() {
-        return interactStrategy;
-    }
-
     public CarbonItem<S> setBaseMaterial(Material material) {
         this.baseMaterial = material;
         return this;
@@ -97,11 +91,6 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     public CarbonItem<S> setDisplayStrategy(ItemDisplayStrategy displayStrategy) {
         this.displayStrategy = displayStrategy;
-        return this;
-    }
-
-    public CarbonItem<S> setInteractStrategy(ItemInteractStrategy interactStrategy) {
-        this.interactStrategy = interactStrategy;
         return this;
     }
 

@@ -5,7 +5,6 @@ import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.element.ModElementRegistry;
 import com.github.orbyfied.carbon.item.CarbonItem;
-import com.github.orbyfied.carbon.item.interact.EventItemInteractStrategyService;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bstats.bukkit.Metrics;
@@ -135,10 +134,6 @@ public abstract class CarbonBootstrap
         // initialize all mods
         ModLoader loader = main.getModLoader();
         loader.initializeAll();
-
-        // initialize strategies
-        EventItemInteractStrategyService eventItemInteractStrategyService =
-                new EventItemInteractStrategyService(main).enable();
 
         // build and host resource pack
         main.getResourcePackManager()

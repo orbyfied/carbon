@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.event.pipeline;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -11,11 +12,11 @@ public class Pipeline<E extends Event> implements PipelineAccess<E> {
     /**
      * The handler list.
      */
-    private LinkedList<Handler<E>> handlers = new LinkedList<>();
+    private ArrayList<Handler<E>> handlers = new ArrayList<>();
 
     /* Getters. */
 
-    public LinkedList<Handler<E>> handlers() {
+    public ArrayList<Handler<E>> handlers() {
         return handlers;
     }
 
@@ -33,8 +34,13 @@ public class Pipeline<E extends Event> implements PipelineAccess<E> {
     @Override
     public Pipeline<E> push(E event) {
         if (handlers.size() == 0) return this;
-        for (Handler<E> handler : handlers)
+
+        int l = handlers.size();
+        for (int i = 0; i < l; i++) {
+            Handler<E> handler = handlers.get(i);
             handler.handle(event);
+        }
+
         return this;
     }
 
@@ -55,7 +61,7 @@ public class Pipeline<E extends Event> implements PipelineAccess<E> {
      * @return This.
      */
     public Pipeline<E> addLast(Handler<E> handler) {
-        handlers.addLast(handler);
+        handlers.add(handler);
         return this;
     }
 

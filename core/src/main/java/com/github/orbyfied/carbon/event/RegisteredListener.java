@@ -2,6 +2,8 @@ package com.github.orbyfied.carbon.event;
 
 import com.github.orbyfied.carbon.event.pipeline.Pipeline;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,11 +83,14 @@ public class RegisteredListener {
                 Class<? extends BusEvent> eventType = (Class<? extends BusEvent>) method.getParameterTypes()[0];
                 Pipeline<? extends BusEvent> pipeline = bus.getPipelineFor(eventType).base();
 
+                // get method handle for quick invocation
+                final MethodHandle handle = MethodHandles.lookup().unreflect(method);
+
                 // create and add handler
                 BusHandler handler = new BusHandler(bus, this, (Pipeline<BusEvent>) pipeline);
                 handler.setDelegate(event -> {
-                    try { method.invoke(obj, event); }
-                    catch (Exception e) { e.printStackTrace(); }
+                    try { handle.invoke(obj, event); }
+                    catch (Throwable e) { e.printStackTrace(); }
                 });
                 handlers.add(handler);
             }

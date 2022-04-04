@@ -17,7 +17,7 @@ public class QueuedTickExecutionService extends ExecutionService {
      * Notified whenever a new
      * task is pushed to the task queue.
      */
-    private Object lock;
+    private final Object lock;
 
     /**
      * The task queue.
@@ -180,8 +180,8 @@ public class QueuedTickExecutionService extends ExecutionService {
                 // tick
                 tick();
 
-                // wait if it is should block
-                // make sure if the lock exists
+                // wait if it should block
+                // make sure the lock exists
                 if (blocking && lock != null) {
                     synchronized (lock) {
                         try {

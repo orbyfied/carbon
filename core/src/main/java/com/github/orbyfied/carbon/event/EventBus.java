@@ -105,10 +105,11 @@ public class EventBus {
     /**
      * Unregisters a registered listener.
      * @param listener The registered listener.
+     * @return This.
      */
-    public void unregister(RegisteredListener listener) {
+    public EventBus unregister(RegisteredListener listener) {
         if (listener == null)
-            return;
+            return this;
 
         // destroy listener
         listener.destroy();
@@ -116,44 +117,70 @@ public class EventBus {
         // remove from lists
         listeners.remove(listener);
         listenersByClass.remove(listener.klass, listener);
+
+        // return
+        return this;
     }
 
     /**
      * Unregisters the last listener of
      * the listeners type.
      * @param listener The listener.
+     * @return This.
      */
-    public void unregisterLast(EventListener listener) {
+    public EventBus unregisterLast(EventListener listener) {
         unregister(listenersByClass.get(listener.getClass()));
+        return this;
     }
 
     /**
      * Unregisters the last listener of
      * the specified type.
      * @param klass The listener class.
+     * @return This.
      */
-    public void unregisterLast(Class<? extends EventListener> klass) {
+    public EventBus unregisterLast(Class<? extends EventListener> klass) {
         unregister(listenersByClass.get(klass));
+        return this;
     }
 
     /**
      * Unregisters all registered listeners
      * of the specified type.
      * @param klass The type.
+     * @return This.
      */
-    public void unregisterAll(Class<? extends EventListener> klass) {
+    public EventBus unregisterAll(Class<? extends EventListener> klass) {
         for (RegisteredListener rl : listeners)
             if (rl.klass == klass) unregister(rl);
+        return this;
+    }
+
+    /**
+     * Bakes the event; prepares it.
+     * Pre-caches the pipeline for an event.
+     * This can significantly improve performance
+     * on the first call.
+     * @param event The event type.
+     * @return This.
+     */
+    public EventBus bake(Class<? extends BusEvent> event) {
+        // cache pipeline
+        getPipelineFor(event);
+
+        // return
+        return this;
     }
 
     /**
      * Posts an event to the event bus.
      * Uses the events class as the pipeline provider.
      * @param event The event.
+     * @return This.
      */
     @SuppressWarnings("unchecked")
-    public <E extends BusEvent> void post(E event) {
-        post((Class<E>) event.getClass(), event);
+    public <E extends BusEvent> EventBus post(E event) {
+        return post((Class<E>) event.getClass(), event);
     }
 
     /**
@@ -162,9 +189,10 @@ public class EventBus {
      * the supplied class.
      * @param fclass The pipeline provider class.
      * @param event The event.
+     * @return This.
      */
     @SuppressWarnings("unchecked")
-    public <E extends BusEvent> void post(Class<E> fclass, E event) {
+    public <E extends BusEvent> EventBus post(Class<E> fclass, E event) {
         // get pipeline for event
         PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
 
@@ -175,6 +203,9 @@ public class EventBus {
             // throw invocation exception
             throw new EventInvocationException(this, "error occurred in event handler", e);
         }
+
+        // return
+        return this;
     }
 
     /**

@@ -67,16 +67,6 @@ public class IOUtil {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>(){
 
                 @Override
-                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-                    // it starts with the source folder so skipping that
-                    if(!sourcePath.equals(dir)) {
-                        zos.putNextEntry(new ZipEntry(sourcePath.relativize(dir) + "/"));
-                        zos.closeEntry();
-                    }
-
-                    return FileVisitResult.CONTINUE;
-                }
-                @Override
                 public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
                     zos.putNextEntry(new ZipEntry(sourcePath.relativize(file).toString()));
 
