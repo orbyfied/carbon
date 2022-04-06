@@ -1,6 +1,5 @@
 package com.github.orbyfied.carbon.item;
 
-import com.github.orbyfied.carbon.core.mod.LoadedMod;
 import com.github.orbyfied.carbon.element.RegistrableElement;
 import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Identifier;
@@ -17,7 +16,6 @@ import static com.github.orbyfied.carbon.util.mc.Nbt.getOrCreateCompound;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -108,6 +106,11 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends ItemComponent<S>> T getComponent(Class<T> tClass) {
+        return (T) componentsMapped.get(tClass);
+    }
+
     public StateAllocator<S> getStateAllocator() {
         return stateAllocator;
     }
@@ -172,6 +175,26 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return s;
     }
 
+    public S loadState(net.minecraft.world.item.ItemStack nmsStack) {
+        // check if it is built
+        checkBuilt();
+
+        // get handle
+        CompoundTag tag = nmsStack.getTag();
+        if (tag == null)
+            return null;
+        CompoundTag stateTag = tag.getCompound(ITEM_STATE_TAG);
+
+        // allocate state
+        S s = stateAllocator.allocate(this);
+
+        // load state
+        s.load(nmsStack, stateTag);
+
+        // return
+        return s;
+    }
+
     /**
      * Creates a new item stack with
      * the default state.
@@ -205,7 +228,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         // update components
         int l = componentsLinear.size();
         for (int i = 0; i < l; i++) {
-            componentsLinear.get(i).update(
+            componentsLinear.get(i).updateItem(
                     nmsStack,
                     state,
                     tag

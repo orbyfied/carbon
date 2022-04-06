@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,6 +24,10 @@ public class CreativeInventoryFactory implements Listener {
 
     public void enable() {
         Bukkit.getPluginManager().registerEvents(this, environment.main.getPlugin());
+    }
+
+    public void disable() {
+        HandlerList.unregisterAll(this);
     }
 
     public HashMap<Player, CarbonCreativeInventory> open = new HashMap<>();

@@ -58,21 +58,21 @@ public class ModelItemDisplayComponent
         bakeModels();
     }
 
-    public ModelItemDisplayComponent setDisplayName(String name) {
+    public ModelItemDisplayComponent displayName(String name) {
         this.displayName = name;
         return this;
     }
 
-    public String getDisplayName() {
+    public String displayName() {
         return displayName;
     }
 
-    public ModelItemDisplayComponent setGlinting(boolean b) {
+    public ModelItemDisplayComponent glinting(boolean b) {
         this.hasGlint = b;
         return this;
     }
 
-    public boolean isGlinting() {
+    public boolean glinting() {
         return hasGlint;
     }
 
@@ -89,7 +89,7 @@ public class ModelItemDisplayComponent
     }
 
     @Override
-    public void update(
+    public void updateItem(
             ItemStack stack,
             CarbonItemState state,
             CompoundTag tag) {

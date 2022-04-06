@@ -23,6 +23,11 @@ public class CarbonUserEnvironment {
         creativeInventoryFactory.enable();
     }
 
+    public void disable() {
+        main.getCommandEngine().disablePlatform();
+        creativeInventoryFactory.disable();
+    }
+
     public Carbon getMain() {
         return main;
     }

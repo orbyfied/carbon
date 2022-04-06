@@ -12,7 +12,7 @@ import java.util.StringJoiner;
  * and deserialized from NBT.
  * @param <I> The item type.
  */
-public class CarbonItemState<I extends CarbonItem<?>> {
+public class CarbonItemState<I extends CarbonItem> {
 
     /**
      * The item type of this state.

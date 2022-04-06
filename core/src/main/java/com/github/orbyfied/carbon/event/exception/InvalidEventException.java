@@ -28,7 +28,7 @@ public class InvalidEventException extends EventException {
 
     @Override
     public String getMessage() {
-        return "for event type " + eventClass.getName() + ": " + getMessage();
+        return "for event type " + eventClass.getName() + ": " + super.getMessage();
     }
 
 }

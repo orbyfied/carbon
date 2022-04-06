@@ -154,14 +154,26 @@ public class LoadedMod {
         if (modApiFactory.accepts(main, this, api))
             modApiFactory.link(main, this, api);
 
-        // call initialized
         try {
+            // call initialized
             modInitializer.modInitialize(api);
         } catch (Exception e) {
             // catch exceptions in there
             throw new ModLoaderException(this, "Exception occurred in initialization handler "
                     + modInitializerClass.getName() + ".modInitialize(...)", e);
         }
+
+        // return
+        return this;
+    }
+
+    /**
+     * Disables/unloads this mod.
+     * @return This.
+     */
+    public LoadedMod disable() {
+        // call disable
+        modInitializer.modDisable(api);
 
         // return
         return this;

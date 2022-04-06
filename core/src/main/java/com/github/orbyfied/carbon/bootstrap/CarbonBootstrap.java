@@ -112,10 +112,17 @@ public abstract class CarbonBootstrap
 
     }
 
+    // properly disable everything
+    // might make testing easier
+    // and might fix some other stuff
     @Override
     public void onDisable() {
 
-        // TODO
+        // disable user environment
+        main.getUserEnvironment().disable();
+
+        // disable all mods
+        main.getModLoader().disableAll();
 
     }
 

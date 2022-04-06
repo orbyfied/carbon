@@ -22,6 +22,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
@@ -45,6 +46,11 @@ public class MinecraftPacketCommandEngine extends CommandEngine
     @Override
     public void enablePlatform() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    @Override
+    public void disablePlatform() {
+
     }
 
     /* Behaviour. */

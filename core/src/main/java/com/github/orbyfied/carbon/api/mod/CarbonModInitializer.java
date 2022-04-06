@@ -30,4 +30,13 @@ public interface CarbonModInitializer {
      */
     void modInitialize(CarbonModAPI api);
 
+    /**
+     * Called to disable/unload all mods.
+     * Happens when the Carbon plugin is
+     * disabled, which is usually at server
+     * shutdown or when a reload happens.
+     * @param api The mod API reference.
+     */
+    default void modDisable(CarbonModAPI api) { }
+
 }

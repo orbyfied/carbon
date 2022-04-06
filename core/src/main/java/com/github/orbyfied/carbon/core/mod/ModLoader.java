@@ -125,4 +125,9 @@ public class ModLoader {
                 (t2 - t1) + "ms");
     }
 
+    public void disableAll() {
+        for (LoadedMod mod : mods)
+            mod.disable();
+    }
+
 }

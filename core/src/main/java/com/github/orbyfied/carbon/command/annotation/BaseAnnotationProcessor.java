@@ -86,14 +86,6 @@ public class BaseAnnotationProcessor {
                 e.printStackTrace();
             }
 
-            MethodHandle methodHandle;
-            try {
-                // look up method handle for fast execution
-                methodHandle = MethodHandles.lookup().unreflect(m);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
             // set the actual method executor
             sub.getComponent(Executable.class).setExecutor((ctx, cmd) -> {
                 try {
@@ -108,7 +100,7 @@ public class BaseAnnotationProcessor {
 //                    System.out.println("ctx.args: " + ctx.getArgs() + ", methodargs: " + args);
 
                     // invoke
-                    methodHandle.invoke(obj, args.toArray());
+                    m.invoke(obj, args.toArray());
                 } catch (Throwable e) {
                     // throw node execution exception
                     throw new NodeExecutionException(cmd.getRoot(), cmd, e);

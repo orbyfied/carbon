@@ -98,6 +98,12 @@ public abstract class CommandEngine {
     public abstract void enablePlatform();
 
     /**
+     * Should shut down the command engine
+     * and clean up any resources.
+     */
+    public abstract void disablePlatform();
+
+    /**
      * Dispatches a suggestion or invocation
      * request for a command.
      * @param sender The command sender.
