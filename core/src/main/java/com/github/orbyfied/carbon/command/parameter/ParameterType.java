@@ -1,7 +1,7 @@
 package com.github.orbyfied.carbon.command.parameter;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.SuggestionAccumulator;
 import com.github.orbyfied.carbon.util.StringReader;
 
 public interface ParameterType<T> {
@@ -20,6 +20,6 @@ public interface ParameterType<T> {
 
     void write(Context context, StringBuilder builder, T v);
 
-    void suggest(Context context, Suggestions suggestions);
+    void suggest(Context context, SuggestionAccumulator suggestions);
 
 }

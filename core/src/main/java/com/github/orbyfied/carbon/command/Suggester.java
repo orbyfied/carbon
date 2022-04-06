@@ -5,7 +5,7 @@ import com.github.orbyfied.carbon.util.StringReader;
 public interface Suggester extends NodeComponent {
 
     void suggestNext(Context ctx,
-                     Suggestions builder,
+                     SuggestionAccumulator builder,
                      StringReader reader,
                      Node next);
 

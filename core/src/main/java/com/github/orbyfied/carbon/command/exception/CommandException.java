@@ -14,14 +14,24 @@ public class CommandException extends RuntimeException {
         this.rootCommand = rootCommand;
     }
 
-    public CommandException(Node rootCommand, Exception e) {
+    public CommandException(Node rootCommand, Throwable e) {
         super(e);
         this.rootCommand = rootCommand;
     }
 
-    public CommandException(Node rootCommand, String msg, Exception e) {
+    public CommandException(Node rootCommand, String msg, Throwable e) {
         super(msg, e);
         this.rootCommand = rootCommand;
+    }
+
+    /**
+     * Determines if it should be printed
+     * to the console and handled like a
+     * real, severe error.
+     * @return True/false.
+     */
+    public boolean isSevere() {
+        return true;
     }
 
     public Node getRootCommand() {

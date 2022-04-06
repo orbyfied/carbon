@@ -4,6 +4,6 @@ public interface Completer extends NodeComponent {
 
     void completeSelf(Context context,
                       Node from,
-                      Suggestions suggestions);
+                      SuggestionAccumulator suggestions);
 
 }

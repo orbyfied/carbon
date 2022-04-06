@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.util;
 
-import com.github.orbyfied.carbon.core.mod.CarbonJavaModAPI;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -85,6 +87,91 @@ public class ReflectionUtil {
         System.out.println("+ CALLED: " + elements[1]);
         for (int i = 2; i < elements.length; i++)
             System.out.println("| " + elements[i]);
+    }
+
+    public static Class<?> getClassSafe(String name) {
+        try {
+            return Class.forName(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Field getDeclaredFieldSafe(Class<?> klass, String name) {
+        Objects.requireNonNull(klass);
+        try {
+            Field f = klass.getDeclaredField(name);
+            f.setAccessible(true);
+            return f;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Method getDeclaredMethodSafe(Class<?> klass, String name,
+                                               Class... argTypes) {
+        Objects.requireNonNull(klass);
+        try {
+            Method m = klass.getDeclaredMethod(name, argTypes);
+            m.setAccessible(true);
+            return m;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Constructor<?> getDeclaredConstructorSafe(Class<?> klass,
+                                                            Class... argTypes) {
+        Objects.requireNonNull(klass);
+        try {
+            Constructor<?> c = klass.getDeclaredConstructor(argTypes);
+            c.setAccessible(true);
+            return c;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T queryFieldSafe(Object on, Field f) {
+        try {
+            return (T) f.get(on);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void setFieldSafe(Object on, Field f, Object val) {
+        try {
+            f.set(on, val);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeSafe(Method m, Object on, Object... args) {
+        try {
+            return (T) m.invoke(on, args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(Constructor<?> c, Object... args) {
+        try {
+            return (T) c.newInstance(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

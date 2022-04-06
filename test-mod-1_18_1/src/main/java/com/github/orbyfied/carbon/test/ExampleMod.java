@@ -5,8 +5,8 @@ import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
-import com.github.orbyfied.carbon.item.StateAllocator;
-import com.github.orbyfied.carbon.item.display.ModelItemDisplayStrategy;
+import com.github.orbyfied.carbon.item.behaviour.EventItemBehaviourComponent;
+import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Material;
@@ -46,10 +46,11 @@ public class ExampleMod
                 CarbonItemState.class
         )
                 .setBaseMaterial(Material.REDSTONE) // set base material
-                .setDisplayStrategy(ModelItemDisplayStrategy::new, // create the service that will display our item
+                .addComponent(ModelItemDisplayComponent::new, // create the service that will display our item
                         (item, ids) -> ids.setDisplayName("Ruby") // set the display name of the item
                             .addModel("ruby") // add default model
                 )
+                .addComponent(EventItemBehaviourComponent::new)
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item
 

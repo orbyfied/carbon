@@ -14,19 +14,34 @@ public class CarbonJavaAPI implements CarbonAPI {
     /**
      * Reference to the plugin instance.
      */
-    private final Carbon plugin;
+    private final Carbon main;
 
     /**
      * Constructor. Should not be used
      * by external code.
-     * @param plugin The Carbon plugin instance.
+     * @param main The Carbon plugin instance.
      */
-    public CarbonJavaAPI(final Carbon plugin) {
-        this.plugin = plugin;
+    public CarbonJavaAPI(final Carbon main) {
+        this.main = main;
+        instance = this;
+    }
+
+    @Override
+    public Carbon getMain() {
+        return main;
     }
 
     public Registry<Registry<? extends Identifiable>> getRegistries() {
-        return plugin.getRegistries();
+        return main.getRegistries();
+    }
+
+    /////////////////////////////////////////////////
+
+    private static CarbonJavaAPI instance;
+
+    @Deprecated
+    public static CarbonJavaAPI get() {
+        return instance;
     }
 
 }

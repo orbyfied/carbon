@@ -3,7 +3,6 @@ package com.github.orbyfied.carbon.command;
 import com.github.orbyfied.carbon.command.impl.CommandNodeExecutor;
 import com.github.orbyfied.carbon.util.StringReader;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class Executable
@@ -51,7 +50,7 @@ public class Executable
     }
 
     @Override
-    public void completeSelf(Context context, Node from, Suggestions suggestions) {
+    public void completeSelf(Context context, Node from, SuggestionAccumulator suggestions) {
         suggestions.suggest(node.getName());
     }
 

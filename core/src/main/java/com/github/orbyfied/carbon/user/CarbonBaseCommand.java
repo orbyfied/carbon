@@ -47,4 +47,12 @@ public class CarbonBaseCommand {
 
     }
 
+    @Subcommand("debug listservices")
+    public void debugListServices(Context ctx, Node node) {
+
+        // TODO
+        ctx.getSender().sendMessage("TODO");
+
+    }
+
 }

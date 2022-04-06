@@ -105,7 +105,7 @@ public abstract class CarbonBootstrap
         loader.loadAll();
 
         // load user environment
-        main.getUserEnvironment().getCreativeInventoryFactory().enable();
+        main.getUserEnvironment().enable();
 
         // prepare to run initialize
         Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
@@ -130,6 +130,9 @@ public abstract class CarbonBootstrap
                 .addService(new CMDRegistryService<>(items));
 
         main.getRegistries().register(items);
+
+        // initialize services
+        main.getServiceManager().initialized();
 
         // initialize all mods
         ModLoader loader = main.getModLoader();

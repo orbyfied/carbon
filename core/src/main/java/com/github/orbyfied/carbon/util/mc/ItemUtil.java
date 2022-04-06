@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.util.mc;
 
+import com.github.orbyfied.carbon.util.ReflectionUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -11,55 +12,32 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
+import static com.github.orbyfied.carbon.util.ReflectionUtil.getDeclaredConstructorSafe;
+import static com.github.orbyfied.carbon.util.ReflectionUtil.getDeclaredFieldSafe;
 import static com.github.orbyfied.carbon.util.mc.Nbt.getOrCreateList;
 
 public class ItemUtil {
 
     private static final Class<?> craftItemStackClass = NmsHelper.getCraftBukkitClass("inventory.CraftItemStack");
-    private static final Field    craftItemStackHandleField;
-    private static final Constructor<?> newCraftItemStack;
-
-    static {
-
-        Field tempCraftItemStackHandleField;
-        Constructor<?> tempNewCraftItemStack;
-        try {
-            tempCraftItemStackHandleField = craftItemStackClass.getDeclaredField("handle");
-            tempCraftItemStackHandleField.setAccessible(true);
-            tempNewCraftItemStack = craftItemStackClass.getDeclaredConstructor(
-                Material.class, Integer.TYPE, Short.TYPE, ItemMeta.class
-            );
-            tempNewCraftItemStack.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            tempCraftItemStackHandleField = null;
-            tempNewCraftItemStack = null;
-        }
-        craftItemStackHandleField = tempCraftItemStackHandleField;
-        newCraftItemStack = tempNewCraftItemStack;
-    }
+    private static final Field    craftItemStackHandleField =
+            getDeclaredFieldSafe(craftItemStackClass, "handle");
+    private static final Constructor<?> newCraftItemStack =
+            getDeclaredConstructorSafe(craftItemStackClass,
+                    Material.class, Integer.TYPE, Short.TYPE, ItemMeta.class);
 
     public static org.bukkit.inventory.ItemStack newCraftStack(
             Material material, int amount, short dur, ItemMeta meta
     ) {
-        try {
-            return (org.bukkit.inventory.ItemStack) newCraftItemStack.newInstance(material, amount, dur, meta);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return ReflectionUtil.newInstance(
+                newCraftItemStack,
+                material, amount, dur, meta
+        );
     }
 
     // maybeTODO: replace with better method
     // this works for now though
     public static ItemStack getHandle(org.bukkit.inventory.ItemStack itemStack) {
-        try {
-            // get field
-            return (ItemStack) craftItemStackHandleField.get(itemStack);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return ReflectionUtil.queryFieldSafe(itemStack, craftItemStackHandleField);
     }
 
     public static final String GLINT_FAKE_ENCH_ID = "misc:glint";

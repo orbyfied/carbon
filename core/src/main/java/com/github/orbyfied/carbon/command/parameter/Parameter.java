@@ -4,7 +4,6 @@ import com.github.orbyfied.carbon.command.*;
 import com.github.orbyfied.carbon.command.exception.NodeParseException;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
-import org.bukkit.event.Event;
 
 public class Parameter
         extends AbstractNodeComponent
@@ -74,7 +73,7 @@ public class Parameter
     }
 
     @Override
-    public void completeSelf(Context context, Node from, Suggestions suggestions) {
+    public void completeSelf(Context context, Node from, SuggestionAccumulator suggestions) {
         type.suggest(context, suggestions);
     }
 

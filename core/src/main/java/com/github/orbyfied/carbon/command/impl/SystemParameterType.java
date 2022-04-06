@@ -1,7 +1,7 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.SuggestionAccumulator;
 import com.github.orbyfied.carbon.command.parameter.*;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
@@ -94,7 +94,7 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, Suggestions suggestions) { }
+            public void suggest(Context context, SuggestionAccumulator suggestions) { }
 
             @Override
             public String toString() {
@@ -348,7 +348,7 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, Suggestions suggestions) { }
+            public void suggest(Context context, SuggestionAccumulator suggestions) { }
         };
     }
 

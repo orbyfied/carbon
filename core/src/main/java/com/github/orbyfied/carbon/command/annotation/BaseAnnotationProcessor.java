@@ -6,6 +6,8 @@ import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
 import com.github.orbyfied.carbon.registry.Identifier;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -60,16 +62,19 @@ public class BaseAnnotationProcessor {
             Parameter[] parameters = m.getParameters();
             int l = parameters.length;
             for (int i = 2; i < l; i++) {
+                // get parameter
                 Parameter param = parameters[i];
+                // check if it is a parameter
                 if (!param.isAnnotationPresent(CommandParameter.class)) continue;
+                // resolve the name and add
                 String name = param.getAnnotation(CommandParameter.class).value();
                 if (name.equals(""))
                     name = param.getName();
                 paramNames.add(name);
             }
 
-            // get initializer
             try {
+                // get the initializer method and invoke it
                 Method initializerSub = klass.getDeclaredMethod(m.getName(), Node.class);
                 if (initializerSub.isAnnotationPresent(SubInitializer.class)) {
                     initializerSub.setAccessible(true);
@@ -81,6 +86,15 @@ public class BaseAnnotationProcessor {
                 e.printStackTrace();
             }
 
+            MethodHandle methodHandle;
+            try {
+                // look up method handle for fast execution
+                methodHandle = MethodHandles.lookup().unreflect(m);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            // set the actual method executor
             sub.getComponent(Executable.class).setExecutor((ctx, cmd) -> {
                 try {
                     ArrayList<Object> args = new ArrayList<>();
@@ -93,8 +107,10 @@ public class BaseAnnotationProcessor {
 
 //                    System.out.println("ctx.args: " + ctx.getArgs() + ", methodargs: " + args);
 
-                    m.invoke(obj, args.toArray());
-                } catch (Exception e) {
+                    // invoke
+                    methodHandle.invoke(obj, args.toArray());
+                } catch (Throwable e) {
+                    // throw node execution exception
                     throw new NodeExecutionException(cmd.getRoot(), cmd, e);
                 }
             });

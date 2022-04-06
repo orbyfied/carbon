@@ -4,7 +4,6 @@ import com.github.orbyfied.carbon.command.exception.CommandException;
 import com.github.orbyfied.carbon.command.exception.NodeExecutionException;
 import com.github.orbyfied.carbon.command.impl.DelegatingNamespacedTypeResolver;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
-import com.github.orbyfied.carbon.command.minecraft.MinecraftParameterType;
 import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.util.StringReader;
@@ -92,6 +91,13 @@ public abstract class CommandEngine {
     protected abstract void unregisterPlatform(Node root);
 
     /**
+     * Should prepare the command engine for
+     * usage. Called whenever the system
+     * is ready for operation.
+     */
+    public abstract void enablePlatform();
+
+    /**
      * Dispatches a suggestion or invocation
      * request for a command.
      * @param sender The command sender.
@@ -104,7 +110,7 @@ public abstract class CommandEngine {
      */
     public Context dispatch(CommandSender sender,
                             String str,
-                            Suggestions suggestions,
+                            SuggestionAccumulator suggestions,
                             Consumer<Context> ctxConsumer) {
 
         // get mode (execute or suggest)
@@ -145,10 +151,17 @@ public abstract class CommandEngine {
                 if (mainc instanceof Executable exec) {
                     lastExecutable = exec;
                     try {
-                        exec.walked(context, reader); // execute walked
+                        // execute walked
+                        exec.walked(context, reader);
                     } catch (Exception e) {
-                        // throw the execution exception
-                        throw new NodeExecutionException(root, current, e);
+                        // dont create a massive chain of exceptions
+                        if (e instanceof NodeExecutionException nex) {
+                            // throw the exception itself
+                            throw nex;
+                        } else {
+                            // throw the execution exception
+                            throw new NodeExecutionException(root, current, e);
+                        }
                     }
 
                     // is parameter
@@ -193,16 +206,26 @@ public abstract class CommandEngine {
             // execute
             if (lastExecutable != null && !isSuggesting && context.isSuccessful()) {
                 try {
-                    lastExecutable.execute(context); // execute walked
+                    // execute final command
+                    lastExecutable.execute(context);
                 } catch (Exception e) {
-                    // throw the execution exception
-                    throw new NodeExecutionException(root, lastExecutable.node, e);
+                    // dont create a massive chain of exceptions
+                    if (e instanceof NodeExecutionException nex) {
+                        // throw the exception itself
+                        throw nex;
+                    } else {
+                        // throw the execution exception
+                        throw new NodeExecutionException(root, lastExecutable.node, e);
+                    }
                 }
             }
 
         } catch (CommandException e) {
-            // handle exception
-            e.printStackTrace();
+            // print stack trace if severe enough
+            if (e.isSevere())
+                e.printStackTrace();
+
+            // communicate with sender
             context.setIntermediateText(e.getFormattedString());
             context.setSuccessful(false); // fail
         }

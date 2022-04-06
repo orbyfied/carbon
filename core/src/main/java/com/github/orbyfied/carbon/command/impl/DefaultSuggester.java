@@ -1,7 +1,6 @@
 package com.github.orbyfied.carbon.command.impl;
 
 import com.github.orbyfied.carbon.command.*;
-import com.github.orbyfied.carbon.command.parameter.Parameter;
 import com.github.orbyfied.carbon.util.StringReader;
 
 public class DefaultSuggester
@@ -14,7 +13,7 @@ public class DefaultSuggester
 
     @Override
     public void suggestNext(Context ctx,
-                            Suggestions builder,
+                            SuggestionAccumulator builder,
                             StringReader reader,
                             Node next) {
         if (next == null) {

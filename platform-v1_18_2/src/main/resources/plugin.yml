@@ -12,3 +12,4 @@ load: STARTUP
 # Dependencies
 libraries:
   - "org.zeroturnaround:zt-zip:1.15"
+  - "org.javassist:javassist:3.28.0-GA"

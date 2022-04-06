@@ -1,19 +1,22 @@
 package com.github.orbyfied.carbon.command.impl;
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
-import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.SuggestionAccumulator;
 import com.github.orbyfied.carbon.command.minecraft.MinecraftParameterType;
+import com.github.orbyfied.carbon.event.EventHandler;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,12 +24,17 @@ import java.util.List;
  * and execute/tab-complete commands.
  * TODO: find a way to get the message above the textbox
  */
-public class BukkitCommandEngine extends CommandEngine {
+public class BukkitCommandEngine extends CommandEngine
+        implements Listener {
 
     private static final SimpleCommandMap commandMap = (SimpleCommandMap) Bukkit.getCommandMap();
 
-    public BukkitCommandEngine() {
+    private final Plugin plugin;
+
+    public BukkitCommandEngine(Plugin plugin) {
         super();
+
+        this.plugin = plugin;
 
         ((DelegatingNamespacedTypeResolver)getTypeResolver())
                 .namespace("minecraft", MinecraftParameterType.typeResolver);
@@ -34,33 +42,29 @@ public class BukkitCommandEngine extends CommandEngine {
 
     @Override
     protected void registerPlatform(Node root) {
-        RegisteredBukkitCommand cmd = new RegisteredBukkitCommand(this, root);
-        commandMap.register(cmd.getLabel(), cmd);
+        commandMap.register(root.getName(), new EnginedCommand(root));
     }
 
     @Override
-    protected void unregisterPlatform(Node root) {
-        throw new UnsupportedOperationException();
+    protected void unregisterPlatform(Node root) { }
+
+    @Override
+    public void enablePlatform() {
+        // register events
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private static String stitchArgs(String label, String[] args) {
-        StringBuilder b = new StringBuilder(label);
-        for (String s : args)
-            b.append(" ").append(s);
-        return b.toString();
-    }
-
-    private static Suggestions createSuggestions(List<String> list) {
-        return new Suggestions() {
+    private static SuggestionAccumulator createSuggestions(List<String> list) {
+        return new SuggestionAccumulator() {
             @Override
-            public Suggestions suggest(Object o) {
+            public SuggestionAccumulator suggest(Object o) {
                 if (o != null)
                     list.add(o.toString());
                 return this;
             }
 
             @Override
-            public Suggestions unsuggest(Object o) {
+            public SuggestionAccumulator unsuggest(Object o) {
                 if (o != null)
                     list.remove(o.toString());
                 return null;
@@ -68,32 +72,61 @@ public class BukkitCommandEngine extends CommandEngine {
         };
     }
 
-    static class RegisteredBukkitCommand extends BukkitCommand {
+    @EventHandler
+    public void onPrepareCommand(AsyncTabCompleteEvent event) {
+        // dispatch command
+        Context ctx = this.dispatch(
+                event.getSender(),
+                event.getBuffer(),
+                createSuggestions(event.getCompletions()),
+                null
+        );
 
-        protected final CommandEngine engine;
+        // handle result if the command was found
+        if (ctx.getRootCommand() != null) {
+            // set handled
+            event.setHandled(true);
 
-        protected RegisteredBukkitCommand(CommandEngine engine,
-                                          Node node) {
-            super(node.getName(),
-                    /* TODO */ "TODO",
-                    /* TODO */ "TODO",
-                    node.getAliases());
-            this.engine = engine;
+            // communicate with sender
+            // TODO: set text above somehow
+        }
+    }
+
+    @EventHandler
+    public void onExecuteCommand(PlayerCommandPreprocessEvent event) {
+        // dispatch command
+        Context ctx = this.dispatch(
+                event.getPlayer(),
+                event.getMessage(),
+                null,
+                null
+        );
+
+        // handle result if the command was found
+        if (ctx.getRootCommand() != null) {
+            // set handled
+            event.setCancelled(true);
+
+            // communicate with sender
+            event.getPlayer().sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Exception in command: " +
+                    ctx.getIntermediateText());
+        }
+    }
+
+    public static class EnginedCommand extends BukkitCommand {
+
+        protected EnginedCommand(Node command) {
+            super(
+                    command.getName(),
+                    /* TODO */ "",
+                    /* TODO */ "",
+                    command.getAliases()
+            );
         }
 
         @Override
-        public boolean execute(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
-            String str = stitchArgs(alias, args);
-            Context ctx = engine.dispatch(sender, str, null, null);
-            return ctx.isSuccessful();
-        }
-
-        @Override
-        public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, Location location) throws IllegalArgumentException {
-            List<String> list = new ArrayList<>();
-            String str = stitchArgs(alias, args);
-            Context ctx = engine.dispatch(sender, str, createSuggestions(list), null);
-            return list;
+        public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
+            return false;
         }
 
     }

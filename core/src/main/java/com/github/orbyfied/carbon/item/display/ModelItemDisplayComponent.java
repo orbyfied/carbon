@@ -2,12 +2,10 @@ package com.github.orbyfied.carbon.item.display;
 
 import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.content.ModelHolder;
-import com.github.orbyfied.carbon.content.pack.ResourcePackBuilder;
-import com.github.orbyfied.carbon.content.pack.SourcedAsset;
 import com.github.orbyfied.carbon.element.SpecifiedIdentifier;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
-import com.github.orbyfied.carbon.item.ItemDisplayStrategy;
+import com.github.orbyfied.carbon.item.ItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -27,7 +25,9 @@ import java.util.List;
  * @see ModelHolder
  * @see CMDRegistryService
  */
-public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements ModelHolder<CarbonItem<?>> {
+public class ModelItemDisplayComponent
+        extends ItemComponent<CarbonItemState>
+        implements ModelHolder<CarbonItem<?>> {
 
     // TODO: clean this mess of a class up
 
@@ -41,7 +41,7 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     protected SpecifiedIdentifier[] models;
     protected int cmdStart;
 
-    public ModelItemDisplayStrategy(CarbonItem<?> item) {
+    public ModelItemDisplayComponent(CarbonItem<CarbonItemState> item) {
         super(item);
         baseMaterial = item.getBaseMaterial();
         hasGlint = false;
@@ -50,15 +50,15 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     @Override
     public void build() {
         // parse models
-        Identifier id = item.getIdentifier();
-        this.baseMaterial = item.getBaseMaterial();
+        Identifier id = element.getIdentifier();
+        this.baseMaterial = element.getBaseMaterial();
         this.models = modelsIntermediate.toArray(new com.github.orbyfied.carbon.element.SpecifiedIdentifier[0]);
 
         // bake
-        prepare();
+        bakeModels();
     }
 
-    public ModelItemDisplayStrategy setDisplayName(String name) {
+    public ModelItemDisplayComponent setDisplayName(String name) {
         this.displayName = name;
         return this;
     }
@@ -67,7 +67,7 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
         return displayName;
     }
 
-    public ModelItemDisplayStrategy setGlinting(boolean b) {
+    public ModelItemDisplayComponent setGlinting(boolean b) {
         this.hasGlint = b;
         return this;
     }
@@ -80,7 +80,7 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
         // register custom model data
         if (models.length == 0)
             throw new IllegalArgumentException("item with 0 models, cant bake");
-        CMDRegistryService<CarbonItem<?>> service = item.getRegistry().getService(CMDRegistryService.class);
+        CMDRegistryService<CarbonItem<?>> service = element.getRegistry().getService(CMDRegistryService.class);
         cmdStart = registerAllAndGetOffset(baseMaterial, service, models.length);
     }
 
@@ -89,19 +89,9 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
     }
 
     @Override
-    public void prepare() {
-        bakeModels();
-    }
-
-    @Override
-    public void makeAssets(ResourcePackBuilder builder) {
-
-    }
-
-    @Override
-    public void makeItem(
+    public void update(
             ItemStack stack,
-            CarbonItemState<?> state,
+            CarbonItemState state,
             CompoundTag tag) {
         if (hasGlint)
             ItemUtil.setHasGlint(stack.getOrCreateTag(), true);
@@ -128,10 +118,10 @@ public class ModelItemDisplayStrategy extends ItemDisplayStrategy implements Mod
         return models;
     }
 
-    public ModelItemDisplayStrategy addModel(String asset) {
+    public ModelItemDisplayComponent addModel(String asset) {
         modelsIntermediate.add(
                 new SpecifiedIdentifier(
-                        item.getIdentifier().getNamespace(),
+                        element.getIdentifier().getNamespace(),
                         "item",
                         asset
                 )

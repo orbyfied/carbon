@@ -8,11 +8,11 @@ public class CommandExecutionException extends CommandException {
         super(rootCommand, message);
     }
 
-    public CommandExecutionException(Node rootCommand, Exception e) {
+    public CommandExecutionException(Node rootCommand, Throwable e) {
         super(rootCommand, e);
     }
 
-    public CommandExecutionException(Node rootCommand, String msg, Exception e) {
+    public CommandExecutionException(Node rootCommand, String msg, Throwable e) {
         super(rootCommand, msg, e);
     }
 

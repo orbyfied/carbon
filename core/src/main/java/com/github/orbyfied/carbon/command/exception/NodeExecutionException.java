@@ -12,12 +12,12 @@ public class NodeExecutionException extends CommandExecutionException {
         this.node = node;
     }
 
-    public NodeExecutionException(Node rootCommand, Node node, Exception e) {
+    public NodeExecutionException(Node rootCommand, Node node, Throwable e) {
         super(rootCommand, e);
         this.node = node;
     }
 
-    public NodeExecutionException(Node rootCommand, Node node, String msg, Exception e) {
+    public NodeExecutionException(Node rootCommand, Node node, String msg, Throwable e) {
         super(rootCommand, msg, e);
         this.node = node;
     }

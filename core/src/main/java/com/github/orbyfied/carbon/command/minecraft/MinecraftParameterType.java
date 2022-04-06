@@ -1,7 +1,7 @@
 package com.github.orbyfied.carbon.command.minecraft;
 
 import com.github.orbyfied.carbon.command.Context;
-import com.github.orbyfied.carbon.command.Suggestions;
+import com.github.orbyfied.carbon.command.SuggestionAccumulator;
 import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
@@ -53,7 +53,7 @@ public class MinecraftParameterType {
                                    final BiPredicate<Context, StringReader> acceptor,
                                    final BiFunction<Context, StringReader, T> parser,
                                    final TriConsumer<Context, StringBuilder, T> writer,
-                                   final BiConsumer<Context, Suggestions> suggester) {
+                                   final BiConsumer<Context, SuggestionAccumulator> suggester) {
         // parse identifier
         final TypeIdentifier bid = TypeIdentifier.of(baseId);
 
@@ -85,7 +85,7 @@ public class MinecraftParameterType {
             }
 
             @Override
-            public void suggest(Context context, Suggestions suggestions) {
+            public void suggest(Context context, SuggestionAccumulator suggestions) {
                 suggester.accept(context, suggestions);
             }
 

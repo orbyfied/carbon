@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 
 import static com.github.orbyfied.carbon.util.mc.Nbt.getOrCreateCompound;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -41,10 +43,9 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      */
     protected Material baseMaterial;
 
-    /**
-     * The display strategy for this item.
-     */
-    protected ItemDisplayStrategy displayStrategy;
+    // TODO: this is really inefficient help me
+    protected HashMap<Class<? extends ItemComponent<S>>, ItemComponent<S>> componentsMapped = new HashMap<>();
+    protected ArrayList<ItemComponent<S>> componentsLinear = new ArrayList<>();
 
     protected StateAllocator<S> stateAllocator;
 
@@ -80,30 +81,30 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return baseMaterial;
     }
 
-    public ItemDisplayStrategy getDisplayStrategy() {
-        return displayStrategy;
-    }
-
     public CarbonItem<S> setBaseMaterial(Material material) {
         this.baseMaterial = material;
         return this;
     }
 
-    public CarbonItem<S> setDisplayStrategy(ItemDisplayStrategy displayStrategy) {
-        this.displayStrategy = displayStrategy;
+    @SuppressWarnings("unchecked")
+    public CarbonItem<S> addComponent(ItemComponent<S> component) {
+        Class<? extends ItemComponent<S>> klass = (Class<? extends ItemComponent<S>>) component.getClass();
+        componentsMapped.put(klass, component);
+        componentsLinear.add(component);
         return this;
     }
 
-    public <T extends ItemDisplayStrategy> CarbonItem<S> setDisplayStrategy(Function<CarbonItem<S>, T> constructor) {
-        this.displayStrategy = constructor.apply(this);
+    public <T extends ItemComponent<S>> CarbonItem<S> addComponent(Function<CarbonItem<S>, T> constructor) {
+        addComponent(constructor.apply(this));
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ItemDisplayStrategy> CarbonItem<S> setDisplayStrategy(Function<CarbonItem<S>, T> constructor,
-                                                                            BiConsumer<CarbonItem<S>, T> consumer) {
-        setDisplayStrategy(constructor);
-        consumer.accept(this, (T) displayStrategy);
+    public <T extends ItemComponent<S>> CarbonItem<S> addComponent(Function<CarbonItem<S>, T> constructor,
+                                                                      BiConsumer<CarbonItem<S>, T> consumer) {
+        T it = constructor.apply(this);
+        addComponent(it);
+        consumer.accept(this, it);
         return this;
     }
 
@@ -122,8 +123,11 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     }
 
     public CarbonItem<S> build() {
-        // build strategies
-        displayStrategy.build();
+        // build components
+        int l = componentsLinear.size();
+        for (int i = 0; i < l; i++) {
+            componentsLinear.get(i).build();
+        }
 
         // check for unset
         if (baseMaterial == null)
@@ -198,8 +202,15 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         nmsStack.setHoverName(new TextComponent("item." + identifier)
                 .setStyle(Style.EMPTY.withItalic(false)));
 
-        // initialize display
-        displayStrategy.makeItem(nmsStack, state, tag);
+        // update components
+        int l = componentsLinear.size();
+        for (int i = 0; i < l; i++) {
+            componentsLinear.get(i).update(
+                    nmsStack,
+                    state,
+                    tag
+            );
+        }
 
         // return stack
         return stack;

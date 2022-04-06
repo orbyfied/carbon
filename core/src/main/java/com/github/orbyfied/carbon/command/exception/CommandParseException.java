@@ -23,6 +23,11 @@ public class CommandParseException extends CommandException {
         this.location = loc;
     }
 
+    @Override
+    public boolean isSevere() {
+        return false;
+    }
+
     public ErrorLocation getLocation() {
         return location;
     }

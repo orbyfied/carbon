@@ -18,6 +18,11 @@ public class CarbonUserEnvironment {
         this.creativeInventoryFactory = new CreativeInventoryFactory(this);
     }
 
+    public void enable() {
+        main.getCommandEngine().enablePlatform();
+        creativeInventoryFactory.enable();
+    }
+
     public Carbon getMain() {
         return main;
     }

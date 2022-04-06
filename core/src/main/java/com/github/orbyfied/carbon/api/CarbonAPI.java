@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.api;
 
+import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Registry;
 
@@ -7,6 +8,12 @@ import com.github.orbyfied.carbon.registry.Registry;
  * The abstract Carbon API.
  */
 public interface CarbonAPI {
+
+    /**
+     * Return the main instance of Carbon.
+     * @return The instance.
+     */
+    Carbon getMain();
 
     /**
      * Gets all registered registries.

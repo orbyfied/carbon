@@ -14,15 +14,15 @@ public class CommandEngineTest {
         protected void unregisterPlatform(Node root) { }
     };
 
-    final Suggestions suggestions = new Suggestions() {
+    final SuggestionAccumulator suggestions = new SuggestionAccumulator() {
         @Override
-        public Suggestions suggest(Object o) {
+        public SuggestionAccumulator suggest(Object o) {
             System.out.println("| Suggestion: \"" + o + "\"");
             return this;
         }
 
         @Override
-        public Suggestions unsuggest(Object o) {
+        public SuggestionAccumulator unsuggest(Object o) {
             return this;
         }
     };

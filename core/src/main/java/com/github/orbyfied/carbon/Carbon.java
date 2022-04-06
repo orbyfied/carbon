@@ -5,10 +5,12 @@ import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
 import com.github.orbyfied.carbon.bootstrap.CarbonConfiguration;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
+import com.github.orbyfied.carbon.command.impl.MinecraftPacketCommandEngine;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.ConfigurationHelper;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
+import com.github.orbyfied.carbon.core.ServiceManager;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.event.EventBus;
 import com.github.orbyfied.carbon.logging.BukkitLogger;
@@ -59,9 +61,10 @@ public class Carbon
         this.registries = new Registry<>("carbon:registries");
         this.modLoader = new ModLoader(this);
         this.processManager = new CarbonProcessManager(this);
+        this.serviceManager = new ServiceManager(this);
         this.coreEventBus = new EventBus();
         this.resourcePackManager = new ResourcePackManager(this);
-        this.commandEngine = new BukkitCommandEngine();
+        this.commandEngine = new BukkitCommandEngine(this.plugin);
         this.userEnvironment = new CarbonUserEnvironment(this);
 
     }
@@ -92,6 +95,11 @@ public class Carbon
      * The main mod loader.
      */
     protected final ModLoader modLoader;
+
+    /**
+     * The main service manager.
+     */
+    protected final ServiceManager serviceManager;
 
     /**
      * The main process manager.
@@ -142,6 +150,10 @@ public class Carbon
 
     public ModLoader getModLoader() {
         return modLoader;
+    }
+
+    public ServiceManager getServiceManager() {
+        return serviceManager;
     }
 
     public ProcessManager getProcessManager() {
