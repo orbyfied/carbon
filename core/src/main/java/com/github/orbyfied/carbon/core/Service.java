@@ -18,6 +18,8 @@ public abstract class Service {
 
     protected abstract void start();
 
+    public void end() { }
+
     public void initialize() {
         try {
             start();

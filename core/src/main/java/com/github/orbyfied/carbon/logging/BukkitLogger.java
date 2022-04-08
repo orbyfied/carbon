@@ -1,11 +1,8 @@
 package com.github.orbyfied.carbon.logging;
 
-import com.github.orbyfied.carbon.util.ArrayUtil;
-import com.mojang.datafixers.types.Func;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 
 import java.awt.*;
 import java.util.Objects;

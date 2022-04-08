@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
 import com.github.orbyfied.carbon.element.ModElementRegistry;
 import com.github.orbyfied.carbon.item.CarbonItem;
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bstats.bukkit.Metrics;
@@ -124,6 +125,9 @@ public abstract class CarbonBootstrap
         // disable all mods
         main.getModLoader().disableAll();
 
+        // disable services
+        main.getServiceManager().disable();
+
     }
 
     /**
@@ -140,6 +144,9 @@ public abstract class CarbonBootstrap
 
         // initialize services
         main.getServiceManager().initialized();
+
+        // initialize misc apis
+        CompiledStack.initialize(main.getAPI());
 
         // initialize all mods
         ModLoader loader = main.getModLoader();

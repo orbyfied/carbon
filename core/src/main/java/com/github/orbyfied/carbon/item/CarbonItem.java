@@ -85,29 +85,29 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     }
 
     @SuppressWarnings("unchecked")
-    public CarbonItem<S> addComponent(ItemComponent<S> component) {
+    public CarbonItem<S> component(ItemComponent<S> component) {
         Class<? extends ItemComponent<S>> klass = (Class<? extends ItemComponent<S>>) component.getClass();
         componentsMapped.put(klass, component);
         componentsLinear.add(component);
         return this;
     }
 
-    public <T extends ItemComponent<S>> CarbonItem<S> addComponent(Function<CarbonItem<S>, T> constructor) {
-        addComponent(constructor.apply(this));
+    public <T extends ItemComponent<S>> CarbonItem<S> component(Function<CarbonItem<S>, T> constructor) {
+        component(constructor.apply(this));
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ItemComponent<S>> CarbonItem<S> addComponent(Function<CarbonItem<S>, T> constructor,
-                                                                      BiConsumer<CarbonItem<S>, T> consumer) {
+    public <T extends ItemComponent<S>> CarbonItem<S> component(Function<CarbonItem<S>, T> constructor,
+                                                                BiConsumer<CarbonItem<S>, T> consumer) {
         T it = constructor.apply(this);
-        addComponent(it);
+        component(it);
         consumer.accept(this, it);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ItemComponent<S>> T getComponent(Class<T> tClass) {
+    public <T extends ItemComponent<S>> T component(Class<T> tClass) {
         return (T) componentsMapped.get(tClass);
     }
 
@@ -228,7 +228,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         // update components
         int l = componentsLinear.size();
         for (int i = 0; i < l; i++) {
-            componentsLinear.get(i).updateItem(
+            componentsLinear.get(i).updateStack(
                     nmsStack,
                     state,
                     tag

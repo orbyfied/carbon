@@ -3,6 +3,9 @@ package com.github.orbyfied.carbon.test;
 import com.github.orbyfied.carbon.api.CarbonModAPI;
 import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
+import com.github.orbyfied.carbon.crafting.Ingredient;
+import com.github.orbyfied.carbon.crafting.Recipe;
+import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
 import com.github.orbyfied.carbon.event.EventHandler;
 import com.github.orbyfied.carbon.event.EventListener;
 import com.github.orbyfied.carbon.item.CarbonItem;
@@ -10,6 +13,7 @@ import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.behaviour.EventItemBehaviourComponent;
 import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
+import com.github.orbyfied.carbon.item.material.MaterialItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Material;
@@ -49,13 +53,15 @@ public class ExampleMod
                 CarbonItemState.class
         )
                 .setBaseMaterial(Material.REDSTONE) // set base material
-                .addComponent(ModelItemDisplayComponent::new, // create the service that will display our item
+                .component(ModelItemDisplayComponent::new, // create the service that will display our item
                         (item, idc) -> idc.displayName("Ruby") // set the display name of the item
                             .addModel("ruby") // add default model
                 )
-                .addComponent(EventItemBehaviourComponent::new,
-                        (item, ibc) -> ibc.adapter()
-                            .addBehaviour(new MyItemBehaviour())
+                .component(EventItemBehaviourComponent::new,
+                        (item, ibc) -> ibc.adapter().addBehaviour(new MyItemBehaviour())
+                )
+                .component(MaterialItemComponent::new,
+                        (item, mic) -> mic.tag("gem.ruby")
                 )
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item

@@ -89,7 +89,7 @@ public class ModelItemDisplayComponent
     }
 
     @Override
-    public void updateItem(
+    public void updateStack(
             ItemStack stack,
             CarbonItemState state,
             CompoundTag tag) {

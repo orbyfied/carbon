@@ -42,7 +42,14 @@ public class ServiceManager {
     public void initialized() {
         isInit = true;
         for (Service s : servicesLinear)
-            s.initialize();
+            if (!s.init)
+                s.initialize();
+    }
+
+    public void disable() {
+        isInit = false;
+        for (Service s : servicesLinear)
+            s.end();
     }
 
     public ServiceManager addService(Service service) {
