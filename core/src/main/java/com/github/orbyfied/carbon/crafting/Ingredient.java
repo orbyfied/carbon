@@ -46,6 +46,10 @@ public interface Ingredient {
             // ignore, empty slots should not be accounted for in amount counting
         }
 
+        @Override
+        public String toString() {
+            return "IngredientEMPTY";
+        }
     };
 
     static Ingredient ofItem(Material material, int amt) {
@@ -68,6 +72,7 @@ public interface Ingredient {
 
             @Override
             public void used(CompiledStack stack, int amount) {
+                System.out.println("hi! stack: " + stack + ", amount: " + amount + ", amtreq: " + amt);
                 stack.getStack().setCount(stack.getAmount() - amount * amt);
             }
         };

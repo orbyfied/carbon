@@ -10,6 +10,9 @@ import net.minecraft.world.item.Items;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 public class CompiledStack {
 
     // TODO: this. is. fucking. shit.
@@ -32,6 +35,8 @@ public class CompiledStack {
     }
 
     public int getAmount() {
+        if (stack == null)
+            return 0;
         return stack.getCount();
     }
 
@@ -41,10 +46,14 @@ public class CompiledStack {
     }
 
     public Item getItemType() {
+        if (stack == null)
+            return null;
         return stack.getItem();
     }
 
     public org.bukkit.inventory.ItemStack getBukkitStack() {
+        if (stack == null)
+            return null;
         return stack.getBukkitStack();
     }
 
@@ -95,27 +104,54 @@ public class CompiledStack {
         if (nmsStack == null)
             return this;
 
-        // get handle
+        // set stack
+        this.stack = nmsStack;
+
+        // get tag
         CompoundTag tag = nmsStack.getTag();
         if (tag == null)
-            return null;
+            return this;
 
         // get and check item type
         String itemId = tag.getString("CarbonItemId");
         CarbonItem item = itemRegistry.getByIdentifier(itemId);
         if (item == null)
-            return null;
+            return this;
 
         try {
             // load state
             state = item.loadState(nmsStack);
         } catch (Exception e) {
             // ignore
-            return null;
+            return this;
         }
 
         // return
         return this;
+    }
+    
+    /* ---- Object ---- */
+
+    @Override
+    public String toString() {
+        if (stack == null)
+            return "EMPTY null stack";
+        return stack.getItem() + " x" + stack.getCount() + (state != null ? " { " + state + " }" : "") + " stack";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CompiledStack stack1 = (CompiledStack) o;
+        return ItemUtil.equalsNmsStack(stack, stack1.stack) && Objects.equals(state, stack1.state);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = Objects.hash(state);
+        h = h * 31 + ItemUtil.hashNmsStack(stack);
+        return h;
     }
 
 }

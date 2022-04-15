@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.crafting.inventory;
 
 import com.github.orbyfied.carbon.item.CompiledStack;
+import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.world.item.Items;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -34,15 +35,13 @@ public class SlotContainer implements Iterable<Slot> {
     }
 
     public Slot addItem(CompiledStack stack) {
-        CompiledStack left = stack;
+        CompiledStack left;
         int l = slots.size();
         for (int i = 0; i < l; i++) {
             Slot slot = slots.get(i);
             if (slot.accepts(stack)) {
                 left = slot.add(stack);
-                if (left == null ||
-                        left.getAmount() == 0 ||
-                        left.getItemType() == Items.AIR)
+                if (ItemUtil.isEmpty(left))
                     return slot;
             }
         }

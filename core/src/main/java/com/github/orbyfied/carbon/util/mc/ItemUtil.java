@@ -58,6 +58,25 @@ public class ItemUtil {
                 stack.getAmount() == 0;
     }
 
+    public static boolean equalsNmsStack(ItemStack a, ItemStack b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        return a.getItem() == b.getItem() &&
+                a.getCount() == b.getCount() &&
+                Objects.equals(a.tag, b.tag);
+    }
+
+    public static int hashNmsStack(ItemStack stack) {
+        if (stack == null)
+            return 0;
+
+        int hash = stack.getCount();
+        hash = hash * 31 + stack.getItem().hashCode();
+        hash = hash * 31 + Objects.hashCode(stack.tag);
+        return hash;
+    }
+
     public static final String GLINT_FAKE_ENCH_ID = "misc:glint";
 
     public static void setHasGlint(CompoundTag tag, boolean b) {

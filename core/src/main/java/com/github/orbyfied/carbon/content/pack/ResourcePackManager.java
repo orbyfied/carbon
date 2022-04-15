@@ -205,8 +205,12 @@ public class ResourcePackManager {
                         // get resource pack proxy
                         ResourcePackProxy rpp = main.getPlatform().getResourcePackProxy();
 
-                        // check if assets were already downloaded
+                        // assign assets folder
                         Path assetsFolder = rpp.getMinecraftAssetsFolder(packDir);
+                        MinecraftAssetService mcAssetService = b.getService(MinecraftAssetService.class);
+                        mcAssetService.setAssetsPath(assetsFolder);
+
+                        // check if assets were already downloaded
                         if (Files.exists(assetsFolder) &&
                                 // check revision
                                 Objects.equals(IOUtil.readFileToUtf8(assetsFolder.resolve(ASSET_REVISION_FN)), Integer.toString(rpp.getAssetsRevision())))
@@ -242,10 +246,6 @@ public class ResourcePackManager {
                             if (Files.exists(assetsFolder))
                                 IOUtil.deleteDirectory(assetsFolder);
                             Files.createDirectories(assetsFolder);
-
-                            // assign assets folder
-                            MinecraftAssetService mcAssetService = b.getService(MinecraftAssetService.class);
-                            mcAssetService.setAssetsPath(assetsFolder);
 
                             // write .rev file
                             Path revFile = assetsFolder.resolve(ASSET_REVISION_FN);

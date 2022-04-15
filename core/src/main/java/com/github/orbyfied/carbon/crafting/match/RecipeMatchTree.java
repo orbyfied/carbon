@@ -66,6 +66,8 @@ public class RecipeMatchTree implements IngredientNodeLike {
             if (ItemUtil.isEmpty(stack))
                 continue;
             curr = curr.findChild(stack);
+            if (curr == null)
+                return null;
             if (curr instanceof Node n && n.recipe != null)
                 return n;
         }

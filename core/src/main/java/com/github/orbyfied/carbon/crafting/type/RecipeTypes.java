@@ -14,11 +14,14 @@ import net.minecraft.world.level.block.Blocks;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,6 +69,7 @@ public class RecipeTypes {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void register(Recipe recipe) {
             tree.add(
                     recipe.ingredients().iterator(),
@@ -74,6 +78,7 @@ public class RecipeTypes {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void unregister(Recipe recipe) {
             tree.remove(recipe.ingredients().iterator());
         }
@@ -91,29 +96,50 @@ public class RecipeTypes {
 
     }
 
+    public static class PrepareCraftWrapper {
+
+        private CraftingInventory inv;
+
+        public List<CompiledStack> stacks;
+        public Recipe recipe;
+        public int amount;
+
+        public PrepareCraftWrapper(CraftingInventory inv) {
+            this.inv = inv;
+        }
+
+        public CraftingInventory getInventory() {
+            return inv;
+        }
+
+    }
+
     public static class ShapedCraftingDefaults implements Listener {
 
+        protected final Plugin plugin = CarbonJavaAPI.get().getMain().getPlugin();
         protected final ShapedCraftingWorker worker;
 
         public ShapedCraftingDefaults(ShapedCraftingWorker worker) {
             this.worker = worker;
         }
 
-        @EventHandler
-        public void onItemPrepareCraft(PrepareItemCraftEvent event) {
+        public void prepareCraft(PrepareCraftWrapper event) {
 
             // collect compiled stacks
-            List<CompiledStack> stacks =
-                    Arrays.stream(event.getInventory().getMatrix())
-                        .map(is -> new CompiledStack().wrap(is))
-                        .collect(Collectors.toList());
+            ItemStack[] inputMatrix = event.getInventory().getMatrix();
+            int iml = inputMatrix.length;
+            List<CompiledStack> stacks = new ArrayList<>(iml);
+            for (int i = 0; i < iml; i++)
+                stacks.add(new CompiledStack().wrap(inputMatrix[i]));
+
+            event.stacks = stacks;
 
             // check if there are any special items
-            boolean isVanilla = stacks.stream().noneMatch(c -> c != null && c.getState() != null);
+            boolean isVanilla = stacks.stream().noneMatch(c -> c.getState() != null);
 
             // get inventories
             CraftingInventory inv = event.getInventory();
-            ItemStack[] matrix = new ItemStack[inv.getMatrix().length];
+            ItemStack[] matrix    = event.getInventory().getMatrix();
 
             // create craft matrix
             Slot resultSlot = Slot.getAndSet(inv::setResult, inv::getResult);
@@ -123,11 +149,12 @@ public class RecipeTypes {
 
             // resolve recipe
             Recipe recipe = worker.resolve(cm);
-            System.out.println(recipe);
+            event.recipe = recipe;
 
             if (recipe == null) {
                 if (!isVanilla)
                     event.getInventory().setResult(null);
+
                 return;
             }
 
@@ -146,6 +173,8 @@ public class RecipeTypes {
                     amount = ia;
             }
 
+            event.amount = amount;
+
             // put result
             recipe.result().write(
                     cm.output(),
@@ -153,15 +182,37 @@ public class RecipeTypes {
                     amount
             );
 
+        }
+
+        @EventHandler
+        public void onItemPrepareCraft(PrepareItemCraftEvent event) {
+            // prepare
+            PrepareCraftWrapper w = new PrepareCraftWrapper(event.getInventory());
+            prepareCraft(w);
+        }
+
+        @EventHandler
+        public void onItemCraft(CraftItemEvent event) {
+            // prepare first
+            PrepareCraftWrapper w = new PrepareCraftWrapper(event.getInventory());
+            prepareCraft(w);
+
+            // execute
+            Recipe recipe = w.recipe;
+
+            System.out.println(recipe);
+
+            int    amount = w.amount;
+            List<CompiledStack> stacks = w.stacks;
+
             // use items
-            l = recipe.ingredients().size();
+            int l = recipe.ingredients().size();
             for (int i = 0; i < l; i++) {
                 Ingredient in = recipe.ingredient(i);
                 CompiledStack stack = stacks.get(i);
 
                 in.used(stack, amount);
             }
-
         }
 
     }
