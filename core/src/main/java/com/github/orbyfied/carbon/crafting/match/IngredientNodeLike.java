@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.crafting.match;
 
 import com.github.orbyfied.carbon.crafting.Ingredient;
+import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 
 import java.util.List;

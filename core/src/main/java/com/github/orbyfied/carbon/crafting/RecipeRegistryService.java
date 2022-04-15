@@ -10,8 +10,7 @@ import com.github.orbyfied.carbon.registry.Registry;
 import java.util.HashMap;
 
 public class RecipeRegistryService
-        extends AbstractRegistryService<Registry<Recipe>, Recipe>
-        implements FunctionalService<Registry<Recipe>, Recipe> {
+        extends AbstractRegistryService<Registry<Recipe>, Recipe> {
 
     public RecipeRegistryService(Registry<Recipe> registry) {
         super(registry);
@@ -33,16 +32,6 @@ public class RecipeRegistryService
 
     public RecipeWorker getWorker(RecipeType type) {
         return getWorker(type.getIdentifier());
-    }
-
-    @Override
-    public void registered(Recipe val) {
-        getWorker(val.type).register(val);
-    }
-
-    @Override
-    public void unregistered(Recipe val) {
-        getWorker(val.type).unregister(val);
     }
 
 }

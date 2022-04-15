@@ -1,10 +1,12 @@
 package com.github.orbyfied.carbon.util.mc;
 
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.util.ReflectionUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.bukkit.Material;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -38,6 +40,22 @@ public class ItemUtil {
     // this works for now though
     public static ItemStack getHandle(org.bukkit.inventory.ItemStack itemStack) {
         return ReflectionUtil.queryFieldSafe(itemStack, craftItemStackHandleField);
+    }
+
+    public static boolean isEmpty(CompiledStack stack) {
+        return stack == null || stack.isEmpty();
+    }
+
+    public static boolean isEmpty(ItemStack stack) {
+        return stack == null ||
+                stack.getItem() == Items.AIR ||
+                stack.getCount() == 0;
+    }
+
+    public static boolean isEmpty(org.bukkit.inventory.ItemStack stack) {
+        return stack == null ||
+                stack.getType() == Material.AIR ||
+                stack.getAmount() == 0;
     }
 
     public static final String GLINT_FAKE_ENCH_ID = "misc:glint";

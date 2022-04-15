@@ -1,6 +1,8 @@
 package com.github.orbyfied.carbon.crafting.inventory;
 
 import com.github.orbyfied.carbon.item.CompiledStack;
+import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -58,5 +60,117 @@ public interface Slot {
      * @return What couldn't be added.
      */
     CompiledStack add(CompiledStack stack);
+
+    ///////////////////////////////////////////////////
+
+    static Slot in(final Inventory inv,
+                   final int index) {
+        return new Slot() {
+
+            @Override
+            public boolean isVirtual() {
+                return false; // real slot
+            }
+
+            @Override
+            public int getIndex() {
+                return index;
+            }
+
+            @Override
+            public CompiledStack getItem() {
+                return new CompiledStack().wrap(inv.getItem(index));
+            }
+
+            @Override
+            public void setItem(CompiledStack stack) {
+                inv.setItem(index, stack.getStack().getBukkitStack());
+            }
+
+            @Override
+            public boolean accepts(CompiledStack stack) {
+                ItemStack bss;
+                if ((bss = inv.getItem(index)) == null
+                    || bss.getAmount() == 0
+                    || bss.getType() == Material.AIR)
+                    return true;
+
+                if (bss.getAmount() >= bss.getMaxStackSize())
+                    return false;
+                // TODO: check if simalar better way
+                if (!stack.getStack().getBukkitStack().isSimilar(bss))
+                    return false;
+                return true;
+            }
+
+            @Override
+            public CompiledStack add(CompiledStack stack) {
+                ItemStack bss;
+                if ((bss = inv.getItem(index)) == null
+                        || bss.getAmount() == 0
+                        || bss.getType() == Material.AIR)
+                    inv.setItem(index, stack.getStack().getBukkitStack());
+                else {
+                    bss.setAmount(bss.getAmount() + stack.getAmount());
+                }
+                // TODO: calculate and return overflow
+                return null;
+            }
+        };
+    }
+
+    static Slot in(ItemStack[] arr, int i) {
+        return new Slot() {
+            @Override
+            public boolean isVirtual() {
+                return false;
+            }
+
+            @Override
+            public int getIndex() {
+                return i;
+            }
+
+            @Override
+            public CompiledStack getItem() {
+                return new CompiledStack().wrap(arr[i]);
+            }
+
+            @Override
+            public void setItem(CompiledStack stack) {
+                arr[i] = stack.getBukkitStack();
+            }
+
+            @Override
+            public boolean accepts(CompiledStack stack) {
+                ItemStack bss;
+                if ((bss = arr[i]) == null
+                        || bss.getAmount() == 0
+                        || bss.getType() == Material.AIR)
+                    return true;
+
+                if (bss.getAmount() >= bss.getMaxStackSize())
+                    return false;
+                // TODO: check if simalar better way
+                if (!stack.getStack().getBukkitStack().isSimilar(bss))
+                    return false;
+                return true;
+            }
+
+            @Override
+            public CompiledStack add(CompiledStack stack) {
+                ItemStack bss;
+                if ((bss = arr[i]) == null
+                        || bss.getAmount() == 0
+                        || bss.getType() == Material.AIR)
+                    arr[i] = stack.getStack().getBukkitStack();
+                else {
+                    bss.setAmount(bss.getAmount() + stack.getAmount());
+                }
+                // TODO: calculate and return overflow
+                return null;
+            }
+        };
+    }
 
 }

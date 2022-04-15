@@ -64,8 +64,8 @@ public class CarbonCreativeInventory {
         i = 18;
         final int l = 54 - 18;
         for (CarbonItem<?> item : items) {
-            ItemStack stack = item.newStack();
-            inv.setItem(i, stack);
+            net.minecraft.world.item.ItemStack stack = item.newStack();
+            inv.setItem(i, stack.getBukkitStack());
             i++;
             if (i >= l)
                 break;

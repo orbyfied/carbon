@@ -12,6 +12,12 @@ public class CommandEngineTest {
 
         @Override
         protected void unregisterPlatform(Node root) { }
+
+        @Override
+        public void enablePlatform() { }
+
+        @Override
+        public void disablePlatform() { }
     };
 
     final SuggestionAccumulator suggestions = new SuggestionAccumulator() {

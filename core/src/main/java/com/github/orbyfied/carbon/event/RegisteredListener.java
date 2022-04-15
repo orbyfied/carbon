@@ -15,6 +15,11 @@ import java.util.Objects;
 public class RegisteredListener {
 
     /**
+     * The lookup to use when parsing methods.
+     */
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
+    /**
      * The event bus this listener belongs to.
      */
     final EventBus bus;
@@ -84,7 +89,7 @@ public class RegisteredListener {
                 Pipeline<? extends BusEvent> pipeline = bus.getPipelineFor(eventType).base();
 
                 // get method handle for quick invocation
-                final MethodHandle handle = MethodHandles.lookup().unreflect(method);
+                final MethodHandle handle = LOOKUP.unreflect(method);
 
                 // create and add handler
                 BusHandler handler = new BusHandler(bus, this, (Pipeline<BusEvent>) pipeline);

@@ -33,9 +33,9 @@ public class Pipeline<E extends Event> implements PipelineAccess<E> {
      */
     @Override
     public Pipeline<E> push(E event) {
-        if (handlers.size() == 0) return this;
-
         int l = handlers.size();
+        if (l == 0) return this;
+
         for (int i = 0; i < l; i++) {
             Handler<E> handler = handlers.get(i);
             handler.handle(event);

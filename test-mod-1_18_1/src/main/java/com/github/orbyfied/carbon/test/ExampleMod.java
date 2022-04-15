@@ -5,11 +5,15 @@ import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.crafting.Ingredient;
 import com.github.orbyfied.carbon.crafting.Recipe;
+import com.github.orbyfied.carbon.crafting.Result;
+import com.github.orbyfied.carbon.crafting.inventory.SlotContainer;
+import com.github.orbyfied.carbon.crafting.match.RecipeDimensions;
 import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
 import com.github.orbyfied.carbon.event.EventHandler;
 import com.github.orbyfied.carbon.event.EventListener;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.item.behaviour.EventItemBehaviourComponent;
 import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
@@ -45,6 +49,9 @@ public class ExampleMod
         // get item registry
         final Registry<CarbonItem<?>> itemRegistry = api.getRegistry("minecraft:items");
 
+        // get the recipe registry
+        final Registry<Recipe<?>> recipeRegistry = api.getRegistry("minecraft:recipes");
+
         // create new item
         CarbonItem<?> ruby = new CarbonItem<>(
                 Identifier.of("example:ruby"), // use your mod id as the namespace
@@ -65,6 +72,17 @@ public class ExampleMod
                 )
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item
+
+        // create recipe for the item
+        RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:ruby_from_dirt"))
+                .dimensions(new RecipeDimensions(2).sized(3, 3))
+                .ingredients(
+                        Ingredient.ofItem(Material.DIRT, 2)
+                )
+                .result((out, recipe, amount) -> {
+                    out.addItem(new CompiledStack().fill(ruby, amount));
+                })
+                .register(recipeRegistry);
 
     }
 

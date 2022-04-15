@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.crafting.Recipe;
 import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.util.CollectionUtil;
+import com.github.orbyfied.carbon.util.mc.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,10 +62,15 @@ public class RecipeMatchTree implements IngredientNodeLike {
     public Node matchIngredients(Iterator<CompiledStack> iterator) {
         IngredientNodeLike curr = this;
         while (iterator.hasNext()) {
-            curr = curr.findChild(iterator.next());
+            CompiledStack stack = iterator.next();
+            if (ItemUtil.isEmpty(stack))
+                continue;
+            curr = curr.findChild(stack);
+            if (curr instanceof Node n && n.recipe != null)
+                return n;
         }
         if (!(curr instanceof Node))
-            throw new IllegalArgumentException();
+            return null;
         return (Node) curr;
     }
 
@@ -80,7 +86,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
             Ingredient in = ingredients.next();
             curr = curr.getIngredientChild(in);
             if (curr == null) {
-                curr = new Node((Node) prev, in);
+                curr = new Node(prev, in);
                 ((Node) curr).ingredient = in;
                 prev.addChild((Node) curr);
             }
@@ -103,7 +109,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
             if (curr.getChildren().size() <= 1) {
                 Node nc = (Node) curr;
                 nc.children = null;
-                nc.parent.children.remove(curr);
+                ((Node)nc.parent).children.remove(curr);
                 break;
             }
         }
@@ -116,7 +122,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
      */
     public static class Node implements IngredientNodeLike {
 
-        public Node(Node parent,
+        public Node(IngredientNodeLike parent,
                     Ingredient ingredient) {
             this.parent     = parent;
             this.ingredient = ingredient;
@@ -125,7 +131,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
         /**
          * The parent node.
          */
-        protected Node parent;
+        protected IngredientNodeLike parent;
 
         /**
          * The children of this node.
@@ -167,7 +173,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
 
         /* Getters. */
 
-        public Node getParent() {
+        public IngredientNodeLike getParent() {
             return parent;
         }
 

@@ -1,7 +1,10 @@
 package com.github.orbyfied.carbon.crafting;
 
 import com.github.orbyfied.carbon.item.CompiledStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
 public interface Ingredient {
 
@@ -24,7 +27,7 @@ public interface Ingredient {
         public boolean matches(CompiledStack stack) {
             return stack == null ||
                     stack.getAmount() == 0 ||
-                    stack.getMinecraftItem() == Items.AIR;
+                    stack.getItemType() == Items.AIR;
         }
 
         @Override
@@ -44,5 +47,30 @@ public interface Ingredient {
         }
 
     };
+
+    static Ingredient ofItem(Material material, int amt) {
+        Item item = CraftMagicNumbers.getItem(material);
+        return new Ingredient() {
+            @Override
+            public boolean matches(CompiledStack stack) {
+                return stack.getItemType() == item;
+            }
+
+            @Override
+            public boolean equals(Ingredient ingredient) {
+                return false;
+            }
+
+            @Override
+            public int count(CompiledStack stack) {
+                return stack.getAmount() / amt;
+            }
+
+            @Override
+            public void used(CompiledStack stack, int amount) {
+                stack.getStack().setCount(stack.getAmount() - amount * amt);
+            }
+        };
+    }
 
 }

@@ -6,12 +6,13 @@ import com.github.orbyfied.carbon.registry.Identifier;
 
 import java.util.*;
 
-public class Recipe implements Identifiable {
+@SuppressWarnings("unchecked")
+public class Recipe<S extends Recipe> implements Identifiable {
 
     protected List<Ingredient> ingredients;
     protected Result       result;
 
-    protected RecipeType type;
+    protected RecipeType<S> type;
 
     protected final Identifier id;
 
@@ -24,48 +25,47 @@ public class Recipe implements Identifiable {
         return id;
     }
 
-    public RecipeType type() {
+    public RecipeType<S> type() {
         return type;
-    }
-
-    public Recipe type(RecipeType type) {
-        this.type = type;
-        return this;
     }
 
     public List<Ingredient> ingredients() {
         return ingredients;
     }
 
-    public Recipe ingredients(Ingredient... ingredients) {
+    public S ingredients(Ingredient... ingredients) {
         this.ingredients = Arrays.asList(ingredients);
-        return this;
+        return (S) this;
     }
 
-    public Recipe ingredients(int size) {
+    public S ingredients(int size) {
         this.ingredients = new ArrayList<>(size);
-        return this;
+        return (S) this;
     }
 
-    public Recipe ingredient(int i, Ingredient ingredient) {
+    public S ingredient(int i, Ingredient ingredient) {
         this.ingredients.set(i, ingredient);
-        return this;
+        return (S) this;
     }
 
-    public Recipe mutable() {
+    public Ingredient ingredient(int i) {
+        return ingredients.get(i);
+    }
+
+    public S mutable() {
         // make ingredients mutable
         if (!(ingredients instanceof ArrayList))
             this.ingredients = new ArrayList<>(ingredients);
-        return this;
+        return (S) this;
     }
 
     public Result result() {
         return result;
     }
 
-    public Recipe result(Result result) {
+    public S result(Result result) {
         this.result = result;
-        return this;
+        return (S) this;
     }
 
     //////////////////////////////////////

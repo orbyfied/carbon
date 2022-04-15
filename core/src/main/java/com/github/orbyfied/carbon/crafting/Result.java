@@ -1,5 +1,7 @@
 package com.github.orbyfied.carbon.crafting;
 
+import com.github.orbyfied.carbon.crafting.inventory.SlotContainer;
+
 /**
  * The result generator which is
  * supposed to fill the result slot
@@ -15,6 +17,9 @@ package com.github.orbyfied.carbon.crafting;
 public interface Result {
 
     void write(
+            SlotContainer out,
+            Recipe recipe,
+            int amount
             /* TODO */
     );
 

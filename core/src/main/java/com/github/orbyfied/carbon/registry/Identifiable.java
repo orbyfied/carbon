@@ -19,4 +19,14 @@ public interface Identifiable {
      */
     Identifier getIdentifier();
 
+    /**
+     * Registers this object to the registry.
+     * @return This.
+     */
+    @SuppressWarnings("unchecked")
+    default Identifiable register(Registry registry) {
+        registry.register(this);
+        return this;
+    }
+
 }

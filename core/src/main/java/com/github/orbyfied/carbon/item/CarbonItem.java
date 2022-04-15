@@ -8,8 +8,10 @@ import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.Item;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
+import net.minecraft.world.item.ItemStack;
+import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
 import static com.github.orbyfied.carbon.util.mc.Nbt.getOrCreateCompound;
 
@@ -40,6 +42,8 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      * The base material of the item.
      */
     protected Material baseMaterial;
+
+    protected Item baseItem;
 
     // TODO: this is really inefficient help me
     protected HashMap<Class<? extends ItemComponent<S>>, ItemComponent<S>> componentsMapped = new HashMap<>();
@@ -81,6 +85,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     public CarbonItem<S> setBaseMaterial(Material material) {
         this.baseMaterial = material;
+        this.baseItem     = CraftMagicNumbers.getItem(material);
         return this;
     }
 
@@ -120,8 +125,9 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return this;
     }
 
-    public CarbonItem<S> register(Registry<CarbonItem<?>> registry) {
-        registry.register(this);
+    @Override
+    public CarbonItem<S> register(Registry registry) {
+        super.register(registry);
         return this;
     }
 
@@ -157,12 +163,12 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return (S) new CarbonItemState<>(this);
     }
 
-    public S loadState(ItemStack stack) {
+    public S loadState(org.bukkit.inventory.ItemStack stack) {
         // check if it is built
         checkBuilt();
 
         // get handle
-        net.minecraft.world.item.ItemStack nmsStack = ItemUtil.getHandle(stack);
+        ItemStack nmsStack = ItemUtil.getHandle(stack);
         CompoundTag stateTag = nmsStack.getOrCreateTag().getCompound(ITEM_STATE_TAG);
 
         // allocate state
@@ -175,7 +181,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return s;
     }
 
-    public S loadState(net.minecraft.world.item.ItemStack nmsStack) {
+    public S loadState(ItemStack nmsStack) {
         // check if it is built
         checkBuilt();
 
@@ -201,17 +207,12 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      * @see CarbonItem#newState()
      * @return The item stack.
      */
-    public ItemStack newStack() {
+    public net.minecraft.world.item.ItemStack newStack() {
         // check if it is built
         checkBuilt();
 
-        // create stack with base item
-        // and get required handle and data
-        ItemStack stack = ItemUtil.newCraftStack(
-                baseMaterial, 1, (short) 0, null
-        );
-
-        net.minecraft.world.item.ItemStack nmsStack = ItemUtil.getHandle(stack);
+        // create base stack with the base material
+        ItemStack nmsStack = new ItemStack(baseItem);
         CompoundTag tag = nmsStack.getOrCreateTag();
 
         // set item id
@@ -236,7 +237,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         }
 
         // return stack
-        return stack;
+        return nmsStack;
     }
 
     /* ------ Internal ------- */

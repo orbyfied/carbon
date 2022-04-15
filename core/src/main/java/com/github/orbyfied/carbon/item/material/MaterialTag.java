@@ -58,12 +58,12 @@ public class MaterialTag {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MaterialTag that = (MaterialTag) o;
-        return Objects.equals(parts, that.parts);
+        return Arrays.equals(parts, that.parts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parts);
+        return Objects.hash((Object)parts);
     }
 
 }

@@ -3,10 +3,15 @@ package com.github.orbyfied.carbon.bootstrap;
 import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.content.CMDRegistryService;
 import com.github.orbyfied.carbon.core.mod.ModLoader;
+import com.github.orbyfied.carbon.crafting.Recipe;
+import com.github.orbyfied.carbon.crafting.RecipeRegistryService;
+import com.github.orbyfied.carbon.crafting.type.RecipeType;
+import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
 import com.github.orbyfied.carbon.element.ModElementRegistry;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.platform.PlatformProxy;
+import com.github.orbyfied.carbon.registry.Identifiable;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -136,11 +141,23 @@ public abstract class CarbonBootstrap
     public void initialize() {
 
         // initialize registries
-        Registry<CarbonItem<?>> items = new Registry<>("minecraft:items");
-        items.addService(new ModElementRegistry<>(items))
-                .addService(new CMDRegistryService<>(items));
 
-        main.getRegistries().register(items);
+        Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items");
+        itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
+                .addService(new CMDRegistryService<>(itemRegistry));
+
+        Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types");
+        RecipeTypes.registerAll(recipeTypeRegistry);
+
+        Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes");
+        recipeRegistry.addService(new RecipeRegistryService(recipeRegistry));
+
+        Registry<Registry<? extends Identifiable>> registries = main.getRegistries();
+
+        registries
+                .register(itemRegistry)
+                .register(recipeTypeRegistry)
+                .register(recipeRegistry);
 
         // initialize services
         main.getServiceManager().initialized();
@@ -151,6 +168,13 @@ public abstract class CarbonBootstrap
         // initialize all mods
         ModLoader loader = main.getModLoader();
         loader.initializeAll();
+
+        // load everything from registries
+        RecipeRegistryService recipeRegistryService = recipeRegistry.getService(RecipeRegistryService.class);
+        for (RecipeType recipeType : recipeTypeRegistry)
+            recipeRegistryService.addWorker(recipeType.newWorker());
+        for (Recipe recipe : recipeRegistry)
+            recipeRegistryService.getWorker(recipe.type()).register(recipe);
 
         // build and host resource pack
         main.getResourcePackManager()

@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.event.exception.EventInvocationException;
 import com.github.orbyfied.carbon.event.exception.InternalBusException;
 import com.github.orbyfied.carbon.event.exception.InvalidEventException;
 import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class EventBus {
     /**
      * Listeners mapped by class.
      */
-    private final HashMap<Class<? extends EventListener>, RegisteredListener> listenersByClass = new HashMap<>();
+    private final Object2ObjectOpenHashMap<Class<? extends EventListener>, RegisteredListener> listenersByClass = new Object2ObjectOpenHashMap<>();
 
     /**
      * Listeners stored linearly.
@@ -29,7 +30,7 @@ public class EventBus {
     /**
      * Cache for event pipelines.
      */
-    private final HashMap<Class<? extends BusEvent>, PipelineAccess<BusEvent>> eventPipelineCache = new HashMap<>();
+    private final Object2ObjectOpenHashMap<Class<? extends BusEvent>, PipelineAccess<BusEvent>> eventPipelineCache = new Object2ObjectOpenHashMap<>();
 
     /**
      * Registers a listener instance by creating
