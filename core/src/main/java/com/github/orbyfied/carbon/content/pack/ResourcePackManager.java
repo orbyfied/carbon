@@ -41,6 +41,8 @@ import java.util.zip.ZipEntry;
 
 public class ResourcePackManager {
 
+    public static final String ASSET_REVISION_FN = ".assetrev";
+
     /**
      * The main Carbon instance.
      */
@@ -207,7 +209,7 @@ public class ResourcePackManager {
                         Path assetsFolder = rpp.getMinecraftAssetsFolder(packDir);
                         if (Files.exists(assetsFolder) &&
                                 // check revision
-                                Objects.equals(IOUtil.readFileToUtf8(assetsFolder.resolve(".rev")), Integer.toString(rpp.getAssetsRevision())))
+                                Objects.equals(IOUtil.readFileToUtf8(assetsFolder.resolve(ASSET_REVISION_FN)), Integer.toString(rpp.getAssetsRevision())))
                             return;
 
                         logger.info("Downloading Minecraft assets. This only needs to run once per version.");
@@ -246,7 +248,7 @@ public class ResourcePackManager {
                             mcAssetService.setAssetsPath(assetsFolder);
 
                             // write .rev file
-                            Path revFile = assetsFolder.resolve(".assetrev");
+                            Path revFile = assetsFolder.resolve(ASSET_REVISION_FN);
 
                             os = Files.newOutputStream(revFile);
                             os.write(String.valueOf(rpp.getAssetsRevision()).getBytes(StandardCharsets.UTF_8));

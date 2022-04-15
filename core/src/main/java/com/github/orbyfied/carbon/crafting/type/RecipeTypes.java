@@ -4,11 +4,13 @@ import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.crafting.Ingredient;
 import com.github.orbyfied.carbon.crafting.Recipe;
 import com.github.orbyfied.carbon.crafting.inventory.CraftMatrix;
+import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.crafting.inventory.SlotContainer;
 import com.github.orbyfied.carbon.crafting.match.RecipeMatchTree;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
+import net.minecraft.world.level.block.Blocks;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -107,22 +109,24 @@ public class RecipeTypes {
                         .collect(Collectors.toList());
 
             // check if there are any special items
-            boolean hasSpecial = stacks.stream().anyMatch(c -> c != null && c.getState() != null);
+            boolean isVanilla = stacks.stream().noneMatch(c -> c != null && c.getState() != null);
 
             // get inventories
             CraftingInventory inv = event.getInventory();
             ItemStack[] matrix = new ItemStack[inv.getMatrix().length];
 
             // create craft matrix
+            Slot resultSlot = Slot.getAndSet(inv::setResult, inv::getResult);
             CraftMatrix cm = new CraftMatrix()
-                    .input(SlotContainer.ofInventory(event.getInventory()))
-                    .output(SlotContainer.ofArray(matrix));
+                    .input(SlotContainer.ofArray(matrix))
+                    .output(SlotContainer.of(resultSlot));
 
             // resolve recipe
             Recipe recipe = worker.resolve(cm);
+            System.out.println(recipe);
 
             if (recipe == null) {
-                if (hasSpecial)
+                if (!isVanilla)
                     event.getInventory().setResult(null);
                 return;
             }

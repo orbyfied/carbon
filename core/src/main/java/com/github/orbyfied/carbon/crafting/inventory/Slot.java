@@ -5,6 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 /**
  * Represents a slot which can
  * hold an item. Used for both
@@ -89,32 +92,12 @@ public interface Slot {
 
             @Override
             public boolean accepts(CompiledStack stack) {
-                ItemStack bss;
-                if ((bss = inv.getItem(index)) == null
-                    || bss.getAmount() == 0
-                    || bss.getType() == Material.AIR)
-                    return true;
-
-                if (bss.getAmount() >= bss.getMaxStackSize())
-                    return false;
-                // TODO: check if simalar better way
-                if (!stack.getStack().getBukkitStack().isSimilar(bss))
-                    return false;
-                return true;
+                return Slot.acceptsDefaultImpl(stack, inv.getItem(index));
             }
 
             @Override
             public CompiledStack add(CompiledStack stack) {
-                ItemStack bss;
-                if ((bss = inv.getItem(index)) == null
-                        || bss.getAmount() == 0
-                        || bss.getType() == Material.AIR)
-                    inv.setItem(index, stack.getStack().getBukkitStack());
-                else {
-                    bss.setAmount(bss.getAmount() + stack.getAmount());
-                }
-                // TODO: calculate and return overflow
-                return null;
+                return Slot.addDefaultImpl(stack, inv.getItem(index), s -> inv.setItem(index, s));
             }
         };
     }
@@ -143,34 +126,77 @@ public interface Slot {
 
             @Override
             public boolean accepts(CompiledStack stack) {
-                ItemStack bss;
-                if ((bss = arr[i]) == null
-                        || bss.getAmount() == 0
-                        || bss.getType() == Material.AIR)
-                    return true;
-
-                if (bss.getAmount() >= bss.getMaxStackSize())
-                    return false;
-                // TODO: check if simalar better way
-                if (!stack.getStack().getBukkitStack().isSimilar(bss))
-                    return false;
-                return true;
+                return Slot.acceptsDefaultImpl(stack, arr[i]);
             }
 
             @Override
             public CompiledStack add(CompiledStack stack) {
-                ItemStack bss;
-                if ((bss = arr[i]) == null
-                        || bss.getAmount() == 0
-                        || bss.getType() == Material.AIR)
-                    arr[i] = stack.getStack().getBukkitStack();
-                else {
-                    bss.setAmount(bss.getAmount() + stack.getAmount());
-                }
-                // TODO: calculate and return overflow
-                return null;
+                return Slot.addDefaultImpl(stack, arr[i], s -> arr[i] = s);
             }
         };
+    }
+
+    static Slot getAndSet(final Consumer<ItemStack> setter,
+                          final Supplier<ItemStack> getter) {
+        return new Slot() {
+            @Override
+            public boolean isVirtual() {
+                return true;
+            }
+
+            @Override
+            public int getIndex() {
+                return -1;
+            }
+
+            @Override
+            public CompiledStack getItem() {
+                return new CompiledStack().wrap(getter.get());
+            }
+
+            @Override
+            public void setItem(CompiledStack stack) {
+                setter.accept(stack.getBukkitStack());
+            }
+
+            @Override
+            public boolean accepts(CompiledStack stack) {
+                return Slot.acceptsDefaultImpl(stack, getter.get());
+            }
+
+            @Override
+            public CompiledStack add(CompiledStack stack) {
+                return Slot.addDefaultImpl(stack, getter.get(), setter);
+            }
+        };
+    }
+
+    ////////////////////////////////////////////////////
+
+    private static boolean acceptsDefaultImpl(CompiledStack stack, ItemStack bss) {
+        if (bss == null
+                || bss.getAmount() == 0
+                || bss.getType() == Material.AIR)
+            return true;
+
+        if (bss.getAmount() >= bss.getMaxStackSize())
+            return false;
+        // TODO: check if simalar better way
+        if (!stack.getStack().getBukkitStack().isSimilar(bss))
+            return false;
+        return true;
+    }
+
+    private static CompiledStack addDefaultImpl(CompiledStack stack, ItemStack bss, Consumer<ItemStack> setter) {
+        if (bss == null
+                || bss.getAmount() == 0
+                || bss.getType() == Material.AIR)
+            setter.accept(stack.getStack().getBukkitStack());
+        else {
+            bss.setAmount(bss.getAmount() + stack.getAmount());
+        }
+        // TODO: calculate and return overflow
+        return null;
     }
 
 }

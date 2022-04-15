@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -56,6 +57,14 @@ public class SlotContainer implements Iterable<Slot> {
     }
 
     /////////////////////////////////////////////
+
+    public static SlotContainer of(final List<Slot> slots) {
+        return new SlotContainer(slots);
+    }
+
+    public static SlotContainer of(final Slot... slots) {
+        return new SlotContainer(Arrays.asList(slots));
+    }
 
     public static SlotContainer ofInventory(final Inventory inventory) {
         ArrayList<Slot> slots = new ArrayList<>();
