@@ -5,8 +5,6 @@ import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.crafting.Ingredient;
 import com.github.orbyfied.carbon.crafting.Recipe;
-import com.github.orbyfied.carbon.crafting.Result;
-import com.github.orbyfied.carbon.crafting.inventory.SlotContainer;
 import com.github.orbyfied.carbon.crafting.match.RecipeDimensions;
 import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
 import com.github.orbyfied.carbon.event.EventHandler;
@@ -22,6 +20,8 @@ import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import static com.github.orbyfied.carbon.crafting.Ingredient.EMPTY;
 
 // indicate that this is a Carbon mod
 @CarbonMod(
@@ -77,7 +77,9 @@ public class ExampleMod
         RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:ruby_from_dirt"))
                 .dimensions(new RecipeDimensions(2).sized(3, 3))
                 .ingredients(
-                        Ingredient.ofItem(Material.DIRT, 2)
+                        Ingredient.ofItem(Material.DIRT, 2), EMPTY, EMPTY,
+                        EMPTY, EMPTY, EMPTY,
+                        EMPTY, EMPTY, EMPTY
                 )
                 .result((out, recipe, amount) -> {
                     out.addItem(new CompiledStack().fill(ruby, amount));

@@ -15,6 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.CraftingInventory;
@@ -103,6 +105,7 @@ public class RecipeTypes {
         public List<CompiledStack> stacks;
         public Recipe recipe;
         public int amount;
+        public CraftMatrix matrix;
 
         public PrepareCraftWrapper(CraftingInventory inv) {
             this.inv = inv;
@@ -147,6 +150,8 @@ public class RecipeTypes {
                     .input(SlotContainer.ofArray(matrix))
                     .output(SlotContainer.of(resultSlot));
 
+            event.matrix = cm;
+
             // resolve recipe
             Recipe recipe = worker.resolve(cm);
             event.recipe = recipe;
@@ -168,7 +173,7 @@ public class RecipeTypes {
                 Ingredient in       = recipe.ingredient(i);
                 CompiledStack stack = stacks.get(i);
 
-                int ia = in.count(stack);
+                int ia = in.count(stack, cm);
                 if (amount == -1 || ia > amount)
                     amount = ia;
             }
@@ -192,15 +197,17 @@ public class RecipeTypes {
         }
 
         @EventHandler
-        public void onItemCraft(CraftItemEvent event) {
+        public void onItemCraft(InventoryClickEvent event) {
+            if (!(event.getClickedInventory() instanceof CraftingInventory)) return;
+            if (event.getSlotType() != InventoryType.SlotType.RESULT) return;
+
             // prepare first
-            PrepareCraftWrapper w = new PrepareCraftWrapper(event.getInventory());
+            CraftingInventory inv = (CraftingInventory) event.getClickedInventory();
+            PrepareCraftWrapper w = new PrepareCraftWrapper(inv);
             prepareCraft(w);
 
             // execute
             Recipe recipe = w.recipe;
-
-            System.out.println(recipe);
 
             int    amount = w.amount;
             List<CompiledStack> stacks = w.stacks;
@@ -211,7 +218,7 @@ public class RecipeTypes {
                 Ingredient in = recipe.ingredient(i);
                 CompiledStack stack = stacks.get(i);
 
-                in.used(stack, amount);
+                in.used(stack, amount, w.matrix);
             }
         }
 

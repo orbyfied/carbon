@@ -30,11 +30,13 @@ public class BasicEventBusTest {
         EVENT_BUS.register(new MyListener());
         EVENT_BUS.bake(YourMomEvent.class);
 
+        YourMomEvent event = new YourMomEvent("hello");
+
         // ---- time
         long t1 = System.nanoTime();
 
-        for (int i = 0; i < 1000; i++)
-            EVENT_BUS.post(new YourMomEvent("hello " + i));
+        for (int i = 0; i < 1_000_000; i++)
+            EVENT_BUS.post(event);
 
         // ---- time
         long t2 = System.nanoTime();
@@ -44,14 +46,11 @@ public class BasicEventBusTest {
 
     }
 
-    public static int counter;
-
     public static class MyListener implements EventListener {
 
         @EventHandler
         public void onYourMomEvent(YourMomEvent event) {
-//            System.out.println("my listener says \"" + event.getText() + "\"");
-            counter++;
+
         }
 
     }

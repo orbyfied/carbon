@@ -2,6 +2,8 @@ package com.github.orbyfied.carbon.crafting.match;
 
 import com.github.orbyfied.carbon.crafting.Ingredient;
 import com.github.orbyfied.carbon.crafting.Recipe;
+import com.github.orbyfied.carbon.crafting.TaggedIngredient;
+import com.github.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.util.CollectionUtil;
@@ -59,13 +61,38 @@ public class RecipeMatchTree implements IngredientNodeLike {
         return null;
     }
 
+    public Node matchMatrix(CraftMatrix matrix) {
+        // set up iterations
+        IngredientNodeLike curr = this;
+        Iterator<Slot> iterator = matrix.input().iterator();
+        while (iterator.hasNext()) { // iterate
+            // get slot and stack
+            Slot slot = iterator.next();
+            CompiledStack stack = slot.getItem();
+
+            // try to find child
+            curr = curr.findChild(stack, matrix);
+            if (curr == null)
+                return null;
+
+            // store tag
+            Node n = (Node) curr;
+            if (n.ingredient instanceof TaggedIngredient ti)
+                matrix.put(ti.tag(matrix), slot);
+        }
+        if (!(curr instanceof Node))
+            return null;
+        return (Node) curr;
+    }
+
+    @Deprecated
     public Node matchIngredients(Iterator<CompiledStack> iterator) {
         IngredientNodeLike curr = this;
         while (iterator.hasNext()) {
             CompiledStack stack = iterator.next();
             if (ItemUtil.isEmpty(stack))
                 continue;
-            curr = curr.findChild(stack);
+            curr = curr.findChild(stack, null);
             if (curr == null)
                 return null;
             if (curr instanceof Node n && n.recipe != null)
@@ -76,6 +103,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
         return (Node) curr;
     }
 
+    @Deprecated
     public Node matchSlots(Iterator<Slot> iterator) {
         return matchIngredients(CollectionUtil.mappedIterator(iterator, Slot::getItem));
     }

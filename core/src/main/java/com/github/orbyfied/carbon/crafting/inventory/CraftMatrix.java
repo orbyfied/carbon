@@ -1,7 +1,10 @@
 package com.github.orbyfied.carbon.crafting.inventory;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -20,6 +23,12 @@ public class CraftMatrix implements Cloneable {
      * The output slots.
      */
     protected SlotContainer output;
+
+    /**
+     * The slots containing the values for
+     * the ingredients by their ingredient tag.
+     */
+    protected HashMap<Object, Slot> taggedSlots;
 
     public CraftMatrix input(SlotContainer slots) {
         this.input = slots;
@@ -42,6 +51,15 @@ public class CraftMatrix implements Cloneable {
     public CraftMatrix output(SlotContainer c) {
         this.output = c;
         return this;
+    }
+
+    public CraftMatrix put(Object o, Slot slot) {
+        this.taggedSlots.put(o, slot);
+        return this;
+    }
+
+    public Slot get(Object o) {
+        return this.taggedSlots.get(o);
     }
 
     /**

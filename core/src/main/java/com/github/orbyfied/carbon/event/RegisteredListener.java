@@ -92,11 +92,18 @@ public class RegisteredListener {
                 final MethodHandle handle = LOOKUP.unreflect(method);
 
                 // create and add handler
-                BusHandler handler = new BusHandler(bus, this, (Pipeline<BusEvent>) pipeline);
-                handler.setDelegate(event -> {
-                    try { handle.invoke(obj, event); }
-                    catch (Throwable e) { e.printStackTrace(); }
-                });
+                BusHandler handler = new BusHandler(bus, this, (Pipeline<BusEvent>) pipeline) {
+
+                    @Override
+                    public void handle(BusEvent event) {
+                        if (!isEnabled()) return;
+
+                        try { handle.invoke(obj, event); }
+                        catch (Throwable e) { e.printStackTrace(); }
+                    }
+
+                };
+
                 handlers.add(handler);
             }
 

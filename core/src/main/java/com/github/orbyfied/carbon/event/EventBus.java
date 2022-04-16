@@ -195,7 +195,7 @@ public class EventBus {
     @SuppressWarnings("unchecked")
     public <E extends BusEvent> EventBus post(Class<E> fclass, E event) {
         // get pipeline for event
-        PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
+        final PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
 
         try {
             // post event
@@ -221,7 +221,8 @@ public class EventBus {
     public PipelineAccess<BusEvent> getPipelineFor(Class<? extends BusEvent> event) {
         // try to get from cache
         PipelineAccess<BusEvent> pipeline = eventPipelineCache.get(event);
-        if (pipeline != null) return pipeline;
+        if (pipeline != null)
+            return pipeline;
 
         // retrieve and cache
         try {
