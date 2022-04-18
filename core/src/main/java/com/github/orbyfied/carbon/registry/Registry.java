@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon.registry;
 
 import com.github.orbyfied.carbon.command.Functional;
 import com.github.orbyfied.carbon.util.ReflectionUtil;
+import com.github.orbyfied.carbon.util.ops.EntryOperation;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -252,6 +253,31 @@ public class Registry<T extends Identifiable>
             return (R) service.getByKey(key);
 
         return null;
+    }
+
+    public EntryOperation<Registry<T>, Identifier, T> entry(T val) {
+        return EntryOperation.<Registry<T>, Identifier, T>builder()
+                .key(val.getIdentifier()).value(val)
+                .returns(this)
+                .doWith((id, t) -> register(t))
+                .doWithout((id, t) -> unregister(t))
+                .doGet(this::getByIdentifier)
+                .doHas((id, t) -> has(t))
+                .build();
+
+    }
+
+    public boolean has(Identifier id) {
+        return mapped.containsKey(id);
+    }
+
+    public boolean has(T t) {
+        if (t == null)
+            return false;
+        Object o = mapped.get(t.getIdentifier());
+        if (o == null)
+            return false;
+        return t.equals(o);
     }
 
     @SuppressWarnings("unchecked")

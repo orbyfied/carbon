@@ -17,6 +17,10 @@ public interface Ingredient {
 
     boolean equals(Ingredient ingredient);
 
+    default TaggedIngredient tagged(Object tag) {
+        return TaggedIngredient.of(this, tag);
+    }
+
     ////////////////////////////////////////
 
     /**

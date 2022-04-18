@@ -18,8 +18,12 @@ import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
 import com.github.orbyfied.carbon.item.material.MaterialItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
+import com.github.orbyfied.carbon.util.ops.EntryOperation;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.github.orbyfied.carbon.crafting.Ingredient.EMPTY;
 
@@ -77,7 +81,7 @@ public class ExampleMod
         RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:ruby_from_dirt"))
                 .dimensions(new RecipeDimensions(2).sized(3, 3))
                 .ingredients(
-                        Ingredient.ofItem(Material.DIRT, 2), EMPTY, EMPTY,
+                        Ingredient.ofItem(Material.DIRT, 2).tagged("item 1"), EMPTY, EMPTY,
                         EMPTY, EMPTY, EMPTY,
                         EMPTY, EMPTY, EMPTY
                 )
