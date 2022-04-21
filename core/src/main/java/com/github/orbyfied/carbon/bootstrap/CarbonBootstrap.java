@@ -66,6 +66,9 @@ public abstract class CarbonBootstrap
         this.platformProxy = newPlatformProxy();
         this.main          = new Carbon(this, platformProxy);
         this.metrics       = new Metrics(this, bStatsPluginId);
+
+        this.initStage = new InitStage();
+        main.setInitializationStage(initStage);
     }
 
     /**
@@ -103,7 +106,7 @@ public abstract class CarbonBootstrap
     public void onEnable() {
 
         // start initialization
-        this.initStage = new InitStage().general(InitStageGeneral.ENABLE);
+        initStage.next(InitStageGeneral.ENABLE);
 
         // send fancy message
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
@@ -208,7 +211,11 @@ public abstract class CarbonBootstrap
             recipeRegistryService.getWorker(recipe.type()).register(recipe);
 
         CarbonReport
-                .reportFileAndStdout(Path.of("./CarbonCrash.txt"))
+                .reportFileAndStdout()
+                .setTime()
+                .setMessage("Bonjour")
+                .setDetails("Test lol")
+                .withError(new RuntimeException("Bonjour! ?Que Tal?"))
                 .write()
                 .crash();
 

@@ -9,12 +9,11 @@ import com.github.orbyfied.carbon.crafting.Recipe;
 import com.github.orbyfied.carbon.crafting.type.RecipeType;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.registry.Registry;
+import com.github.orbyfied.carbon.util.IOUtil;
 import com.github.orbyfied.carbon.util.Verbose;
 import org.bukkit.Bukkit;
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class CarbonReport {
 
     protected Date time;
     protected String message;
-    protected List<Throwable> errors;
+    protected List<Throwable> errors = new ArrayList<>();
     protected String details;
 
     public CarbonReport withOutput(Writer w) {
@@ -96,6 +95,22 @@ public class CarbonReport {
     }
 
     public StringBuilder createString(StringBuilder b) {
+        b.append("Carbon has experienced an exception and has generated a report.\n");
+        b.append("Carbon v").append(Carbon.VERSION).append("\n");
+        b.append("\n");
+        b.append("Message: ").append(message).append("\n");
+        b.append("DateTime: ").append(time).append("\n\n");
+        b.append(details).append("\n\n");
+        if (errors != null && errors.size() != 0) {
+            b.append("Errors:\n");
+            for (Throwable t : errors) {
+                StringWriter stw = new StringWriter();
+                t.printStackTrace(new PrintWriter(stw));
+                String stacktrace = stw.toString();
+                b.append(stacktrace).append("\n");
+            }
+        }
+
         return b;
     }
 
@@ -148,7 +163,14 @@ public class CarbonReport {
         return this;
     }
 
-    public static final Writer STDOUT_WRITER = new OutputStreamWriter(System.out);
+    public static final Writer STDOUT_WRITER = new PrintWriter(System.out);
+
+    public static CarbonReport reportFileAndStdout() {
+        Date now = new Date();
+        Path file = Path.of("./logs/carbon-report-" +
+                IOUtil.toIOFriendlyString(now) + ".log");
+        return reportFileAndStdout(file).setTime(now);
+    }
 
     public static CarbonReport reportFileAndStdout(Path file) {
         Writer fileWriter;
@@ -163,7 +185,13 @@ public class CarbonReport {
             e.printStackTrace();
             return new CarbonReport();
         }
-        return new CarbonReport()
+        return new CarbonReport() {
+            @Override
+            public StringBuilder createString(StringBuilder b) {
+                b.append("Full Crash Report: ").append(file.toAbsolutePath()).append("\n\n");
+                return super.createString(b);
+            }
+        }
                 .withOutput(fileWriter)
                 .withOutput(STDOUT_WRITER);
     }
@@ -174,7 +202,7 @@ public class CarbonReport {
         Carbon main = CarbonJavaAPI.get().getMain();
 
         // header
-        b.append("+ //  +   CARBON DUMP   +  //");
+        b.append("+ //   CARBON DUMP   //\n");
 
         // core
         b.append("| @ Carbon v").append(Carbon.VERSION).append(" by orbyfied <https://github.com/orbyfied/carbon>\n");
@@ -182,7 +210,7 @@ public class CarbonReport {
         b.append("| Init Stage: ").append(main.getInitializationStage()).append("\n");
 
         // services
-        b.append("-\n");
+        b.append("\n");
         ServiceManager serviceManager = main.getServiceManager();
         b.append("| Services Running: ").append(serviceManager.getAmount()).append("\n");
         for (Service s : serviceManager.getServices()) {
@@ -194,13 +222,13 @@ public class CarbonReport {
         }
 
         // content
-        b.append("-\n");
+        b.append("\n");
         b.append("| Mods Loaded: ").append(main.getModLoader().length()).append("\n");
         b.append("| Registries Loaded: ").append(main.getRegistries().size()).append("\n");
         b.append("| Registries:\n");
         for (Registry<?> reg : main.getRegistries()) {
             b.append("|- ")
-                    .append(reg.toString())
+                    .append("registry/").append(reg.getIdentifier())
                     .append(" + len: ")
                     .append(reg.size())
                     .append(", servc: ")

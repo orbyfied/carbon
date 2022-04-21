@@ -6,11 +6,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class IOUtil {
+
+    public static String toIOFriendlyString(Date date) {
+        return date.getMonth() + "-" + date.getDay() + "-" +
+                date.getYear() + "_" + date.getHours() + "-" +
+                date.getMinutes() + "-" + date.getSeconds();
+    }
 
     public static String readFileToUtf8(Path path) {
         if (!Files.exists(path))
