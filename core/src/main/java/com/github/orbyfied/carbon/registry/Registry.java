@@ -343,6 +343,18 @@ public class Registry<T extends Identifiable>
         return removeComponent(componentsMapped.get(klass));
     }
 
+    public Map<Class<? extends RegistryComponent<Registry<T>, T, ?, ?>>, RegistryComponent<Registry<T>, T, ?, ?>> getComponentsMapped() {
+        return Collections.unmodifiableMap(componentsMapped);
+    }
+
+    public List<RegistryComponent<Registry<T>, T, ?, ?>> getComponentsLinear() {
+        return Collections.unmodifiableList(componentsLinear);
+    }
+
+    public int getComponentsSize() {
+        return componentsLinear.size();
+    }
+
     @SuppressWarnings("unchecked")
     public <K, V, M extends RegistryService<Registry<T>, T>> M getService(int index) {
         return (M) servicesLinear.get(index);
@@ -419,6 +431,18 @@ public class Registry<T extends Identifiable>
 
     public <S> ArrayList<S> getServicesOf(Class<S> type) {
         return getServicesOf(type, new ArrayList<>());
+    }
+
+    public List<RegistryService<Registry<T>, T>> getServicesLinear() {
+        return Collections.unmodifiableList(servicesLinear);
+    }
+
+    public Map<Class<? extends RegistryService<Registry<T>, T>>, RegistryService<Registry<T>, T>> getServicesMapped() {
+        return Collections.unmodifiableMap(servicesMapped);
+    }
+
+    public int getServicesSize() {
+        return servicesLinear.size();
     }
 
     ///////////////////////////////

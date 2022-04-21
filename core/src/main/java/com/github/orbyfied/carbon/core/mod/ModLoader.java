@@ -47,6 +47,10 @@ public class ModLoader {
         return modsByClass.get(klass);
     }
 
+    public int length() {
+        return mods.size();
+    }
+
     public boolean load(Plugin plugin) {
         try {
             LoadedMod mod = new LoadedMod(main, plugin);

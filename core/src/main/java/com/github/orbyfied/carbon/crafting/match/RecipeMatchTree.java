@@ -78,7 +78,7 @@ public class RecipeMatchTree implements IngredientNodeLike {
             // store tag
             Node n = (Node) curr;
             if (n.ingredient instanceof TaggedIngredient ti)
-                matrix.put(ti.tag(matrix), slot);
+                ti.tag(matrix, slot);
         }
         if (!(curr instanceof Node))
             return null;

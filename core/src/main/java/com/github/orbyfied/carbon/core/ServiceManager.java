@@ -31,6 +31,10 @@ public class ServiceManager {
         return Collections.unmodifiableMap(servicesMapped);
     }
 
+    public int getAmount() {
+        return servicesLinear.size();
+    }
+
     public Service getService(Class<? extends Service> id) {
         return servicesMapped.get(id);
     }

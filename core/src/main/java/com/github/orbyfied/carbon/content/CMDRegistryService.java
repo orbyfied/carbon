@@ -23,15 +23,21 @@ public class CMDRegistryService<T extends RegistrableElement>
     }
 
     private HashMap<Material, ArrayList<ModelHolder<T>>> cmds = new HashMap<>(); // raw custom model data counter
+    private int takenTotal = 0;
 
     public HashMap<Material, ArrayList<ModelHolder<T>>> getCMDRegistry() {
         return cmds;
+    }
+
+    public int getTotalTaken() {
+        return takenTotal;
     }
 
     public int next(Material base, ModelHolder<T> holder) {
         ArrayList<ModelHolder<T>> list = cmds.computeIfAbsent(base, __ -> new ArrayList<>());
         int i = list.size() + 1;
         list.add(holder);
+        takenTotal++;
         return i;
     }
 
@@ -115,6 +121,7 @@ public class CMDRegistryService<T extends RegistrableElement>
         public int next(ModelHolder<T> holder) {
             int i = list.size() + 1;
             list.add(holder);
+            takenTotal++;
             return i;
         }
 

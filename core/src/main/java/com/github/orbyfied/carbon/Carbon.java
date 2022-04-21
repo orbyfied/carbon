@@ -136,6 +136,11 @@ public class Carbon
      */
     protected final EventBus coreEventBus;
 
+    /**
+     * The stage of initialization Carbon is in.
+     */
+    protected Object initStage;
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -154,6 +159,15 @@ public class Carbon
 
     public ServiceManager getServiceManager() {
         return serviceManager;
+    }
+
+    public Carbon setInitializationStage(Object o) {
+        this.initStage = o;
+        return this;
+    }
+
+    public Object getInitializationStage() {
+        return initStage;
     }
 
     public ProcessManager getProcessManager() {

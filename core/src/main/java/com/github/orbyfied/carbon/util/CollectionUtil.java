@@ -37,4 +37,21 @@ public class CollectionUtil {
         };
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T[] resize(T[] in, int size) {
+        T[] r = (T[]) new Object[size];
+        System.arraycopy(in, 0, r, 0, in.length);
+        return r;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] remove(T[] in, int index) {
+        if (index < 0 || index >= in.length)
+            return in;
+        T[] r = (T[]) new Object[in.length - 1];
+        System.arraycopy(in, 0, r, 0, index - 1);
+        System.arraycopy(in, index + 1, r, index, in.length - index + 1);
+        return r;
+    }
+
 }
