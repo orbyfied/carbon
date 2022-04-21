@@ -7,11 +7,14 @@ import com.github.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.util.CollectionUtil;
+import com.github.orbyfied.carbon.util.TriPredicate;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * A tree structure used for quick recipe matching.
@@ -54,6 +57,13 @@ public class RecipeMatchTree implements IngredientNodeLike {
     }
 
     @Override
+    public Node createChild(Ingredient ingredient) {
+        Node node = new Node(this, ingredient);
+        heads.add(node);
+        return node;
+    }
+
+    @Override
     public Node getIngredientChild(Ingredient ingredient) {
         for (Node node : heads)
             if (node.ingredient.equals(ingredient))
@@ -62,6 +72,11 @@ public class RecipeMatchTree implements IngredientNodeLike {
     }
 
     public Node matchMatrix(CraftMatrix matrix) {
+        return matchMatrix(matrix, (i1, i2, i3) -> false);
+    }
+
+    public Node matchMatrix(CraftMatrix matrix,
+                            TriPredicate<Slot, CompiledStack, IngredientNodeLike> skip) {
         // set up iterations
         IngredientNodeLike curr = this;
         Iterator<Slot> iterator = matrix.input().iterator();
@@ -69,6 +84,10 @@ public class RecipeMatchTree implements IngredientNodeLike {
             // get slot and stack
             Slot slot = iterator.next();
             CompiledStack stack = slot.getItem();
+
+            // test
+            if (skip.test(slot, stack, curr))
+                continue;
 
             // try to find child
             curr = curr.findChild(stack, matrix);
@@ -194,11 +213,26 @@ public class RecipeMatchTree implements IngredientNodeLike {
         }
 
         @Override
+        public Node createChild(Ingredient ingredient) {
+            Node node = new Node(this, ingredient);
+            children.add(node);
+            return node;
+        }
+
+        @Override
         public Node getIngredientChild(Ingredient ingredient) {
             for (Node node : children)
                 if (node.ingredient.equals(ingredient))
                     return node;
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
+                    .add("ingredient: " + ingredient)
+                    .add("recipe: " + recipe)
+                    .toString();
         }
 
         /* Getters. */
@@ -218,6 +252,13 @@ public class RecipeMatchTree implements IngredientNodeLike {
 
         public Recipe getRecipe() {
             return recipe;
+        }
+
+        /* Setters. */
+
+        public Node setRecipe(Recipe recipe) {
+            this.recipe = recipe;
+            return this;
         }
 
     }

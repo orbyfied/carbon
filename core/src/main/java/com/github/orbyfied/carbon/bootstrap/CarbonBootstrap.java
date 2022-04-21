@@ -210,15 +210,6 @@ public abstract class CarbonBootstrap
         for (Recipe recipe : recipeRegistry)
             recipeRegistryService.getWorker(recipe.type()).register(recipe);
 
-        CarbonReport
-                .reportFileAndStdout()
-                .setTime()
-                .setMessage("Bonjour")
-                .setDetails("Test lol")
-                .withError(new RuntimeException("Bonjour! ?Que Tal?"))
-                .write()
-                .crash();
-
         // build and host resource pack
         initStage.next(InitStageGeneral.MAKE_RESOURCE_PACK);
         main.getResourcePackManager()

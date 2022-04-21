@@ -7,6 +7,8 @@ import net.minecraft.world.item.Items;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
+import java.util.StringJoiner;
+
 public interface Ingredient {
 
     boolean matches(CompiledStack stack, CraftMatrix matrix);
@@ -59,28 +61,50 @@ public interface Ingredient {
 
     static Ingredient ofItem(Material material, int amt) {
         Item item = CraftMagicNumbers.getItem(material);
-        return new Ingredient() {
-            @Override
-            public boolean matches(CompiledStack stack, CraftMatrix matrix) {
-                return stack.getItemType() == item;
-            }
+        return new UnspecificItemIngredient(item, amt);
+    }
 
-            @Override
-            public boolean equals(Ingredient ingredient) {
-                return false;
-            }
+    /* ---- Implementations ---- */
 
-            @Override
-            public int count(CompiledStack stack, CraftMatrix matrix) {
-                return stack.getAmount() / amt;
-            }
+    class UnspecificItemIngredient implements Ingredient {
 
-            @Override
-            public void used(CompiledStack stack, int amount, CraftMatrix matrix) {
-                System.out.println("hi! stack: " + stack + ", amount: " + amount + ", amtreq: " + amt);
-                stack.getStack().setCount(stack.getAmount() - amount * amt);
-            }
-        };
+        private final Item item;
+        private final int  amt;
+
+        public UnspecificItemIngredient(Item item, int amt) {
+            this.item = item;
+            this.amt = amt;
+        }
+
+        @Override
+        public boolean matches(CompiledStack stack, CraftMatrix matrix) {
+            return stack.getItemType() == item;
+        }
+
+        @Override
+        public boolean equals(Ingredient ingredient) {
+            if (ingredient == this)
+                return true;
+            if (ingredient instanceof UnspecificItemIngredient uii)
+                return uii.item == item && uii.amt == amt;
+            return false;
+        }
+
+        @Override
+        public int count(CompiledStack stack, CraftMatrix matrix) {
+            return stack.getAmount() / amt;
+        }
+
+        @Override
+        public void used(CompiledStack stack, int amount, CraftMatrix matrix) {
+            stack.getStack().setCount(stack.getAmount() - amount * amt);
+        }
+
+        @Override
+        public String toString() {
+            return "Ingredient(" + item + " min " + amt + "x)";
+        }
+
     }
 
 }

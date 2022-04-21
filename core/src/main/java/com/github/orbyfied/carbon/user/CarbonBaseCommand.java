@@ -1,13 +1,17 @@
 package com.github.orbyfied.carbon.user;
 
+import com.github.orbyfied.carbon.bootstrap.CarbonReport;
 import com.github.orbyfied.carbon.command.Context;
 import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.annotation.BaseCommand;
+import com.github.orbyfied.carbon.command.annotation.CommandParameter;
 import com.github.orbyfied.carbon.command.annotation.Subcommand;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.nio.file.Path;
 
 @BaseCommand(name = "carbon")
 public class CarbonBaseCommand {
@@ -47,11 +51,23 @@ public class CarbonBaseCommand {
 
     }
 
-    @Subcommand("debug listservices")
-    public void debugListServices(Context ctx, Node node) {
+    @Subcommand("debug dumpReport <system:string path>")
+    public void debugListServices(Context ctx, Node node,
 
-        // TODO
-        ctx.getSender().sendMessage("TODO");
+                                  @CommandParameter("path") String p) {
+
+        System.out.println(p);
+        Path path = Path.of(p);
+
+        CarbonReport.reportFile(path)
+                .setTime()
+                .setMessage("Requested dump report by " + ctx.getSender() + " using '/carbon debug dumpReport'")
+                .write()
+                .close();
+
+        CommandSender sender = ctx.getSender();
+        sender.sendMessage(ChatColor.WHITE + "Generated dump report at: " +
+                ChatColor.AQUA + path.toAbsolutePath());
 
     }
 

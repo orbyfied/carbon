@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -18,6 +19,21 @@ public interface IngredientNodeLike {
     IngredientNodeLike addChild(RecipeMatchTree.Node node);
 
     IngredientNodeLike removeChild(RecipeMatchTree.Node node);
+
+    RecipeMatchTree.Node createChild(Ingredient ingredient);
+
+    default RecipeMatchTree.Node getOrCreateChild(Ingredient in) {
+        RecipeMatchTree.Node node;
+        if ((node = getIngredientChild(in)) == null)
+            node = createChild(in);
+        return node;
+    }
+
+    default void debugPrint(PrintStream out, int depth) {
+        out.println("| " + " ".repeat(depth) + "<" + depth + ">" + this);
+        for (RecipeMatchTree.Node n : getChildren())
+            n.debugPrint(out, depth + 1);
+    }
 
     RecipeMatchTree.Node getIngredientChild(Ingredient ingredient);
 

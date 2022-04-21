@@ -28,7 +28,7 @@ public class CraftMatrix implements Cloneable {
      * The slots containing the values for
      * the ingredients by their ingredient tag.
      */
-    protected HashMap<Object, Slot> taggedSlots;
+    protected HashMap<Object, Slot> taggedSlots = new HashMap<>();
 
     public CraftMatrix input(SlotContainer slots) {
         this.input = slots;

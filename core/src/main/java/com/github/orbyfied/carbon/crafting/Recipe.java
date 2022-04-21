@@ -16,8 +16,9 @@ public class Recipe<S extends Recipe> implements Identifiable {
 
     protected final Identifier id;
 
-    public Recipe(Identifier id) {
+    public Recipe(RecipeType type, Identifier id) {
         this.id = id;
+        this.type = type;
     }
 
     @Override

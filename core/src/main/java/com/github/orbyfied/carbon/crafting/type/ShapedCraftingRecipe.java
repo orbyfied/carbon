@@ -8,9 +8,8 @@ public class ShapedCraftingRecipe extends Recipe<ShapedCraftingRecipe> {
 
     protected RecipeDimensions dimensions;
 
-    public ShapedCraftingRecipe(Identifier id) {
-        super(id);
-        type = RecipeTypes.CRAFTING_SHAPED;
+    public ShapedCraftingRecipe(RecipeType type, Identifier id) {
+        super(type, id);
     }
 
     public RecipeDimensions dimensions() {

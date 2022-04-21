@@ -39,6 +39,8 @@ public class DelegatingNamespacedTypeResolver implements TypeResolver {
 
     @Override
     public ParameterType<?> resolve(Identifier identifier) {
+        if (identifier.getNamespace() == null || identifier.getNamespace().isEmpty())
+            identifier = new Identifier("system", identifier.getPath());
         TypeResolver namespacedResolver = namespaces.get(identifier.getNamespace());
         if (namespacedResolver != null)
             return namespacedResolver.resolve(identifier);

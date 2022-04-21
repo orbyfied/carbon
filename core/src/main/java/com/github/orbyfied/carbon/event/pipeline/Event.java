@@ -67,6 +67,37 @@ public class Event {
     }
 
     /**
+     * Gets the value corresponding
+     * with the specified key. If it
+     * is null the "def" parameter
+     * is returned.
+     * @param key The key.
+     * @param def The default/else value.
+     * @param <T> The return type.
+     * @return The value or else the default.
+     */
+    public <T> T carried(String key, T def) {
+        T val = carried(key);
+        if (val == null)
+            return def;
+        return val;
+    }
+
+    /**
+     * Gets the value corresponding
+     * with the specified key. If it
+     * is null the "def" parameter
+     * is returned.
+     * @param key The key.
+     * @param def The default/else value.
+     * @param <T> The return type.
+     * @return The value or else the default.
+     */
+    public <T> T carried(String key, Class<T> tClass, T def) {
+        return (T) carried(key, def);
+    }
+
+    /**
      * Checks if it carries the key.
      * @param key The key.
      * @return True/false.

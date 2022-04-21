@@ -95,12 +95,17 @@ public class CarbonReport {
     }
 
     public StringBuilder createString(StringBuilder b) {
-        b.append("Carbon has experienced an exception and has generated a report.\n");
-        b.append("Carbon v").append(Carbon.VERSION).append("\n");
+        b.append("===== Report Overview =====\n");
+        b.append("Installation: Carbon v")
+                .append(Carbon.VERSION)
+                .append(" @ ")
+                .append(Bukkit.getVersion())
+                .append("\n");
         b.append("\n");
         b.append("Message: ").append(message).append("\n");
         b.append("DateTime: ").append(time).append("\n\n");
-        b.append(details).append("\n\n");
+        if (details != null)
+            b.append(details).append("\n\n");
         if (errors != null && errors.size() != 0) {
             b.append("Errors:\n");
             for (Throwable t : errors) {
@@ -173,10 +178,22 @@ public class CarbonReport {
     }
 
     public static CarbonReport reportFileAndStdout(Path file) {
+        return reportFile(file).withOutput(STDOUT_WRITER);
+    }
+
+    public static CarbonReport reportFile() {
+        Date now = new Date();
+        Path file = Path.of("./logs/carbon-report-" +
+                IOUtil.toIOFriendlyString(now) + ".log");
+        return reportFile(file).setTime(now);
+    }
+
+    public static CarbonReport reportFile(Path file) {
         Writer fileWriter;
         try {
-            if (!Files.exists(file.getParent()))
-                Files.createDirectories(file.getParent());
+            if (file.getParent() != null)
+                if (!Files.exists(file.getParent()))
+                    Files.createDirectories(file.getParent());
             if (!Files.exists(file))
                 Files.createFile(file);
             OutputStream os = Files.newOutputStream(file);
@@ -192,8 +209,7 @@ public class CarbonReport {
                 return super.createString(b);
             }
         }
-                .withOutput(fileWriter)
-                .withOutput(STDOUT_WRITER);
+                .withOutput(fileWriter);
     }
 
     //////////////////////////////////////////

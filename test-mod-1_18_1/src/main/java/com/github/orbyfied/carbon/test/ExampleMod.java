@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.api.mod.CarbonMod;
 import com.github.orbyfied.carbon.api.mod.CarbonModInitializer;
 import com.github.orbyfied.carbon.crafting.Ingredient;
 import com.github.orbyfied.carbon.crafting.Recipe;
+import com.github.orbyfied.carbon.crafting.Result;
 import com.github.orbyfied.carbon.crafting.match.RecipeDimensions;
 import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
 import com.github.orbyfied.carbon.event.EventHandler;
@@ -88,6 +89,14 @@ public class ExampleMod
                 .result((out, recipe, amount) -> {
                     out.addItem(new CompiledStack().fill(ruby, amount));
                 })
+                .register(recipeRegistry);
+
+        RecipeTypes.CRAFTING_UNSHAPED.newRecipe(Identifier.of("example:ruby_sussy_baka"))
+                .ingredients(
+                        Ingredient.ofItem(Material.BLAZE_ROD, 1),
+                        Ingredient.ofItem(Material.ENDER_PEARL, 1)
+                )
+                .result(Result.ofItem(ruby, 2))
                 .register(recipeRegistry);
 
     }
