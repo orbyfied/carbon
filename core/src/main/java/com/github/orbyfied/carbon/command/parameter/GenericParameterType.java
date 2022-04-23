@@ -1,66 +1,87 @@
 package com.github.orbyfied.carbon.command.parameter;
 
+import com.github.orbyfied.carbon.command.Context;
+import com.github.orbyfied.carbon.command.SuggestionAccumulator;
+import com.github.orbyfied.carbon.util.StringReader;
+
 import java.util.*;
 
+/**
+ * @param <B> The base type (without the generics, for example {@link List})
+ */
 public abstract class GenericParameterType<B> implements ParameterType<B> {
 
-    public GenericParameterType(List<TypeParameter> params) {
-        for (TypeParameter param : params) {
-            parameters.add(param);
-            parametersByName.put(param.getName(), param);
-        }
+    public GenericParameterType(List<String> params) {
+        this.parameters = new ArrayList<>(params);
     }
 
-    public GenericParameterType(TypeParameter... params) {
+    public GenericParameterType(String... params) {
         this(Arrays.asList(params));
     }
 
-    HashMap<String, TypeParameter> parametersByName = new HashMap<>();
-
-    ArrayList<TypeParameter> parameters = new ArrayList<>();
+    /**
+     * The type parameters available.
+     */
+    final ArrayList<String> parameters;
 
     @SuppressWarnings("unchecked")
     public Class<B> getBaseType() {
         return (Class<B>) getType();
     }
 
-    public TypeIdentifier getGenericIdentifier() {
+    public TypeIdentifier getGenericIdentifier(LinkedHashMap<String, ParameterType<?>> typeParams) {
         TypeIdentifier id = getBaseIdentifier().clone();
-        for (TypeParameter param : parameters)
-            id.getTypeParams().add(param.getType().getBaseIdentifier());
+        for (ParameterType<?> pt : typeParams.values())
+            id.getTypeParams().add(pt.getIdentifier());
         return id;
     }
 
-    @Override
-    public TypeIdentifier getIdentifier() {
-        return getGenericIdentifier();
+    public List<String> getTypeParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
-    public GenericParameterType<B> setTypeParameter(String s, ParameterType<?> type) {
-        parametersByName.get(s).setType(type);
-        return this;
-    }
-
-    public GenericParameterType<B> setTypeParameter(int i, ParameterType<?> type) {
-        parameters.get(i).setType(type);
-        return this;
-    }
-
-    public TypeParameter getTypeParameter(String s) {
-        return parametersByName.get(s);
-    }
-
-    public TypeParameter getTypeParameter(int i) {
+    public String getTypeParameter(int i) {
         return parameters.get(i);
     }
 
     @Override
-    public String toString() {
-        return new StringJoiner(", ", GenericParameterType.class.getSimpleName() + "[", "]")
-                .add("parametersByName=" + parametersByName)
-                .add("parameters=" + parameters)
-                .add("identifier=" + getGenericIdentifier())
-                .toString();
+    public TypeIdentifier getIdentifier() {
+        return getBaseIdentifier();
     }
+
+    @Override
+    public boolean accepts(Context context, StringReader reader) {
+        throw new IllegalArgumentException("Raw use of parameterized type " + getBaseIdentifier());
+    }
+
+    @Override
+    public B parse(Context context, StringReader reader) {
+        throw new IllegalArgumentException("Raw use of parameterized type " + getBaseIdentifier());
+    }
+
+    @Override
+    public void write(Context context, StringBuilder builder, B v) {
+        throw new IllegalArgumentException("Raw use of parameterized type " + getBaseIdentifier());
+    }
+
+    @Override
+    public void suggest(Context context, SuggestionAccumulator suggestions) {
+        throw new IllegalArgumentException("Raw use of parameterized type " + getBaseIdentifier());
+    }
+
+    public GenericTypeInstance<B> instance(ParameterType... types) {
+        return new GenericTypeInstance<>(this, types);
+    }
+
+    public GenericTypeInstance<B> instance(List<ParameterType> types) {
+        return new GenericTypeInstance<>(this, types);
+    }
+
+    /* actual parameter methods */
+
+    public abstract boolean accepts(Context context, StringReader reader, LinkedHashMap<String, ParameterType> types);
+    public abstract B parse(Context context, StringReader reader, LinkedHashMap<String, ParameterType> types);
+    public abstract void write(Context context, StringBuilder builder, B v, LinkedHashMap<String, ParameterType> types);
+    public abstract void suggest(Context context, SuggestionAccumulator suggestions, LinkedHashMap<String, ParameterType> types);
 
 }

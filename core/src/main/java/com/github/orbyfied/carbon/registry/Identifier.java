@@ -1,7 +1,9 @@
 package com.github.orbyfied.carbon.registry;
 
-import java.util.Objects;
-import java.util.StringJoiner;
+import com.github.orbyfied.carbon.util.ReflectionUtil;
+import com.github.orbyfied.carbon.util.StringReader;
+
+import java.util.*;
 
 /**
  * Namespaced unique identifier.
@@ -20,17 +22,26 @@ public class Identifier implements Cloneable {
     public static Identifier parse(String in, Identifier out) {
         Objects.requireNonNull(in, "input string cannot be null");
         Objects.requireNonNull(out, "output identifier cannot be null");
-        String[] components = in.split(":");
-        if (components.length < 1)
-            throw new MalformedIdentifierException(in, Identifier.class);
-        if (components.length < 2) {
-            String[] tmp = new String[2];
-            tmp[1] = components[0];
-            tmp[0] = null;
-            components = tmp;
+
+        StringReader reader     = new StringReader(in, 0);
+        List<String> components = new ArrayList<>();
+        char c;
+        while ((c = reader.current()) != StringReader.DONE
+                && c != '<' && c != '>') {
+            components.add(reader.collect(c1 -> c1 != ':' && c1 != '<' && c1 != '>', 1));
         }
-        out.namespace = components[0];
-        out.path      = components[1];
+
+        if (components.size() < 1)
+            throw new MalformedIdentifierException(in, Identifier.class);
+        if (components.size() < 2) {
+            String[] tmp = new String[2];
+            tmp[1] = components.get(0);
+            tmp[0] = null;
+            components = Arrays.asList(tmp);
+        }
+
+        out.namespace = components.get(0);
+        out.path      = components.get(1);
         return out;
     }
 

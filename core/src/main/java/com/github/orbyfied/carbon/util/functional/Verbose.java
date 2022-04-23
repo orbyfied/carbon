@@ -1,10 +1,9 @@
-package com.github.orbyfied.carbon.util;
+package com.github.orbyfied.carbon.util.functional;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;

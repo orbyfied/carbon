@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.util;
 
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,22 +72,38 @@ public class ReflectionUtil {
         }
     }
 
-    public static void printParentTree(Class<?> klass) {
+    public static void printParentTree(PrintStream out, Class<?> klass) {
         ReflectionUtil.walkParents(klass, null, (d, c) -> {
-            System.out.println("@ depth " + d + ": " + "  ".repeat(d) + "|- " + c);
+            out.println("@ depth " + d + ": " + "  ".repeat(d) + "|- " + c);
         });
     }
 
-    public static void printCallTree() {
+    public static void printParentTree(Class<?> klass) {
+        printParentTree(System.out, klass);
+    }
+
+    public static void printCallTree(PrintStream out, int off) {
         StackTraceElement[] elements;
         try {
             throw new Exception();
         } catch (Exception e) {
             elements = e.getStackTrace();
         }
-        System.out.println("+ CALLED: " + elements[1]);
-        for (int i = 2; i < elements.length; i++)
-            System.out.println("| " + elements[i]);
+        out.println("+ CALLED: " + elements[1 + off]);
+        for (int i = 2 + off; i < elements.length; i++)
+            out.println("| " + elements[i]);
+    }
+
+    public static void printCallTree() {
+        printCallTree(System.out, 1);
+    }
+
+    public static void printCallTree(int off) {
+        printCallTree(System.out, off + 1);
+    }
+
+    public static void printCallTree(PrintStream out) {
+        printCallTree(out, 1);
     }
 
     public static Class<?> getClassSafe(String name) {

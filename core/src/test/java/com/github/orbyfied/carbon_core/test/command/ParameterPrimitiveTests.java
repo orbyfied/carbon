@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon_core.test.command;
 
 import com.github.orbyfied.carbon.command.parameter.ParameterType;
 import com.github.orbyfied.carbon.command.impl.SystemParameterType;
+import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
 import com.github.orbyfied.carbon.util.StringReader;
 import org.junit.jupiter.api.Test;
 
@@ -22,10 +23,8 @@ public class ParameterPrimitiveTests {
                 SystemParameterType.STRING,
                 SystemParameterType.INT,
                 SystemParameterType.VEC_3_INT,
-                SystemParameterType.listOf(SystemParameterType.VEC_3_INT)
+                SystemParameterType.typeResolver.compile(TypeIdentifier.of("system:list<system:vec3i>"))
         };
-
-        System.out.println(SystemParameterType.INT);
 
         /* code */
 

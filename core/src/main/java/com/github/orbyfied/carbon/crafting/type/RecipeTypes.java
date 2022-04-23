@@ -116,6 +116,7 @@ public class RecipeTypes {
             // create craft matrix
             Slot resultSlot = Slot.getAndSet(inv::setResult, inv::getResult);
             CraftMatrix cm = new CraftMatrix()
+                    .dimensions(matrix.length, matrix.length == 9 ? 3 : 2)
                     .input(SlotContainer.ofArray(matrix))
                     .output(SlotContainer.of(resultSlot));
 
@@ -168,8 +169,16 @@ public class RecipeTypes {
             PrepareItemCraftEvent event = we.getEvent();
 
             // prepare
+            long t1 = System.nanoTime();
+
             PrepareCraftWrapper w = new PrepareCraftWrapper(event.getInventory());
             prepareCraft(w, true);
+
+            long t2 = System.nanoTime();
+            long t   = t2 - t1;
+            long tms = t / 1_000_000;
+
+            System.out.println("[+d] Time Elapsed: " + t + "ns (" + tms + "ms)");
 
             if (w.recipe == null)
                 return;
@@ -267,7 +276,7 @@ public class RecipeTypes {
 
         @Override
         public Recipe resolve(CraftMatrix matrix) {
-            matrix.normalize();
+            matrix = matrix.normalize();
             RecipeMatchTree.Node n = tree.matchMatrix(matrix);
             if (n == null)
                 return null;
@@ -367,7 +376,7 @@ public class RecipeTypes {
 
         @Override
         public Recipe resolve(CraftMatrix matrix) {
-            matrix.normalize();
+//            matrix.normalize();
             RecipeMatchTree.Node n = tree.matchMatrix(
                     matrix,
                     (__, item, ___) -> ItemUtil.isEmpty(item)

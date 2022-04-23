@@ -49,20 +49,4 @@ public class DelegatingNamespacedTypeResolver implements TypeResolver {
         return null;
     }
 
-    @Override
-    public ParameterType<?> compile(TypeIdentifier identifier) {
-        ParameterType<?> base = resolve(identifier);
-        if (!(base instanceof GenericParameterType<?> g))
-            return base;
-
-        ArrayList<TypeIdentifier> params = identifier.getTypeParams();
-        int l = params.size();
-        for (int i = 0; i < l; i++) {
-            TypeIdentifier id = params.get(i);
-            g.setTypeParameter(i, compile(id));
-        }
-
-        return base;
-    }
-
 }

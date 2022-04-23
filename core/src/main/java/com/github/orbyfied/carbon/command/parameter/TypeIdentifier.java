@@ -42,13 +42,6 @@ public class TypeIdentifier extends Identifier implements Cloneable {
         return typeParams;
     }
 
-    public GenericParameterType<?> transfer(GenericParameterType<?> type) {
-        int l = typeParams.size();
-        for (int i = 0; i < l; i++)
-            type.setTypeParameter(i, (ParameterType<?>) typeParams.get(i));
-        return type;
-    }
-
     @Override
     public TypeIdentifier clone() {
         try {

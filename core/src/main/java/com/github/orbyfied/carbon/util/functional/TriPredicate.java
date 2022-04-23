@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon.util;
+package com.github.orbyfied.carbon.util.functional;
 
 @FunctionalInterface
 public interface TriPredicate<A, B, C> {

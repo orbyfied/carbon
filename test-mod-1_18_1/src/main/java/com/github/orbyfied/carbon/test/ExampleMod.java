@@ -12,19 +12,14 @@ import com.github.orbyfied.carbon.event.EventHandler;
 import com.github.orbyfied.carbon.event.EventListener;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
-import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.item.behaviour.EventItemBehaviourComponent;
 import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
 import com.github.orbyfied.carbon.item.material.MaterialItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.registry.Registry;
-import com.github.orbyfied.carbon.util.ops.EntryOperation;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.orbyfied.carbon.crafting.Ingredient.EMPTY;
 
@@ -82,13 +77,9 @@ public class ExampleMod
         RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:ruby_from_dirt"))
                 .dimensions(new RecipeDimensions(2).sized(3, 3))
                 .ingredients(
-                        Ingredient.ofItem(Material.DIRT, 2).tagged("item 1"), EMPTY, EMPTY,
-                        EMPTY, EMPTY, EMPTY,
-                        EMPTY, EMPTY, EMPTY
+                        Ingredient.ofItem(Material.DIRT, 2).tagged("item 1")
                 )
-                .result((out, recipe, amount) -> {
-                    out.addItem(new CompiledStack().fill(ruby, amount));
-                })
+                .result(Result.ofItem(ruby, 1))
                 .register(recipeRegistry);
 
         RecipeTypes.CRAFTING_UNSHAPED.newRecipe(Identifier.of("example:ruby_sussy_baka"))
@@ -97,6 +88,15 @@ public class ExampleMod
                         Ingredient.ofItem(Material.ENDER_PEARL, 1)
                 )
                 .result(Result.ofItem(ruby, 2))
+                .register(recipeRegistry);
+
+        RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:amogus"))
+                .ingredients(
+                        Ingredient.ofItem(Material.REDSTONE, 1), EMPTY,
+                        EMPTY, Ingredient.ofItem(Material.DIAMOND, 1)
+                )
+                .result(Result.ofItem(ruby, 69))
+                .dimensions(new RecipeDimensions(2).sized(2, 2))
                 .register(recipeRegistry);
 
     }

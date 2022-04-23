@@ -39,6 +39,8 @@ public class SlotContainer implements Iterable<Slot> {
         int l = slots.size();
         for (int i = 0; i < l; i++) {
             Slot slot = slots.get(i);
+            if (slot == null)
+                continue;
             if (slot.accepts(stack)) {
                 left = slot.add(stack);
                 if (ItemUtil.isEmpty(left))

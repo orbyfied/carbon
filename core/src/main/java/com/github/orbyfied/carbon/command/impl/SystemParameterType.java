@@ -5,13 +5,14 @@ import com.github.orbyfied.carbon.command.SuggestionAccumulator;
 import com.github.orbyfied.carbon.command.parameter.*;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
-import com.github.orbyfied.carbon.util.TriConsumer;
+import com.github.orbyfied.carbon.util.functional.QuadConsumer;
+import com.github.orbyfied.carbon.util.functional.TriConsumer;
+import com.github.orbyfied.carbon.util.functional.TriFunction;
+import com.github.orbyfied.carbon.util.functional.TriPredicate;
 import com.github.orbyfied.carbon.util.math.Vec3i;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -36,11 +37,6 @@ public class SystemParameterType {
         @Override
         public ParameterType<?> resolve(Identifier identifier) {
             return types.get(identifier.getPath());
-        }
-
-        @Override
-        public ParameterType<?> compile(TypeIdentifier identifier) {
-            throw new UnsupportedOperationException();
         }
 
     }
@@ -100,6 +96,56 @@ public class SystemParameterType {
             public String toString() {
                 return bid.toString();
             }
+        };
+
+        // register type
+        typeResolver.types.put(bid.getPath(), type);
+
+        // return
+        return type;
+    }
+    /**
+     * Function to quickly create generic
+     * parameter types with lambdas.
+     * @see ParameterType
+     */
+    static <T> GenericParameterType<T> ofGeneric(final Class<T> klass,
+                                                 final String baseId,
+                                                 final String paramsStr,
+                                                 final TriPredicate<Context, StringReader, LinkedHashMap<String, ParameterType>> acceptor,
+                                                 final TriFunction<Context, StringReader, LinkedHashMap<String, ParameterType>, T> parser,
+                                                 final QuadConsumer<Context, StringBuilder, T, LinkedHashMap<String, ParameterType>> writer) {
+        // parse identifier
+        final TypeIdentifier bid = TypeIdentifier.of(baseId);
+
+        // parse type parameters
+        final String[] params = paramsStr.split(" ");
+
+        // create type
+        GenericParameterType<T> type = new GenericParameterType<>(params) {
+            @Override
+            public boolean accepts(Context context, StringReader reader, LinkedHashMap<String, ParameterType> types) {
+                return acceptor.test(context, reader, types);
+            }
+
+            @Override
+            public T parse(Context context, StringReader reader, LinkedHashMap<String, ParameterType> types) {
+                return parser.apply(context, reader, types);
+            }
+
+            @Override
+            public void write(Context context, StringBuilder builder, T v, LinkedHashMap<String, ParameterType> types) {
+                writer.accept(context, builder, v, types);
+            }
+
+            @Override
+            public void suggest(Context context, SuggestionAccumulator suggestions, LinkedHashMap<String, ParameterType> types) { }
+
+            @Override
+            public TypeIdentifier getBaseIdentifier() { return bid; }
+
+            @Override
+            public Class<?> getType() { return klass; }
         };
 
         // register type
@@ -278,6 +324,26 @@ public class SystemParameterType {
             (context, builder, s) -> builder.append("'").append(s).append("'")
     );
 
+    /**
+     * {@link Path}
+     * Parses a path from a string.
+     * Utilizes {@link SystemParameterType#STRING}
+     * for reading actual data and then parses it
+     * using {@link Path#of(String, String...)}
+     */
+    public static final ParameterType<Path> FILE_PATH = of(Path.class, "system:filepath",
+            (context, reader) -> true,
+            ((context, reader) -> Path.of(STRING.parse(context, reader))),
+            (context, builder, v) -> builder.append("\"").append(v.toString()).append("\n")
+    );
+
+    /**
+     * {@link Vec3i}
+     * Parses a vector 3 of integers.
+     * Allowed notations are:
+     * - {@code 0 1 2} and,
+     * - {@code (0, 1, 2)}
+     */
     public static final ParameterType<Vec3i> VEC_3_INT = of(Vec3i.class, "system:vec3i",
             (context, reader) -> true,
             ((context, reader) -> {
@@ -301,58 +367,48 @@ public class SystemParameterType {
             (context, builder, v) -> builder.append(v.toString())
     );
 
-    public static <T> ParameterType<List<T>> listOf(ParameterType<T> type) {
-        final TypeIdentifier listBaseIdent = TypeIdentifier.of("system:list");
-        return new GenericParameterType<>(new TypeParameter("T").setType(type)) {
-            @Override
-            public TypeIdentifier getBaseIdentifier() {
-                return listBaseIdent;
-            }
+    /**
+     * A list of any other parameter type (generic).
+     * Notation: {@code [elem1, elem2, ...]}
+     */
+    public static final GenericParameterType<List> LIST = ofGeneric(List.class, "system:list", "T",
+            (context, reader, types) -> true,
+            ((context, reader, types) -> {
+                // get type
+                ParameterType<?> type = types.get("T");
 
-            @Override
-            public Class<?> getType() {
-                return List.class;
-            }
-
-            @Override
-            public boolean accepts(Context context, StringReader reader) {
-                return true; // TODO
-            }
-
-            @Override
-            public List<T> parse(Context context, StringReader reader) {
-                ParameterType<?> type = getTypeParameter("T").getType();
+                // construct empty list
                 List<Object> list = new ArrayList<>();
+
                 char c1;
                 while ((c1 = reader.next()) != ']' && c1 != StringReader.DONE) { // already skips over first [
-//                    System.out.println("b" + reader.index() + ": '" + reader.current() + "'");
-                    reader.collect(c -> c == ' ');
+                    reader.collect(c -> c == ' '); // to skip whitespace
+                    // parse value using type and add that to the list
                     list.add(type.parse(context, reader));
-//                    System.out.println("a" + reader.index() + ": '" + reader.current() + "'");
-//                    System.out.println("l: " + list);
                 }
 
-                return (List<T>) list;
-            }
+                return list;
+            }),
+            ((context, builder, v, types) -> {
+                // get type
+                ParameterType type = types.get("T");
 
-            @Override
-            public void write(Context context, StringBuilder builder, List<T> v) {
+                // start with [
                 builder.append("[");
                 int l = v.size();
                 for (int i = 0; i < l; i++) {
-                    if (i != 0)
+                    if (i != 0) // append comma
                         builder.append(", ");
+                    // write value using type
                     type.write(context, builder, v.get(i));
                 }
+
+                // end with ]
                 builder.append("]");
-            }
+            })
+    );
 
-            @Override
-            public void suggest(Context context, SuggestionAccumulator suggestions) { }
-        };
-    }
-
-    public static final ParameterType<TypeIdentifier> TYPE_IDENTIFIER = of(TypeIdentifier.class, "system:type_identifer",
+    public static final ParameterType<TypeIdentifier> TYPE_IDENTIFIER = of(TypeIdentifier.class, "system:type_identifier",
             (context, reader) -> true,
             (context, reader) -> TypeIdentifier.of(reader.collect(c -> c != ' ')),
             (context, builder, identifier) -> builder.append(identifier)

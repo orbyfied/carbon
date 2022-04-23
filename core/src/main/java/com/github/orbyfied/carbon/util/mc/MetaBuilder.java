@@ -4,6 +4,7 @@ import com.github.orbyfied.carbon.util.TextFormatting;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Field;
@@ -115,6 +116,20 @@ public class MetaBuilder<V extends ItemMeta, Self extends MetaBuilder<V, ?>> {
 
     public boolean isUnbreakable() {
         return it.isUnbreakable();
+    }
+
+    public Self empty() {
+        it.setDisplayName("");
+        it.addItemFlags(
+                ItemFlag.HIDE_ENCHANTS,
+                ItemFlag.HIDE_UNBREAKABLE,
+                ItemFlag.HIDE_ATTRIBUTES,
+                ItemFlag.HIDE_DYE,
+                ItemFlag.HIDE_PLACED_ON,
+                ItemFlag.HIDE_POTION_EFFECTS
+        );
+
+        return (Self) this;
     }
 
 }

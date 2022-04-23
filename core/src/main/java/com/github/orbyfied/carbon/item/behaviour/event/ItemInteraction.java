@@ -5,12 +5,7 @@ import com.github.orbyfied.carbon.event.EventBus;
 import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
-import com.github.orbyfied.carbon.util.TriConsumer;
-import com.github.orbyfied.carbon.util.mc.ItemUtil;
-import net.minecraft.world.item.ItemStack;
 import org.bukkit.event.player.PlayerInteractEvent;
-
-import java.util.function.BiConsumer;
 
 public class ItemInteraction extends BusEvent {
 

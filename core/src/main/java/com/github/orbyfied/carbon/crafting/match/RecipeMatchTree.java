@@ -7,10 +7,9 @@ import com.github.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import com.github.orbyfied.carbon.crafting.inventory.Slot;
 import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.util.CollectionUtil;
-import com.github.orbyfied.carbon.util.TriPredicate;
+import com.github.orbyfied.carbon.util.functional.TriPredicate;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +82,8 @@ public class RecipeMatchTree implements IngredientNodeLike {
         while (iterator.hasNext()) { // iterate
             // get slot and stack
             Slot slot = iterator.next();
+            if (slot == null)
+                continue;
             CompiledStack stack = slot.getItem();
 
             // test

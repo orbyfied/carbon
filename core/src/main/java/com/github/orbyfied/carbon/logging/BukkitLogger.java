@@ -72,7 +72,7 @@ public class BukkitLogger {
         return b.toString();
     }
 
-    private String createLoggingString(int level, Object... msg) {
+    private String createLoggingString(int level, boolean colAll, Object... msg) {
         String msgstr;
         if (msg.length == 0)
             msgstr = "";
@@ -81,15 +81,34 @@ public class BukkitLogger {
         else
             msgstr = createArrayString(msg);
         return createLevelText(level) + " " + ChatColor.RESET + ChatColor.GRAY + "[ " + ChatColor.WHITE + tag
-                + (stage != null ? ChatColor.DARK_GRAY + "/" + stage : "") + ChatColor.GRAY + " ] " + msgstr;
+                + (stage != null ? ChatColor.DARK_GRAY + "/" + stage : "") + ChatColor.GRAY + " ] " +
+                (colAll ? colorMapper.apply(level) : "") + msgstr;
+    }
+
+    public BukkitLogger log(int level, boolean colAll, Object msg) {
+        sender.sendMessage(createLoggingString(level, colAll, msg));
+        return this;
+    }
+
+    public BukkitLogger log(int level, boolean colAll, String stage, Object msg) {
+        return stage(stage).log(level, colAll, msg);
     }
 
     public BukkitLogger log(int level, Object msg) {
-        sender.sendMessage(createLoggingString(level, msg));
+        sender.sendMessage(createLoggingString(level, false, msg));
         return this;
     }
 
     public BukkitLogger log(int level, String stage, Object msg) {
+        return stage(stage).log(level, msg);
+    }
+
+    public BukkitLogger logc(int level, Object msg) {
+        sender.sendMessage(createLoggingString(level, true, msg));
+        return this;
+    }
+
+    public BukkitLogger logc(int level, String stage, Object msg) {
         return stage(stage).log(level, msg);
     }
 
@@ -115,6 +134,14 @@ public class BukkitLogger {
 
     public BukkitLogger warn(String stage, Object msg) {
         return stage(stage).log(1, msg);
+    }
+
+    public BukkitLogger warnc(Object msg) {
+        return logc(1, msg);
+    }
+
+    public BukkitLogger warnc(String stage, Object msg) {
+        return stage(stage).logc(1, msg);
     }
 
     public BukkitLogger err(Object msg) {

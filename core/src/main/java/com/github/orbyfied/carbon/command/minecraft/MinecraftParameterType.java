@@ -7,7 +7,7 @@ import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
 import com.github.orbyfied.carbon.command.parameter.TypeResolver;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.StringReader;
-import com.github.orbyfied.carbon.util.TriConsumer;
+import com.github.orbyfied.carbon.util.functional.TriConsumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

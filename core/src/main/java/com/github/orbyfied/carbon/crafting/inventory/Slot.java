@@ -1,11 +1,11 @@
 package com.github.orbyfied.carbon.crafting.inventory;
 
 import com.github.orbyfied.carbon.item.CompiledStack;
+import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -38,6 +38,8 @@ public interface Slot {
      */
     CompiledStack getItem();
 
+    ItemStack     getBukkitItem();
+
     /**
      * Set the item in this slot.
      * @param stack The item.
@@ -65,6 +67,18 @@ public interface Slot {
      */
     CompiledStack add(CompiledStack stack);
 
+    /**
+     * Checks whether this slot is empty.
+     * By default it checks if the item
+     * provided by {@link Slot#getBukkitItem()}
+     * is null or empty.
+     * @see ItemUtil#isEmpty(CompiledStack)
+     * @return If it is empty.
+     */
+    default boolean isEmpty() {
+        return ItemUtil.isEmpty(getBukkitItem());
+    }
+
     ///////////////////////////////////////////////////
 
     static Slot in(final Inventory inv,
@@ -84,6 +98,11 @@ public interface Slot {
             @Override
             public CompiledStack getItem() {
                 return new CompiledStack().wrap(inv.getItem(index));
+            }
+
+            @Override
+            public ItemStack getBukkitItem() {
+                return inv.getItem(index);
             }
 
             @Override
@@ -121,6 +140,11 @@ public interface Slot {
             }
 
             @Override
+            public ItemStack getBukkitItem() {
+                return arr[i];
+            }
+
+            @Override
             public void setItem(CompiledStack stack) {
                 arr[i] = stack.getBukkitStack();
             }
@@ -153,6 +177,11 @@ public interface Slot {
             @Override
             public CompiledStack getItem() {
                 return new CompiledStack().wrap(getter.get());
+            }
+
+            @Override
+            public ItemStack getBukkitItem() {
+                return getter.get();
             }
 
             @Override

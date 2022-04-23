@@ -10,16 +10,13 @@ import com.github.orbyfied.carbon.crafting.type.RecipeType;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.IOUtil;
-import com.github.orbyfied.carbon.util.Verbose;
+import com.github.orbyfied.carbon.util.functional.Verbose;
 import org.bukkit.Bukkit;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class CarbonReport {
 
@@ -30,6 +27,8 @@ public class CarbonReport {
     protected String message;
     protected List<Throwable> errors = new ArrayList<>();
     protected String details;
+
+    protected Map<String, Object> properties = new HashMap<>();
 
     public CarbonReport withOutput(Writer w) {
         outputs.add(w);
@@ -68,6 +67,16 @@ public class CarbonReport {
     public CarbonReport setDetails(String d) {
         details = d;
         return this;
+    }
+
+    public CarbonReport setProperty(String key, Object val) {
+        properties.put(key, val);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getProperty(String key) {
+        return (T) properties.get(key);
     }
 
     public List<Throwable> getErrors() {
@@ -121,6 +130,15 @@ public class CarbonReport {
 
     public StringBuilder createStringVerbose(StringBuilder b) {
         createString(b).append("\n");
+        // append properties
+        if (properties.size() != 0) {
+            b.append("\nProperties:\n");
+            for (Map.Entry<String, Object> entry : properties.entrySet())
+                if (!entry.getKey().startsWith("--"))
+                    b.append("- ").append(entry.getKey()).append(": ").append(entry.getValue());
+            b.append("\n");
+        }
+
         dumpInfo(b).append("\n");
         return b;
     }
@@ -188,7 +206,11 @@ public class CarbonReport {
         return reportFile(file).setTime(now);
     }
 
+
+
     public static CarbonReport reportFile(Path file) {
+        if (file == null)
+            return reportFile();
         Writer fileWriter;
         try {
             if (file.getParent() != null)
@@ -209,7 +231,8 @@ public class CarbonReport {
                 return super.createString(b);
             }
         }
-                .withOutput(fileWriter);
+                .withOutput(fileWriter)
+                .setProperty("--file", file);
     }
 
     //////////////////////////////////////////

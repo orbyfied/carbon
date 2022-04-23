@@ -6,6 +6,8 @@ import com.github.orbyfied.carbon.command.Node;
 import com.github.orbyfied.carbon.command.annotation.BaseCommand;
 import com.github.orbyfied.carbon.command.annotation.CommandParameter;
 import com.github.orbyfied.carbon.command.annotation.Subcommand;
+import com.github.orbyfied.carbon.util.ReflectionUtil;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
@@ -56,18 +58,23 @@ public class CarbonBaseCommand {
 
                                   @CommandParameter("path") String p) {
 
-        System.out.println(p);
-        Path path = Path.of(p);
+        Path path = null;
+        if (p != null)
+            path = Path.of(p);
 
-        CarbonReport.reportFile(path)
+        CarbonReport r = CarbonReport.reportFile(path)
                 .setTime()
                 .setMessage("Requested dump report by " + ctx.getSender() + " using '/carbon debug dumpReport'")
                 .write()
                 .close();
 
+        ReflectionUtil.printParentTree(ServerPlayer.class);
+
+        Path realFile = r.getProperty("--file");
+
         CommandSender sender = ctx.getSender();
         sender.sendMessage(ChatColor.WHITE + "Generated dump report at: " +
-                ChatColor.AQUA + path.toAbsolutePath());
+                ChatColor.AQUA + realFile.toAbsolutePath());
 
     }
 
