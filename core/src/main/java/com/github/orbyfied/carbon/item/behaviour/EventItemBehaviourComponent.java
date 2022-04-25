@@ -6,10 +6,10 @@ import com.github.orbyfied.carbon.core.Service;
 import com.github.orbyfied.carbon.core.ServiceManager;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.item.ItemComponent;
-import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
+import com.github.orbyfied.carbon.item.behaviour.event.PlayerItemInteraction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,9 +25,11 @@ public class EventItemBehaviourComponent
         this.main = CarbonJavaAPI.get().getMain();
     }
 
-    protected ItemInteractionAdapter adapter = new ItemInteractionAdapter();
+    protected ItemInteractionAdapter adapter;
 
     public ItemInteractionAdapter adapter() {
+        if (adapter == null)
+            adapter = new ItemInteractionAdapter();
         return adapter;
     }
 
@@ -45,7 +47,7 @@ public class EventItemBehaviourComponent
     }
 
     @Override
-    public void updateStack(ItemStack stack, CarbonItemState state, CompoundTag tag) { }
+    public void updateStack(CompiledStack stack, CarbonItemState state, CompoundTag tag) { }
 
     /**
      * The event listener service to call
@@ -73,7 +75,7 @@ public class EventItemBehaviourComponent
         @EventHandler
         void onPlayerInteract(PlayerInteractEvent event) {
 
-            ItemInteraction interaction = ItemInteractionAdapter.interactionOf(event);
+            PlayerItemInteraction interaction = ItemInteractionAdapter.interactionOf(event);
             if (interaction == null)
                 return;
 

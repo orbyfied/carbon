@@ -8,12 +8,10 @@ import com.github.orbyfied.carbon.crafting.Recipe;
 import com.github.orbyfied.carbon.crafting.Result;
 import com.github.orbyfied.carbon.crafting.match.RecipeDimensions;
 import com.github.orbyfied.carbon.crafting.type.RecipeTypes;
-import com.github.orbyfied.carbon.event.EventHandler;
-import com.github.orbyfied.carbon.event.EventListener;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
 import com.github.orbyfied.carbon.item.behaviour.EventItemBehaviourComponent;
-import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
+import com.github.orbyfied.carbon.item.behaviour.event.PlayerItemInteraction;
 import com.github.orbyfied.carbon.item.display.ModelItemDisplayComponent;
 import com.github.orbyfied.carbon.item.material.MaterialItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
@@ -65,9 +63,15 @@ public class ExampleMod
                             .addModel("ruby") // add default model
                 )
                 .component(EventItemBehaviourComponent::new,
-                        (item, ibc) -> ibc.adapter().addBehaviour(new MyItemBehaviour())
+                        (item, ibc) -> ibc.adapter()
+                            // define a behaviour handler for our item
+                            .behaviour(PlayerItemInteraction.class, interaction ->
+                                    interaction.getEvent().getPlayer().sendMessage(interaction.getState().toString()))
                 )
                 .component(MaterialItemComponent::new,
+                        // configure gem.ruby as our tag
+                        // read more at the documentation
+                        // for MaterialTag and MaterialAPI
                         (item, mic) -> mic.tag("gem.ruby")
                 )
                 .register(itemRegistry) // first register our item
@@ -98,23 +102,6 @@ public class ExampleMod
                 .result(Result.ofItem(ruby, 69))
                 .dimensions(new RecipeDimensions(2).sized(2, 2))
                 .register(recipeRegistry);
-
-    }
-
-    /**
-     * Define behaviour for our item.
-     */
-    public static class MyItemBehaviour implements EventListener {
-
-        // this is called every time a player
-        // interacts with or using our item
-        @EventHandler
-        public void interact(ItemInteraction interaction) {
-            // send state as message for testing
-            interaction.getEvent().getPlayer().sendMessage(
-                    interaction.getState().toString()
-            );
-        }
 
     }
 

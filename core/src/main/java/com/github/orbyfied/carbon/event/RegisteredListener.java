@@ -1,5 +1,6 @@
 package com.github.orbyfied.carbon.event;
 
+import com.github.orbyfied.carbon.event.pipeline.Handler;
 import com.github.orbyfied.carbon.event.pipeline.Pipeline;
 
 import java.lang.invoke.MethodHandle;
@@ -8,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A listener that has been registered.
@@ -39,13 +41,17 @@ public class RegisteredListener {
      */
     final Class<? extends EventListener> klass;
 
+    /**
+     * If this listener is dynamic.
+     */
+    boolean dynamic;
+
     public RegisteredListener(EventBus bus, EventListener obj) {
         Objects.requireNonNull(bus, "the event bus cannot be null");
-        Objects.requireNonNull(obj, "the object cannot be null");
         this.bus = bus;
         this.obj = obj;
 
-        this.klass = obj.getClass();
+        this.klass = obj == null ? null : obj.getClass();
     }
 
     /**
@@ -86,16 +92,16 @@ public class RegisteredListener {
 
                 // get event type and pipeline
                 Class<? extends BusEvent> eventType = (Class<? extends BusEvent>) method.getParameterTypes()[0];
-                Pipeline<? extends BusEvent> pipeline = bus.getPipelineFor(eventType).base();
+                Pipeline<?> pipeline = bus.getPipelineFor(eventType).base();
 
                 // get method handle for quick invocation
                 final MethodHandle handle = LOOKUP.unreflect(method);
 
                 // create and add handler
-                BusHandler handler = new BusHandler(bus, this, (Pipeline<BusEvent>) pipeline) {
+                BusHandler handler = new BusHandler(bus, this, pipeline) {
 
                     @Override
-                    public void handle(BusEvent event) {
+                    public void handle(Object event) {
                         if (!isEnabled()) return;
 
                         try { handle.invoke(obj, event); }
@@ -128,6 +134,42 @@ public class RegisteredListener {
         return this;
     }
 
+    /**
+     * Configure if this listener is dynamic.
+     * @param b True/false.
+     * @return This.
+     */
+    public RegisteredListener dynamic(boolean b) {
+        this.dynamic = b;
+        return this;
+    }
+
+    /**
+     * Adds any generic behaviour handler to this
+     * listener. If dynamic, registers the handlers
+     * on the fly.
+     * @param klass The event class.
+     * @param handler The event handler.
+     * @param <E> The generic event type.
+     * @return This.
+     */
+    @SuppressWarnings("unchecked")
+    public <E> RegisteredListener handle(Class<E> klass, Handler<E> handler) {
+        // create handler
+        BusHandler h = new BusHandler(bus, this, bus.getPipelineFor(klass).base())
+                .setDelegate((Handler<Object>) handler);
+
+        // register dynamically if needed
+        if (dynamic)
+            h.register();
+
+        // add handler to list
+        handlers.add(h);
+
+        // return
+        return this;
+    }
+
     /* Getters and setters. */
 
     public void setEnabled(boolean b) {
@@ -137,6 +179,14 @@ public class RegisteredListener {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public boolean isDynamic() {
+        return dynamic;
     }
 
 }

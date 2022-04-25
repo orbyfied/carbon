@@ -94,6 +94,20 @@ public class CompiledStack {
         return this;
     }
 
+    public CompiledStack trust(CarbonItemState state) {
+        this.state = state;
+        return this;
+    }
+
+    public CompiledStack primitive(ItemStack nmsStack) {
+        this.stack = nmsStack;
+        return this;
+    }
+
+    public CompiledStack primitive(org.bukkit.inventory.ItemStack bukkitStack) {
+        return primitive(ItemUtil.getHandle(bukkitStack));
+    }
+
     public CompiledStack wrap(org.bukkit.inventory.ItemStack bukkitStack) {
         if (bukkitStack == null)
             return this;

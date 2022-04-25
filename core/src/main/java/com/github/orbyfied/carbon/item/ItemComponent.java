@@ -11,7 +11,7 @@ public abstract class ItemComponent<S extends CarbonItemState>
         super(element);
     }
 
-    public abstract void updateStack(ItemStack stack,
+    public abstract void updateStack(CompiledStack stack,
                                      S state,
                                      CompoundTag tag);
 

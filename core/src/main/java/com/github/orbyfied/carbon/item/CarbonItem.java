@@ -226,18 +226,31 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         nmsStack.setHoverName(new TextComponent("item." + identifier)
                 .setStyle(Style.EMPTY.withItalic(false)));
 
+        // compile stack
+        CompiledStack compiledStack = new CompiledStack()
+                .primitive(nmsStack)
+                .trust(state);
+
+        // update
+        updateStack(compiledStack);
+
+        // return stack
+        return nmsStack;
+    }
+
+    @SuppressWarnings("unchecked")
+    public CarbonItem updateStack(CompiledStack compiledStack) {
         // update components
         int l = componentsLinear.size();
         for (int i = 0; i < l; i++) {
             componentsLinear.get(i).updateStack(
-                    nmsStack,
-                    state,
-                    tag
+                    compiledStack,
+                    (S) compiledStack.getState(),
+                    compiledStack.getStack().getOrCreateTag()
             );
         }
 
-        // return stack
-        return nmsStack;
+        return this;
     }
 
     /* ------ Internal ------- */

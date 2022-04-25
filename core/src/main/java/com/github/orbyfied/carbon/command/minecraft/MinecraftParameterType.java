@@ -28,11 +28,6 @@ public class MinecraftParameterType {
             return types.get(identifier.getPath());
         }
 
-        @Override
-        public ParameterType<?> compile(TypeIdentifier identifier) {
-            throw new UnsupportedOperationException();
-        }
-
     }
 
     /** UTILITY CLASS */

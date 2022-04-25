@@ -13,6 +13,7 @@ import com.github.orbyfied.carbon.util.math.Vec3i;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -54,13 +55,25 @@ public class SystemParameterType {
      * parameter types with lambdas.
      * @see ParameterType
      */
+    @SuppressWarnings("unchecked")
     static <T> ParameterType<T> of(final Class<T> klass,
                                    final String baseId,
                                    final BiPredicate<Context, StringReader> acceptor,
                                    final BiFunction<Context, StringReader, T> parser,
-                                   final TriConsumer<Context, StringBuilder, T> writer) {
+                                   final TriConsumer<Context, StringBuilder, T> writer,
+                                   final Object... optional) {
         // parse identifier
         final TypeIdentifier bid = TypeIdentifier.of(baseId);
+
+        // parse optionals
+        BiConsumer<Context, SuggestionAccumulator> suggester = null;
+
+        for (Object o : optional) {
+            if (o instanceof BiConsumer)
+                suggester = (BiConsumer<Context, SuggestionAccumulator>) o;
+        }
+
+        final BiConsumer<Context, SuggestionAccumulator> finalSuggester = suggester;
 
         // create type
         ParameterType<T> type = new ParameterType<>() {
@@ -90,7 +103,10 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, SuggestionAccumulator suggestions) { }
+            public void suggest(Context context, SuggestionAccumulator suggestions) {
+                if (finalSuggester != null)
+                    finalSuggester.accept(context, suggestions);
+            }
 
             @Override
             public String toString() {
@@ -109,17 +125,29 @@ public class SystemParameterType {
      * parameter types with lambdas.
      * @see ParameterType
      */
+    @SuppressWarnings("unchecked")
     static <T> GenericParameterType<T> ofGeneric(final Class<T> klass,
                                                  final String baseId,
                                                  final String paramsStr,
                                                  final TriPredicate<Context, StringReader, LinkedHashMap<String, ParameterType>> acceptor,
                                                  final TriFunction<Context, StringReader, LinkedHashMap<String, ParameterType>, T> parser,
-                                                 final QuadConsumer<Context, StringBuilder, T, LinkedHashMap<String, ParameterType>> writer) {
+                                                 final QuadConsumer<Context, StringBuilder, T, LinkedHashMap<String, ParameterType>> writer,
+                                                 final Object... optional) {
         // parse identifier
         final TypeIdentifier bid = TypeIdentifier.of(baseId);
 
         // parse type parameters
         final String[] params = paramsStr.split(" ");
+
+        // parse optionals
+        TriConsumer<Context, SuggestionAccumulator, LinkedHashMap<String, ParameterType>> suggester = null;
+
+        for (Object o : optional) {
+            if (o instanceof BiConsumer)
+                suggester = (TriConsumer<Context, SuggestionAccumulator, LinkedHashMap<String, ParameterType>>) o;
+        }
+
+        final TriConsumer<Context, SuggestionAccumulator, LinkedHashMap<String, ParameterType>> finalSuggester = suggester;
 
         // create type
         GenericParameterType<T> type = new GenericParameterType<>(params) {
@@ -139,7 +167,10 @@ public class SystemParameterType {
             }
 
             @Override
-            public void suggest(Context context, SuggestionAccumulator suggestions, LinkedHashMap<String, ParameterType> types) { }
+            public void suggest(Context context, SuggestionAccumulator suggestions, LinkedHashMap<String, ParameterType> types) {
+                if (finalSuggester != null)
+                    finalSuggester.accept(context, suggestions, types);
+            }
 
             @Override
             public TypeIdentifier getBaseIdentifier() { return bid; }
@@ -203,7 +234,7 @@ public class SystemParameterType {
                 case 'x' -> radix = 16;
                 case 'b' -> radix = 2;
                 case 'o' -> radix = 8;
-                default -> c = false;
+                default  -> c = false;
             }
             if (c)
                 reader.next(2);
@@ -405,6 +436,16 @@ public class SystemParameterType {
 
                 // end with ]
                 builder.append("]");
+            }),
+
+            /* suggester */
+            ((TriConsumer<Context, SuggestionAccumulator, LinkedHashMap<String, ParameterType>>)(context, suggestions, types) -> {
+                StringReader reader = context.getReader();
+                suggestions.suggest("]");
+                suggestions.suggest(",");
+
+                // just suggest a value
+                types.get("T").suggest(context, suggestions);
             })
     );
 

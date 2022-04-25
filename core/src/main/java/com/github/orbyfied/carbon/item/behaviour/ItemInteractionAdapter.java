@@ -4,9 +4,11 @@ import com.github.orbyfied.carbon.Carbon;
 import com.github.orbyfied.carbon.core.CarbonJavaAPI;
 import com.github.orbyfied.carbon.event.EventBus;
 import com.github.orbyfied.carbon.event.EventListener;
+import com.github.orbyfied.carbon.event.RegisteredListener;
+import com.github.orbyfied.carbon.event.pipeline.Handler;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
-import com.github.orbyfied.carbon.item.behaviour.event.ItemInteraction;
+import com.github.orbyfied.carbon.item.behaviour.event.PlayerItemInteraction;
 import com.github.orbyfied.carbon.registry.Registry;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +21,8 @@ public class ItemInteractionAdapter {
 
     protected final Carbon main = CarbonJavaAPI.get().getMain();
 
+    protected RegisteredListener genericListener;
+
     static final Registry<CarbonItem> itemRegistry = CarbonJavaAPI.get().getRegistries()
             .getByIdentifier("minecraft:items");
 
@@ -26,17 +30,29 @@ public class ItemInteractionAdapter {
         return bus;
     }
 
-    public ItemInteractionAdapter post(ItemInteraction event) {
+    public ItemInteractionAdapter post(PlayerItemInteraction event) {
         bus.post(event);
         return this;
     }
 
     public ItemInteractionAdapter tryPost(PlayerInteractEvent event) {
-        ItemInteraction i = interactionOf(event);
+        PlayerItemInteraction i = interactionOf(event);
         if (i == null)
             return this;
         post(i);
         return this;
+    }
+
+    public RegisteredListener getOrCreateGenericListener() {
+        if (genericListener == null)
+            genericListener = new RegisteredListener(bus, null)
+                    .dynamic(true)
+                    .register();
+        return genericListener;
+    }
+
+    public RegisteredListener getGenericListenerOrNull() {
+        return genericListener;
     }
 
     public ItemInteractionAdapter addBehaviour(EventListener o) {
@@ -44,7 +60,14 @@ public class ItemInteractionAdapter {
         return this;
     }
 
-    public static ItemInteraction interactionOf(PlayerInteractEvent event) {
+    public <E> ItemInteractionAdapter behaviour(Class<E> eClass, Handler<E> handler) {
+        getOrCreateGenericListener().handle(eClass, handler);
+        return this;
+    }
+
+    /* Event Stuff */
+
+    public static PlayerItemInteraction interactionOf(PlayerInteractEvent event) {
         // check for item
         if (event.getItem() == null)
             return null;
@@ -71,7 +94,7 @@ public class ItemInteractionAdapter {
         }
 
         // construct event
-        ItemInteraction interaction = new ItemInteraction(
+        PlayerItemInteraction interaction = new PlayerItemInteraction(
                 item,
                 state,
                 event

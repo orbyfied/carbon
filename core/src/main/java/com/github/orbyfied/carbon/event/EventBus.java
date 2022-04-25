@@ -3,14 +3,15 @@ package com.github.orbyfied.carbon.event;
 import com.github.orbyfied.carbon.event.exception.EventInvocationException;
 import com.github.orbyfied.carbon.event.exception.InternalBusException;
 import com.github.orbyfied.carbon.event.exception.InvalidEventException;
+import com.github.orbyfied.carbon.event.pipeline.BusPipelineFactory;
+import com.github.orbyfied.carbon.event.pipeline.Event;
 import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
+import com.github.orbyfied.carbon.event.service.EventService;
+import com.github.orbyfied.carbon.event.service.FunctionalEventService;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * The main event system class.
@@ -30,7 +31,17 @@ public class EventBus {
     /**
      * Cache for event pipelines.
      */
-    private final Object2ObjectOpenHashMap<Class<? extends BusEvent>, PipelineAccess<BusEvent>> eventPipelineCache = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<Class<?>, PipelineAccess<?>> eventPipelineCache = new Object2ObjectOpenHashMap<>();
+
+    /**
+     * The default pipeline factory for events
+     * that don't explicitly specify a pipeline.
+     */
+    private BusPipelineFactory defaultPipelineFactory;
+
+    /* Services. */
+    private final ArrayList<EventService> servicesLinear = new ArrayList<>();
+    private final HashMap<Class<? extends EventService>, EventService> servicesMapped = new HashMap<>();
 
     /**
      * Registers a listener instance by creating
@@ -47,6 +58,16 @@ public class EventBus {
 
         // parse and register
         rl.parse().register();
+
+        // call services
+        {
+            int l = servicesLinear.size();
+            for (int i = 0; i < l; i++) {
+                EventService service = servicesLinear.get(i);
+                if (service instanceof FunctionalEventService fes) // functional
+                    fes.registered(rl);
+            }
+        }
 
         // return
         return rl;
@@ -119,6 +140,16 @@ public class EventBus {
         listeners.remove(listener);
         listenersByClass.remove(listener.klass, listener);
 
+        // call services
+        {
+            int l = servicesLinear.size();
+            for (int i = 0; i < l; i++) {
+                EventService service = servicesLinear.get(i);
+                if (service instanceof FunctionalEventService fes) // functional
+                    fes.unregistered(listener);
+            }
+        }
+
         // return
         return this;
     }
@@ -165,7 +196,7 @@ public class EventBus {
      * @param event The event type.
      * @return This.
      */
-    public EventBus bake(Class<? extends BusEvent> event) {
+    public EventBus bake(Class<?> event) {
         // cache pipeline
         getPipelineFor(event);
 
@@ -188,14 +219,44 @@ public class EventBus {
      * Posts an event to the event bus
      * through the pipeline supplied by
      * the supplied class.
+     * NOTE: Doesn't call any events, and
+     * does not catch any errors.
+     * @param fclass The pipeline provider class.
+     * @param event The event.
+     */
+    @SuppressWarnings("unchecked")
+    public <E> void postUnsafe(Class fclass, E event) {
+        // get pipeline for event
+        final PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
+
+        // post event
+        acc.push(event);
+    }
+
+    /**
+     * Posts an event to the event bus
+     * through the pipeline supplied by
+     * the supplied class. Calls all
+     * functional event services before
+     * posting.
      * @param fclass The pipeline provider class.
      * @param event The event.
      * @return This.
      */
     @SuppressWarnings("unchecked")
-    public <E extends BusEvent> EventBus post(Class<E> fclass, E event) {
+    public <E> EventBus post(Class<E> fclass, E event) {
         // get pipeline for event
         final PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
+
+        // call services
+        {
+            int l = servicesLinear.size();
+            for (int i = 0; i < l; i++) {
+                EventService service = servicesLinear.get(i);
+                if (service instanceof FunctionalEventService fes) // functional
+                    fes.prePublish(event, acc);
+            }
+        }
 
         try {
             // post event
@@ -211,37 +272,77 @@ public class EventBus {
 
     /**
      * Retrieves the pipeline of an event
-     * for this event bus from either the cache
-     * or the {@link BusEvent#getPipeline(EventBus)} method.
+     * for this event bus from either the cache, the
+     * {@link BusEvent#getPipeline(EventBus)} method or
+     * the {@link EventBus#defaultPipelineFactory}.
      * @param event The event class.
      * @return The pipeline or null if the event type
      *         is invalid or an error occurred.
      */
     @SuppressWarnings("unchecked")
-    public PipelineAccess<BusEvent> getPipelineFor(Class<? extends BusEvent> event) {
+    public PipelineAccess<?> getPipelineFor(Class<?> event) {
         // try to get from cache
-        PipelineAccess<BusEvent> pipeline = eventPipelineCache.get(event);
+        PipelineAccess<?> pipeline = eventPipelineCache.get(event);
         if (pipeline != null)
             return pipeline;
 
         // retrieve and cache
         try {
-            Method getPipeline;
             try {
-                getPipeline = event.getDeclaredMethod("getPipeline", EventBus.class);
+                // try to use pipeline getter method
+                Method getPipeline = event.getDeclaredMethod("getPipeline", EventBus.class);
+                pipeline = (PipelineAccess<BusEvent>) getPipeline.invoke(null, this);
             } catch (NoSuchMethodException e) {
-                // throw exception
-                throw new InvalidEventException(this, event, "pipeline provider { PipelineAccess<E> getPipeline(EventBus); } not implemented");
+                if (defaultPipelineFactory == null)
+                    // throw exception
+                    throw new InvalidEventException(this, event, "pipeline provider { PipelineAccess<E> getPipeline(EventBus); } not implemented");
+                // create default pipeline
+                pipeline = defaultPipelineFactory.createPipeline(this, event);
             }
 
-            pipeline = (PipelineAccess<BusEvent>) getPipeline.invoke(null, this);
             eventPipelineCache.put(event, pipeline); // cache
             return pipeline;
+        } catch (InvalidEventException e) {
+            throw e; // dont catch these
         } catch (Exception e) {
             // throw internal exception
             throw new InternalBusException(this, "internal exception while retrieving event pipeline from '" +
                     event.getName() + "'", e);
         }
+    }
+
+    public PipelineAccess<?> getPipelineOrNull(Class<?> event) {
+        return eventPipelineCache.get(event);
+    }
+
+    public EventBus withDefaultPipelineFactory(BusPipelineFactory factory) {
+        this.defaultPipelineFactory = factory;
+        return this;
+    }
+
+    public List<EventService> getServicesLinear() {
+        return Collections.unmodifiableList(servicesLinear);
+    }
+
+    public Map<Class<? extends EventService>, EventService> getServicesMapped() {
+        return Collections.unmodifiableMap(servicesMapped);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <S extends EventService> S getService(Class<S> klass) {
+        return (S) servicesMapped.get(klass);
+    }
+
+    public EventBus addService(EventService s) {
+        servicesLinear.add(s);
+        servicesMapped.put(s.getClass(), s);
+        return this;
+    }
+
+    public EventBus removeService(EventService s) {
+        servicesLinear.remove(s);
+        servicesMapped.remove(s.getClass());
+        return this;
     }
 
 }

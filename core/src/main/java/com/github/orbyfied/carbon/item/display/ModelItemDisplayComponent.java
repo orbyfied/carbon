@@ -5,6 +5,7 @@ import com.github.orbyfied.carbon.content.ModelHolder;
 import com.github.orbyfied.carbon.element.SpecifiedIdentifier;
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.item.ItemComponent;
 import com.github.orbyfied.carbon.registry.Identifier;
 import com.github.orbyfied.carbon.util.mc.ItemUtil;
@@ -90,16 +91,17 @@ public class ModelItemDisplayComponent
 
     @Override
     public void updateStack(
-            ItemStack stack,
+            CompiledStack stack,
             CarbonItemState state,
             CompoundTag tag) {
+        ItemStack nmsStack = stack.getStack();
         if (hasGlint)
-            ItemUtil.setHasGlint(stack.getOrCreateTag(), true);
+            ItemUtil.setHasGlint(nmsStack.getOrCreateTag(), true);
 
         MutableComponent displayNameComponent = new TextComponent(displayName);
         displayNameComponent.setStyle(Style.EMPTY.withItalic(false));
 
-        stack.setHoverName(displayNameComponent);
+        nmsStack.setHoverName(displayNameComponent);
         tag.putInt("CustomModelData", cmdStart + getModelIdFrom(state));
     }
 

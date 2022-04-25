@@ -5,7 +5,7 @@ package com.github.orbyfied.carbon.event.pipeline;
  * Allows for non-linear pipelines and complex
  * joining of pipeline without extra overhead.
  */
-public interface PipelineAccess<E extends Event> {
+public interface PipelineAccess<E> {
 
     /**
      * Pushes an event to the pipeline.

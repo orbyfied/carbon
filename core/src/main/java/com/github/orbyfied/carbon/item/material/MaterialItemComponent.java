@@ -2,6 +2,7 @@ package com.github.orbyfied.carbon.item.material;
 
 import com.github.orbyfied.carbon.item.CarbonItem;
 import com.github.orbyfied.carbon.item.CarbonItemState;
+import com.github.orbyfied.carbon.item.CompiledStack;
 import com.github.orbyfied.carbon.item.ItemComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +43,7 @@ public class MaterialItemComponent extends ItemComponent<CarbonItemState> {
     }
 
     @Override
-    public void updateStack(ItemStack stack, CarbonItemState state, CompoundTag tag) {
+    public void updateStack(CompiledStack stack, CarbonItemState state, CompoundTag tag) {
         // nothing x2
     }
 

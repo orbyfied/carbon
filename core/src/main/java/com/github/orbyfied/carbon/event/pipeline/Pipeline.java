@@ -7,7 +7,7 @@ import java.util.LinkedList;
  * A list of handlers capable of processing events.
  * @param <E> The type of the event.
  */
-public class Pipeline<E extends Event> implements PipelineAccess<E> {
+public class Pipeline<E> implements PipelineAccess<E> {
 
     /**
      * The handler list.

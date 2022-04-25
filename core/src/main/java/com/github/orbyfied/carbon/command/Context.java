@@ -1,6 +1,7 @@
 package com.github.orbyfied.carbon.command;
 
 import com.github.orbyfied.carbon.registry.Identifier;
+import com.github.orbyfied.carbon.util.StringReader;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -30,6 +31,12 @@ public class Context {
     protected boolean canFormat = true;
 
     protected boolean successful;
+
+    protected StringReader reader;
+
+    protected Node current;
+
+    protected Executable currentExecutable;
 
     public Context setCanFormat(boolean canFormat) {
         this.canFormat = canFormat;
@@ -79,6 +86,18 @@ public class Context {
 
     public HashMap<Identifier, Object> getArgs() {
         return args;
+    }
+
+    public StringReader getReader() {
+        return reader;
+    }
+
+    public Executable getCurrentExecutable() {
+        return currentExecutable;
+    }
+
+    public Node getCurrent() {
+        return current;
     }
 
     @SuppressWarnings("unchecked")

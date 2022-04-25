@@ -4,19 +4,8 @@ import com.github.orbyfied.carbon.event.BusEvent;
 import com.github.orbyfied.carbon.event.EventBus;
 import com.github.orbyfied.carbon.event.EventHandler;
 import com.github.orbyfied.carbon.event.EventListener;
-import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
-import org.bukkit.Location;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import com.github.orbyfied.carbon.event.util.Pipelines;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class BasicEventBusTest {
 
@@ -27,16 +16,17 @@ public class BasicEventBusTest {
     @Test
     public void testBasicListener() {
 
+        EVENT_BUS.withDefaultPipelineFactory((bus, event) -> Pipelines.mono(bus));
         EVENT_BUS.register(new MyListener());
-        EVENT_BUS.bake(YourMomEvent.class);
 
         YourMomEvent event = new YourMomEvent("hello");
+        Class<YourMomEvent> eventClass = YourMomEvent.class;
 
         // ---- time
         long t1 = System.nanoTime();
 
-        for (int i = 0; i < 1_000_000; i++)
-            EVENT_BUS.post(event);
+        for (int i = 0; i < 1_000_000_000; i++)
+            EVENT_BUS.postUnsafe(eventClass, event);
 
         // ---- time
         long t2 = System.nanoTime();
@@ -68,13 +58,6 @@ public class BasicEventBusTest {
 
         public String getText() {
             return text;
-        }
-
-        ////////////////////////////////
-
-        // required
-        public static PipelineAccess<BusEvent> getPipeline(EventBus bus) {
-            return BusEvent.createMonoPipeline(bus);
         }
 
     }

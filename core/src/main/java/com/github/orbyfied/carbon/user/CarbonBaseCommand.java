@@ -68,8 +68,6 @@ public class CarbonBaseCommand {
                 .write()
                 .close();
 
-        ReflectionUtil.printParentTree(ServerPlayer.class);
-
         Path realFile = r.getProperty("--file");
 
         CommandSender sender = ctx.getSender();

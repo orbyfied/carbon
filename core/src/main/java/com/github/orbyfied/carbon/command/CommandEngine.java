@@ -142,6 +142,7 @@ public abstract class CommandEngine {
         }
 
         context.rootCommand = root;
+        context.reader      = reader;
 
         // error handling
         try {
@@ -152,6 +153,10 @@ public abstract class CommandEngine {
             Suggester suggester = null; // last suggester
             Node current = root;
             while (true) {
+
+                // update context
+                context.current = current;
+                context.currentExecutable = lastExecutable;
 
                 // is executable
                 if (mainc instanceof Executable exec) {

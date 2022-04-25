@@ -27,34 +27,11 @@ public class BusEvent extends Event {
 
     /* ----------- Pipelines ------------- */
 
-    public static PipelineAccess<BusEvent> createMonoPipeline(EventBus bus) {
-        return new PipelineAccess<>() {
-            final Pipeline<BusEvent> pipeline = new Pipeline<>();
-
-            @Override
-            public PipelineAccess<BusEvent> push(BusEvent event) {
-                pipeline.push(event);
-                return this;
-            }
-
-            @Override
-            public PipelineAccess<BusEvent> register(Handler<BusEvent> handler) {
-                pipeline.register(handler);
-                return this;
-            }
-
-            @Override
-            public Pipeline<BusEvent> base() {
-                return pipeline;
-            }
-        };
-    }
-
     public static PipelineAccess<BusEvent> createJoiningPipeline(EventBus bus, Class<? extends BusEvent> childClass) {
         return new PipelineAccess<>() {
 
             final Pipeline<BusEvent> my = new Pipeline<>();
-            final PipelineAccess<BusEvent> child = bus.getPipelineFor(childClass);
+            final PipelineAccess child = bus.getPipelineFor(childClass);
 
             @Override
             public PipelineAccess<BusEvent> push(BusEvent event) {
