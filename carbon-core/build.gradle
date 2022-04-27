@@ -60,7 +60,9 @@ dependencies {
 
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
-    implementation project(":carbon-event")
+    // TODO: may separate it later
+//    implementation project(":carbon-event")
+//    implementation project(":carbon-process")
 
     implementation 'org.bstats:bstats-bukkit:3.0.0'
     compileOnly 'org.zeroturnaround:zt-zip:1.15'

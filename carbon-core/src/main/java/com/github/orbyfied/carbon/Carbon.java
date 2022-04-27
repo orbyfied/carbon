@@ -5,7 +5,6 @@ import com.github.orbyfied.carbon.bootstrap.CarbonBootstrap;
 import com.github.orbyfied.carbon.bootstrap.CarbonConfiguration;
 import com.github.orbyfied.carbon.command.CommandEngine;
 import com.github.orbyfied.carbon.command.impl.BukkitCommandEngine;
-import com.github.orbyfied.carbon.command.impl.MinecraftPacketCommandEngine;
 import com.github.orbyfied.carbon.config.Configurable;
 import com.github.orbyfied.carbon.config.ConfigurationHelper;
 import com.github.orbyfied.carbon.content.pack.ResourcePackManager;
