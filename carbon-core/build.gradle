@@ -1,7 +1,5 @@
 import org.apache.commons.io.Charsets
 
-import java.nio.charset.StandardCharsets
-
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "7.1.2"
@@ -11,20 +9,20 @@ plugins {
 group rootProject.group
 version rootProject.version
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 java {
     // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
+shadowJar {
+    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
+}
+
 tasks {
+
     // Configure reobfJar to run when invoking the build task
     assemble {
-        dependsOn(reobfJar)
+        dependsOn(shadowJar, reobfJar)
     }
 
     compileJava {
@@ -34,24 +32,47 @@ tasks {
         // See https://openjdk.java.net/jeps/247 for more information.
         options.release.set(17)
     }
+    
     javadoc {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
     }
+
     processResources {
         filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
     }
+
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+}
+
+def mclib(String src) {
+    return files(rootProject.minecraftLibraries.find(src));
+}
+def mcver(String src) {
+    return files(rootProject.minecraftVersions.find(src));
 }
 
 dependencies {
 
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.1-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
-    compileOnly project(":carbon-core")
+    implementation project(":carbon-event")
 
+    implementation 'org.bstats:bstats-bukkit:3.0.0'
+    compileOnly 'org.zeroturnaround:zt-zip:1.15'
+    compileOnly 'org.javassist:javassist:3.28.0-GA'
+
+    // test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
 }
 
 test {
+    // enable JUnit for testing
     useJUnitPlatform()
 }

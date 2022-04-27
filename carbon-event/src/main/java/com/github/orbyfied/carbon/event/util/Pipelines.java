@@ -1,0 +1,57 @@
+package com.github.orbyfied.carbon.event.util;
+
+import com.github.orbyfied.carbon.event.BusEvent;
+import com.github.orbyfied.carbon.event.EventBus;
+import com.github.orbyfied.carbon.event.pipeline.Handler;
+import com.github.orbyfied.carbon.event.pipeline.Pipeline;
+import com.github.orbyfied.carbon.event.pipeline.PipelineHandlerAction;
+import com.github.orbyfied.carbon.event.pipeline.impl.BasicPipeline;
+import com.github.orbyfied.carbon.event.pipeline.PipelineAccess;
+
+public class Pipelines {
+
+    private Pipelines() { }
+
+    @SuppressWarnings("unchecked")
+    public static PipelineAccess parental(EventBus bus,
+                                          Class<?> klass) {
+        final Class<?>[] parents = klass.getClasses();
+        return new PipelineAccess() {
+            BasicPipeline pipeline = new BasicPipeline<>();
+
+            @Override
+            public PipelineAccess push(Object event) {
+                pipeline.push(event);
+                for (Class<?> parent : parents) {
+                    PipelineAccess p = bus.getPipelineOrNull(parent);
+                    if (p == null)
+                        continue;
+                    p.push(event);
+                }
+                return this;
+            }
+
+            @Override
+            public BasicPipeline base() {
+                return pipeline;
+            }
+        };
+    }
+
+    public static PipelineAccess<BusEvent> mono(EventBus bus) {
+        return new PipelineAccess<>() {
+            final BasicPipeline<BusEvent> pipeline = new BasicPipeline<>();
+
+            @Override
+            public PipelineAccess<BusEvent> push(BusEvent event) {
+                pipeline.push(event);
+                return this;
+            }
+
+            @Override
+            public Pipeline<BusEvent, ? extends PipelineHandlerAction> base() {
+                return pipeline;
+            }
+        };
+    }
+}
