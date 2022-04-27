@@ -19,12 +19,14 @@ import com.github.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -97,18 +99,6 @@ public class RecipeTypes {
         public void prepareCraft(PrepareCraftWrapper event,
                                  boolean interact) {
 
-            // collect compiled stacks
-            ItemStack[] inputMatrix = event.getInventory().getMatrix();
-            int iml = inputMatrix.length;
-            List<CompiledStack> stacks = new ArrayList<>(iml);
-            for (int i = 0; i < iml; i++)
-                stacks.add(new CompiledStack().wrap(inputMatrix[i]));
-
-            event.stacks = stacks;
-
-            // check if there are any special items
-            boolean isVanilla = stacks.stream().noneMatch(c -> c.getState() != null);
-
             // get inventories
             CraftingInventory inv = event.getInventory();
             ItemStack[] matrix    = event.getInventory().getMatrix();
@@ -120,7 +110,21 @@ public class RecipeTypes {
                     .input(SlotContainer.ofArray(matrix))
                     .output(SlotContainer.of(resultSlot));
 
+            cm = worker.processMatrix(cm);
+
             event.matrix = cm;
+
+            // collect compiled stacks
+            SlotContainer inc = cm.input();
+            int iml = inc.getSize();
+            List<CompiledStack> stacks = new ArrayList<>(iml);
+            for (int i = 0; i < iml; i++)
+                stacks.add(inc.getSlot(i).getItem());
+
+            event.stacks = stacks;
+
+            // check if there are any special items
+            boolean isVanilla = stacks.stream().noneMatch(c -> c.getState() != null);
 
             // resolve recipe
             Recipe recipe = worker.resolve(cm);
@@ -144,20 +148,18 @@ public class RecipeTypes {
                 CompiledStack stack = stacks.get(i);
 
                 int ia = in.count(stack, cm);
-                if (amount == -1 || ia > amount)
+                if (amount == -1 || ia < amount)
                     amount = ia;
             }
 
-            event.amount = amount;
+            amount = recipe.result().count(
+                    cm,
+                    cm.output(),
+                    recipe,
+                    amount
+            );
 
-            // put result
-            if (interact) {
-                recipe.result().write(
-                        cm.output(),
-                        recipe,
-                        amount
-                );
-            }
+            event.amount = amount;
 
         }
 
@@ -183,6 +185,15 @@ public class RecipeTypes {
             if (w.recipe == null)
                 return;
 
+            // put result
+            CraftMatrix cm = w.matrix;
+            w.recipe.result().write(
+                    cm,
+                    cm.output(),
+                    w.recipe,
+                    w.amount
+            );
+
             we.carry(EVENT_HANDLED_FLAG, true);
         }
 
@@ -207,9 +218,16 @@ public class RecipeTypes {
 
             // execute
             Recipe recipe = w.recipe;
-
-            int    amount = w.amount;
+            int amount = w.amount;
             List<CompiledStack> stacks = w.stacks;
+
+            System.out.println("TOTAL AMOUNT: " + amount);
+
+            // if normal click, only take one
+            if (event.getClick() == ClickType.LEFT)
+                amount = 1;
+
+            System.out.println("FINAL AMOUNT: " + amount);
 
             // use items
             int l = recipe.ingredients().size();
@@ -274,13 +292,19 @@ public class RecipeTypes {
             tree.remove(recipe.ingredients().iterator());
         }
 
+
+
         @Override
         public Recipe resolve(CraftMatrix matrix) {
-            matrix = matrix.normalize();
             RecipeMatchTree.Node n = tree.matchMatrix(matrix);
             if (n == null)
                 return null;
             return n.getRecipe();
+        }
+
+        @Override
+        public CraftMatrix processMatrix(CraftMatrix matrix) {
+            return matrix.normalize();
         }
 
     }
@@ -384,6 +408,11 @@ public class RecipeTypes {
             if (n == null)
                 return null;
             return n.getRecipe();
+        }
+
+        @Override
+        public CraftMatrix processMatrix(CraftMatrix matrix) {
+            return matrix.cleanAllEmpty();
         }
 
     }

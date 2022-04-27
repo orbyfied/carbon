@@ -97,12 +97,20 @@ public interface Ingredient {
 
         @Override
         public void used(CompiledStack stack, int amount, CraftMatrix matrix) {
-            stack.getStack().setCount(stack.getAmount() - amount * amt);
+            int items = amount * amt;
+            int resultStackAmount = stack.getAmount() - items;
+            System.out.println("from " + this +
+                    ": amount: " + amount +
+                    ", needed: " + amt +
+                    ", items: " + items +
+                    ", resultAmt: " + resultStackAmount);
+
+            stack.getStack().setCount(resultStackAmount);
         }
 
         @Override
         public String toString() {
-            return "Ingredient(" + item + " min " + amt + "x)";
+            return "UnspecificIngredient(" + item + " min " + amt + "x)";
         }
 
     }

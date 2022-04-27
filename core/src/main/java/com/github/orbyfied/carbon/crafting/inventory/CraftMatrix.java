@@ -144,11 +144,13 @@ public class CraftMatrix implements Cloneable {
 
         int dw = brx - tlx;
 
+        System.out.println("TLX/TLY/BRX/BRY: " + tlx + "," + tly + " " + brx + "," + bry);
+
         // apply changes
         int l = slots.size();
         List<Slot> slotsFinal = new ArrayList<>(l);
-        for (int x = tlx; x < brx; x++)
-            for (int y = tly; y < tlx; y++)
+        for (int x = tlx; x <= brx; x++)
+            for (int y = tly; y <= bry; y++)
                 slotsFinal.add(slots.get(flatten(x, y)));
 
         // create matrix
@@ -163,6 +165,27 @@ public class CraftMatrix implements Cloneable {
         matrix.width = dw;
 
         // return
+        return matrix;
+    }
+
+    public CraftMatrix cleanAllEmpty() {
+        List<Slot> slots = input.getSlots();
+        List<Slot> slotsFinal = new ArrayList<>();
+        Slot slot;
+        int l = slots.size();
+        for (int i = 0; i < l; i++)
+            if ((slot = slots.get(i)) != null && !slot.isEmpty())
+                slotsFinal.add(slot);
+
+        // create and return
+        CraftMatrix matrix = new CraftMatrix();
+
+        matrix.root   = this;
+        matrix.input  = SlotContainer.of(slotsFinal);
+        matrix.output = output;
+        matrix.size   = slotsFinal.size();
+        matrix.width  = -1;
+
         return matrix;
     }
 
@@ -191,6 +214,11 @@ public class CraftMatrix implements Cloneable {
         int result = Objects.hash(output);
         result = 31 * result + Objects.hash(input);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "MATRIX size: " + size + ", in: " + input + ", out: " + output;
     }
 
 }

@@ -79,6 +79,14 @@ public interface Slot {
         return ItemUtil.isEmpty(getBukkitItem());
     }
 
+    /**
+     * To string method for debug purposes.
+     * @return A debug string.
+     */
+    default String toDebugString() {
+        return "Slot(virt: " + isVirtual() + ", idx: " + getIndex() + ", isEmpty: " + isEmpty() + ", item: " + getItem() + ")";
+    }
+
     ///////////////////////////////////////////////////
 
     static Slot in(final Inventory inv,

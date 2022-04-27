@@ -79,7 +79,7 @@ public class ExampleMod
 
         // create recipe for the item
         RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:ruby_from_dirt"))
-                .dimensions(new RecipeDimensions(2).sized(3, 3))
+                .dimensions(new RecipeDimensions(2).sized(1, 1))
                 .ingredients(
                         Ingredient.ofItem(Material.DIRT, 2).tagged("item 1")
                 )
@@ -99,7 +99,7 @@ public class ExampleMod
                         Ingredient.ofItem(Material.REDSTONE, 1), EMPTY,
                         EMPTY, Ingredient.ofItem(Material.DIAMOND, 1)
                 )
-                .result(Result.ofItem(ruby, 69))
+                .result(Result.ofItem(ruby, 4))
                 .dimensions(new RecipeDimensions(2).sized(2, 2))
                 .register(recipeRegistry);
 

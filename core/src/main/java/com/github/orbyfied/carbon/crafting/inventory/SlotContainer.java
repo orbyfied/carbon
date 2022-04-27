@@ -7,10 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents an array of slots which
@@ -34,6 +31,8 @@ public class SlotContainer implements Iterable<Slot> {
         return slots.get(i);
     }
 
+    public int getSize() { return slots.size(); }
+
     public Slot addItem(CompiledStack stack) {
         CompiledStack left;
         int l = slots.size();
@@ -55,6 +54,11 @@ public class SlotContainer implements Iterable<Slot> {
     @Override
     public Iterator<Slot> iterator() {
         return slots.iterator();
+    }
+
+    @Override
+    public String toString() {
+        return slots.toString();
     }
 
     /////////////////////////////////////////////

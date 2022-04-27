@@ -21,4 +21,6 @@ public abstract class RecipeWorker {
 
     public abstract Recipe resolve(CraftMatrix matrix);
 
+    public abstract CraftMatrix processMatrix(CraftMatrix matrix);
+
 }
