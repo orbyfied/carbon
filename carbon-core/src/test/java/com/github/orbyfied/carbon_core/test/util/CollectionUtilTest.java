@@ -1,10 +1,6 @@
 package com.github.orbyfied.carbon_core.test.util;
 
-import com.github.orbyfied.carbon.util.CollectionUtil;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
+import net.orbyfied.carbon.util.CollectionUtil;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

@@ -1,10 +1,10 @@
 package com.github.orbyfied.carbon_core.test.event;
 
-import com.github.orbyfied.carbon.event.BusEvent;
-import com.github.orbyfied.carbon.event.EventBus;
-import com.github.orbyfied.carbon.event.handler.BasicHandler;
-import com.github.orbyfied.carbon.event.EventListener;
-import com.github.orbyfied.carbon.event.util.Pipelines;
+import net.orbyfied.carbon.event.BusEvent;
+import net.orbyfied.carbon.event.EventBus;
+import net.orbyfied.carbon.event.handler.BasicHandler;
+import net.orbyfied.carbon.event.EventListener;
+import net.orbyfied.carbon.event.util.Pipelines;
 import org.junit.jupiter.api.Test;
 
 public class BasicEventBusTest {

@@ -1,7 +1,7 @@
 package com.github.orbyfied.carbon_core.test.command;
 
-import com.github.orbyfied.carbon.command.*;
-import com.github.orbyfied.carbon.command.impl.SystemParameterType;
+import net.orbyfied.carbon.command.*;
+import net.orbyfied.carbon.command.impl.SystemParameterType;
 import org.junit.jupiter.api.Test;
 
 public class CommandEngineTest {

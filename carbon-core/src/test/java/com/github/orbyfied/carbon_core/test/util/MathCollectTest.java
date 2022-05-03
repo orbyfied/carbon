@@ -1,9 +1,8 @@
 package com.github.orbyfied.carbon_core.test.util;
 
-import com.github.orbyfied.carbon.util.math.Range;
 import org.junit.jupiter.api.Test;
 
-import static com.github.orbyfied.carbon.util.math.Range.doubles;
+import static net.orbyfied.carbon.util.math.Range.doubles;
 
 public class MathCollectTest {
 

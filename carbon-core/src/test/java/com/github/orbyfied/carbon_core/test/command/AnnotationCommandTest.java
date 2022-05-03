@@ -1,7 +1,7 @@
 package com.github.orbyfied.carbon_core.test.command;
 
-import com.github.orbyfied.carbon.command.*;
-import com.github.orbyfied.carbon.command.annotation.*;
+import net.orbyfied.carbon.command.*;
+import net.orbyfied.carbon.command.annotation.*;
 import org.junit.jupiter.api.Test;
 
 public class AnnotationCommandTest {

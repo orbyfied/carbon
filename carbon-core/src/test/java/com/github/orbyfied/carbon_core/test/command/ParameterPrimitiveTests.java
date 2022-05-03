@@ -1,9 +1,9 @@
 package com.github.orbyfied.carbon_core.test.command;
 
-import com.github.orbyfied.carbon.command.parameter.ParameterType;
-import com.github.orbyfied.carbon.command.impl.SystemParameterType;
-import com.github.orbyfied.carbon.command.parameter.TypeIdentifier;
-import com.github.orbyfied.carbon.util.StringReader;
+import net.orbyfied.carbon.command.parameter.ParameterType;
+import net.orbyfied.carbon.command.impl.SystemParameterType;
+import net.orbyfied.carbon.command.parameter.TypeIdentifier;
+import net.orbyfied.carbon.util.StringReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

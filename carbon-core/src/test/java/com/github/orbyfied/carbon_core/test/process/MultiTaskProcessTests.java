@@ -1,17 +1,14 @@
 package com.github.orbyfied.carbon_core.test.process;
 
-import com.github.orbyfied.carbon.process.ExecutionService;
-import com.github.orbyfied.carbon.process.Process;
-import com.github.orbyfied.carbon.process.ProcessManager;
-import com.github.orbyfied.carbon.process.impl.AsyncTask;
-import com.github.orbyfied.carbon.process.impl.ParallelTask;
-import com.github.orbyfied.carbon.process.impl.QueuedTickExecutionService;
-import com.github.orbyfied.carbon.process.impl.SyncTask;
+import net.orbyfied.carbon.process.ExecutionService;
+import net.orbyfied.carbon.process.Process;
+import net.orbyfied.carbon.process.ProcessManager;
+import net.orbyfied.carbon.process.impl.ParallelTask;
+import net.orbyfied.carbon.process.impl.QueuedTickExecutionService;
+import net.orbyfied.carbon.process.impl.SyncTask;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class MultiTaskProcessTests {
 

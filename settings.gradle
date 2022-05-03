@@ -11,10 +11,7 @@ rootProject.name = 'carbon'
 
 include 'carbon-core'
 
-include 'carbon-event'
-
 include 'platform-v1_18_2'
 
 include 'test-mod-1_18_1'
-include 'carbon-process'
 

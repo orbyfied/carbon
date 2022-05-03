@@ -1,9 +1,9 @@
 package com.github.orbyfied.carbon_core.test.config;
 
-import com.github.orbyfied.carbon.config.AbstractConfiguration;
-import com.github.orbyfied.carbon.config.Configurable;
-import com.github.orbyfied.carbon.config.Configuration;
-import com.github.orbyfied.carbon.config.Configure;
+import net.orbyfied.carbon.config.AbstractConfiguration;
+import net.orbyfied.carbon.config.Configurable;
+import net.orbyfied.carbon.config.Configuration;
+import net.orbyfied.carbon.config.Configure;
 import org.junit.jupiter.api.Test;
 
 public class SimpleConfigurableTest {
