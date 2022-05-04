@@ -2,6 +2,7 @@ package net.orbyfied.carbon.bootstrap;
 
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.content.CMDRegistryService;
+import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
 import net.orbyfied.carbon.crafting.Recipe;
 import net.orbyfied.carbon.crafting.RecipeRegistryService;
@@ -10,6 +11,7 @@ import net.orbyfied.carbon.crafting.type.RecipeTypes;
 import net.orbyfied.carbon.element.ModElementRegistry;
 import net.orbyfied.carbon.item.CarbonItem;
 import net.orbyfied.carbon.item.CompiledStack;
+import net.orbyfied.carbon.item.ItemFixer;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
@@ -186,12 +188,15 @@ public abstract class CarbonBootstrap
 
         // initialize services
         initStage.next(InitStageGeneral.INIT_SERVICES);
-        main.getServiceManager().initialized();
+        final ServiceManager sm = main.getServiceManager();
+        sm.initialized();
 
         // initialize misc apis
         initStage.next(InitStageGeneral.INIT_MISC_APIS);
         initStage.details("CompiledStack: Inject API");
         CompiledStack.initialize(main.getAPI());
+        initStage.details("ItemFixer: Register Service");
+        sm.addService(new ItemFixer(sm));
 
         // initialize all mods
         initStage.next(InitStageGeneral.INIT_MODS);
