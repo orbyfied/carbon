@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.util;
+package net.orbyfied.carboncoretest.util;
 
 import org.junit.jupiter.api.Test;
 

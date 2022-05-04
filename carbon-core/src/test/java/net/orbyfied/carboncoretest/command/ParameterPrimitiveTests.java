@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.command;
+package net.orbyfied.carboncoretest.command;
 
 import net.orbyfied.carbon.command.parameter.ParameterType;
 import net.orbyfied.carbon.command.impl.SystemParameterType;

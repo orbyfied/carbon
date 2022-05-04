@@ -1,4 +1,4 @@
-package com.github.orbyfied.example;
+package net.orbyfied.examplemod;
 
 import net.orbyfied.carbon.api.CarbonModAPI;
 import net.orbyfied.carbon.api.mod.CarbonMod;

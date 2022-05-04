@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.util;
+package net.orbyfied.carboncoretest.util;
 
 import net.orbyfied.carbon.core.mod.CarbonJavaModAPI;
 import net.orbyfied.carbon.util.ReflectionUtil;

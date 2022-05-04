@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.process;
+package net.orbyfied.carboncoretest.process;
 
 import net.orbyfied.carbon.process.ExecutionService;
 import net.orbyfied.carbon.process.Process;

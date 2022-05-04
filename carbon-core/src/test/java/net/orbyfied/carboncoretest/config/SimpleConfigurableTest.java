@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.config;
+package net.orbyfied.carboncoretest.config;
 
 import net.orbyfied.carbon.config.AbstractConfiguration;
 import net.orbyfied.carbon.config.Configurable;

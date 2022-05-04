@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.event;
+package net.orbyfied.carboncoretest.event;
 
 import net.orbyfied.carbon.event.BusEvent;
 import net.orbyfied.carbon.event.EventBus;

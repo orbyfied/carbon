@@ -1,4 +1,4 @@
-package com.github.orbyfied.carbon_core.test.random_shit;
+package net.orbyfied.carboncoretest.random_shit;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;

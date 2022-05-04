@@ -15,7 +15,7 @@ public class CarbonJavaAPI implements CarbonAPI {
     /**
      * The access validator for checking if a caller can get the main instance.
      */
-    private static final AccessValidator ACCESS_VALIDATOR_GET_MAIN = AccessValidator.topInPackage("com.github.orbyfied.carbon");
+    private static final AccessValidator ACCESS_VALIDATOR_GET_MAIN = AccessValidator.topInPackage("net.orbyfied.carbon");
 
     //////////////////////////////////////////////////
 
