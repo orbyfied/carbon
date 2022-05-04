@@ -1,6 +1,5 @@
 package net.orbyfied.carbon.element;
 
-import com.github.orbyfied.carbon.registry.*;
 import net.orbyfied.carbon.registry.AbstractRegistryService;
 import net.orbyfied.carbon.registry.FunctionalService;
 import net.orbyfied.carbon.registry.MappingService;

@@ -2,7 +2,6 @@ package net.orbyfied.carbon.core.mod;
 
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.api.CarbonModAPI;
-import com.github.orbyfied.carbon.api.mod.*;
 import net.orbyfied.carbon.api.mod.CarbonMod;
 import net.orbyfied.carbon.api.mod.CarbonModInitializer;
 import net.orbyfied.carbon.api.mod.MalformedModException;

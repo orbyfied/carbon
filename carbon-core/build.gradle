@@ -1,12 +1,17 @@
 import org.apache.commons.io.Charsets
 
 plugins {
-    id 'java'
+    id 'java' // java
+
+    // for shading in dependencies
     id "com.github.johnrengelman.shadow" version "7.1.2"
+
+    // for minecraft lol
     id ("io.papermc.paperweight.userdev") version "1.3.5"
 }
 
-group rootProject.group
+// Properties
+group   rootProject.group
 version rootProject.version
 
 java {
@@ -14,65 +19,82 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
-shadowJar {
-    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
-}
+// Task Configuration
 
 tasks {
 
-    // Configure reobfJar to run when invoking the build task
     assemble {
-        dependsOn(shadowJar, reobfJar)
-    }
+        dependsOn(shadowJar, reobfJar) }
 
     compileJava {
-        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-
-        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
-        // See https://openjdk.java.net/jeps/247 for more information.
-        options.release.set(17)
-    }
-    
+        options.encoding = Charsets.UTF_8.name()
+        options.release.set(17) }
     javadoc {
-        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-    }
-
+        options.encoding = Charsets.UTF_8.name() }
     processResources {
-        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
-    }
+        filteringCharset = Charsets.UTF_8.name() }
+
 
 }
+
+processResources {
+    // replace placeholders for epicness
+    // (and streamlining) but mostly epicness
+    // (and other processing)
+    filesNotMatching([
+            // media
+            '**/*.png',
+            '**/*.ogg',
+            '**/*.wav',
+            '**/*.mp3',
+
+            // compiled
+            '**/*.jar',
+            '**/*.class'
+    ]) {
+        // expand placeholders
+        expand 'carbon.project.version': project.version
+    }
+}
+
+// Dependencies
 
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
-}
 
-def mclib(String src) {
-    return files(rootProject.minecraftLibraries.find(src));
-}
-def mcver(String src) {
-    return files(rootProject.minecraftVersions.find(src));
+    // tried to use mixins lol
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
 }
 
 dependencies {
 
+    // Minecraft
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
     // TODO: may separate it later
+    //  Modules
 //    implementation project(":carbon-event")
 //    implementation project(":carbon-process")
 
+    // External Libraries
     implementation 'org.bstats:bstats-bukkit:3.0.0'
+
     compileOnly 'org.zeroturnaround:zt-zip:1.15'
     compileOnly 'org.javassist:javassist:3.28.0-GA'
 
-    // test dependencies
+    // Test Dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
 }
+
+shadowJar {
+    // relocate BStats into the right directory
+    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
+}
+
+// Test Configuration
 
 test {
     // enable JUnit for testing

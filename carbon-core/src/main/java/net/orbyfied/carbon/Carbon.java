@@ -29,7 +29,7 @@ import java.nio.file.Path;
 public class Carbon
         implements Configurable<CarbonConfiguration> {
 
-    public static final Version VERSION = Version.of("0.1.0");
+    public static final Version VERSION = Version.of("${carbon.project.version}");
 
     /* ----------- PLUGIN ------------ */
 

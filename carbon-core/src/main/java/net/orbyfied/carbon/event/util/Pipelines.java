@@ -2,7 +2,6 @@ package net.orbyfied.carbon.event.util;
 
 import net.orbyfied.carbon.event.BusEvent;
 import net.orbyfied.carbon.event.EventBus;
-import com.github.orbyfied.carbon.event.pipeline.*;
 import net.orbyfied.carbon.event.pipeline.PipelineAccess;
 import net.orbyfied.carbon.event.pipeline.PipelineConverter;
 import net.orbyfied.carbon.event.pipeline.impl.BasicPipeline;

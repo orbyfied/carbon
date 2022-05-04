@@ -3,77 +3,92 @@ import org.apache.commons.io.Charsets
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id 'java'
+    id 'java' // java
+
+    // for shading in dependencies
     id "com.github.johnrengelman.shadow" version "7.1.2"
+
+    // for minecraft lol
     id "io.papermc.paperweight.userdev" version "1.3.5"
 }
 
 ext {
+    // muy importante or something
     minecraftVersion = "1.18.2"
 }
 
-group rootProject.group
+// Properties
+group   rootProject.group
 version rootProject.version
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
+// Task Configuration
 
 java {
     // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
-shadowJar {
-    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
-}
-
 tasks {
-    // Configure reobfJar to run when invoking the build task
-    assemble {
-        dependsOn(reobfJar)
-    }
 
+    // configure reobfJar to run when invoking the build task
+    assemble {
+        dependsOn(reobfJar) }
     build {
-        dependsOn(reobfJar)
-    }
+        dependsOn(reobfJar) }
 
     compileJava {
-        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-
-        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
-        // See https://openjdk.java.net/jeps/247 for more information.
-        options.release.set(17)
-    }
+        options.encoding = Charsets.UTF_8.name()
+        options.release.set(17) }
     javadoc {
-        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-    }
+        options.encoding = Charsets.UTF_8.name() }
     processResources {
-        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
-    }
+        filteringCharset = Charsets.UTF_8.name() }
 
     reobfJar {
+        // set jar format
         final String format = "carbon-${project.minecraftVersion}+${project.version}.jar"
-
         outputJar.set(layout.buildDirectory.file("libs/" + format))
     }
 }
 
-def mclib(String src) {
-    return files(rootProject.minecraftLibraries.find(src));
+processResources {
+    // replace placeholders for epicness
+    // (and streamlining) but mostly epicness
+    // (and other processing)
+    filesNotMatching([
+            // media
+            '**/*.png',
+            '**/*.ogg',
+            '**/*.wav',
+            '**/*.mp3',
+
+            // compiled
+            '**/*.jar',
+            '**/*.class'
+    ]) {
+        // expand placeholders
+        expand 'carbon.project.version': project.version
+    }
+}
+
+// Dependency Management
+
+repositories {
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
 
+    // Minecraft
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
+    // Modules (Core)
     implementation project(":carbon-core")
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
-test {
-    useJUnitPlatform()
+shadowJar {
+    // relocate BStats into the right directory
+    relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
 }
