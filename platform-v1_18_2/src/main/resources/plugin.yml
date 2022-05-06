@@ -1,7 +1,7 @@
 # Main Properties
 name: Carbon
 main: net.orbyfied.carbon.bootstrap.Carbon1182Bootstrap
-version: ${carbon.project.version}
+version: '$${carbonProjectVersion}'
 
 # For 1.18 (this platform)
 api-version: 1.18

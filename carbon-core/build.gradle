@@ -51,13 +51,43 @@ processResources {
             // compiled
             '**/*.jar',
             '**/*.class'
-    ]) {
+    ] as Iterable<String>) {
         // expand placeholders
-        expand 'carbon': [
-            'project': [
-                'version': project.version
-            ]
+        def placeholders = [
+                'carbonProjectVersion' : project.version
         ]
+
+        // filter for placeholder expansion
+        // From: https://stackoverflow.com/questions/17274107/how-to-expand-property-references-in-jar-resources
+        filter { String line ->
+            line.findAll(/\$\$\{([a-z,A-Z,0-9,\.]+)\}/).each {
+                // get the key from the expression
+                String key      = it.replace("\$\${", "").replace("}", "")
+                String keyParts = key.split("\\.");
+                System.out.println(keyParts)
+
+                // iterate over key
+                Object currentValue = placeholders;
+                for (String keyPart : keyParts) {
+                    // check if we can continue
+                    if (!(currentValue instanceof Map)) {
+                        System.out.println("[WARN] Could not resolve property for key: " + key)
+                        return;
+                    }
+
+                    // get next value
+                    currentValue = ((Map<String,Object>)currentValue).get(keyPart);
+                }
+
+                if (currentValue != null) {
+                    // replace
+                    line = line.replace(it, currentValue)
+                } else System.out.println("[WARN] No property defined for key: " + key)
+            }
+
+            // return line
+            line
+        }
     }
 }
 
@@ -78,8 +108,12 @@ dependencies {
 
     // TODO: may separate it later
     //  Modules
-//    implementation project(":carbon-event")
-//    implementation project(":carbon-process")
+    implementation project(":carbon-event")
+    implementation project(":carbon-process")
+    implementation project(":carbon-util")
+    implementation project(":carbon-config")
+    implementation project(":carbon-command")
+    implementation project(":carbon-registry")
 
     // External Libraries
     implementation 'org.bstats:bstats-bukkit:3.0.0'
@@ -87,20 +121,9 @@ dependencies {
     compileOnly 'org.zeroturnaround:zt-zip:1.15'
     compileOnly 'org.javassist:javassist:3.28.0-GA'
 
-    // Test Dependencies
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
 }
 
 shadowJar {
     // relocate BStats into the right directory
     relocate 'org.bstats', 'com.github.orbyfied.carbon.vendor.bstats'
-}
-
-// Test Configuration
-
-test {
-    // enable JUnit for testing
-    useJUnitPlatform()
 }

@@ -1,3 +1,4 @@
+// Plugin Management
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -7,11 +8,15 @@ pluginManagement {
     }
 }
 
+// Properties
 rootProject.name = 'carbon'
-
 include 'carbon-core'
-
 include 'platform-v1_18_2'
-
 include 'example-mod-1_18_1'
+include 'carbon-event'
+include 'carbon-process'
+include 'carbon-util'
+include 'carbon-config'
+include 'carbon-command'
+include 'carbon-registry'
 

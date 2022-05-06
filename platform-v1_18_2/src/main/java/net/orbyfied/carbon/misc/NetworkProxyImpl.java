@@ -1,9 +1,9 @@
 package net.orbyfied.carbon.misc;
 
 import net.orbyfied.carbon.platform.NetworkProxy;
-import net.orbyfied.carbon.util.mc.NmsHelper;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
+import net.orbyfied.carbon.util.mc.NmsHelper;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;

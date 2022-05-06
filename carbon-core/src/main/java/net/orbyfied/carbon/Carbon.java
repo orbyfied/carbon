@@ -15,7 +15,7 @@ import net.orbyfied.carbon.event.EventBus;
 import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.process.ProcessManager;
-import net.orbyfied.carbon.process.impl.CarbonProcessManager;
+import net.orbyfied.carbon.process.CarbonProcessManager;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.user.CarbonUserEnvironment;
@@ -29,7 +29,7 @@ import java.nio.file.Path;
 public class Carbon
         implements Configurable<CarbonConfiguration> {
 
-    public static final Version VERSION = Version.of("${carbon.project.version}");
+    public static final Version VERSION = Version.readFromResource(Carbon.class, "/version.txt");
 
     /* ----------- PLUGIN ------------ */
 

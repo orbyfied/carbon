@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -56,6 +57,11 @@ public class BukkitLogger {
         return this;
     }
 
+    private void foreachLine(String msg, Consumer<String> consumer) {
+        for (String line : msg.split("\n"))
+            consumer.accept(line);
+    }
+
     private String createLevelText(int level) {
         String name = nameMapper.apply(level);
         return colorMapper.apply(level) + "(" + name + ")";
@@ -72,7 +78,7 @@ public class BukkitLogger {
         return b.toString();
     }
 
-    private String createLoggingString(int level, boolean colAll, Object... msg) {
+    private String toStringMessage(Object... msg) {
         String msgstr;
         if (msg.length == 0)
             msgstr = "";
@@ -80,13 +86,20 @@ public class BukkitLogger {
             msgstr = Objects.toString(msg[0]);
         else
             msgstr = createArrayString(msg);
+        return msgstr;
+    }
+
+    private String createLoggingString(int level, boolean colAll, String msgstr) {
         return createLevelText(level) + " " + ChatColor.RESET + ChatColor.GRAY + "[ " + ChatColor.WHITE + tag
                 + (stage != null ? ChatColor.DARK_GRAY + "/" + stage : "") + ChatColor.GRAY + " ] " +
                 (colAll ? colorMapper.apply(level) : "") + msgstr;
     }
 
     public BukkitLogger log(int level, boolean colAll, Object msg) {
-        sender.sendMessage(createLoggingString(level, colAll, msg));
+        foreachLine(toStringMessage(msg), line -> {
+            sender.sendMessage(createLoggingString(level, colAll, line));
+        });
+
         return this;
     }
 
@@ -95,8 +108,7 @@ public class BukkitLogger {
     }
 
     public BukkitLogger log(int level, Object msg) {
-        sender.sendMessage(createLoggingString(level, false, msg));
-        return this;
+        return log(level, false, msg);
     }
 
     public BukkitLogger log(int level, String stage, Object msg) {
@@ -104,8 +116,7 @@ public class BukkitLogger {
     }
 
     public BukkitLogger logc(int level, Object msg) {
-        sender.sendMessage(createLoggingString(level, true, msg));
-        return this;
+        return log(level, true, msg);
     }
 
     public BukkitLogger logc(int level, String stage, Object msg) {
@@ -150,6 +161,14 @@ public class BukkitLogger {
 
     public BukkitLogger err(String stage, Object msg) {
         return stage(stage).log(2, msg);
+    }
+
+    public BukkitLogger errc(Object msg) {
+        return logc(2, msg);
+    }
+
+    public BukkitLogger errc(String stage, Object msg) {
+        return stage(stage).logc(2, msg);
     }
 
     public BukkitLogger misc(Object msg) {

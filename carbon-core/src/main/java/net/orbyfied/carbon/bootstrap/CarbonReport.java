@@ -10,7 +10,7 @@ import net.orbyfied.carbon.crafting.type.RecipeType;
 import net.orbyfied.carbon.item.CarbonItem;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.IOUtil;
-import net.orbyfied.carbon.util.functional.Verbose;
+import net.orbyfied.carbon.util.Verbose;
 import org.bukkit.Bukkit;
 
 import java.io.*;

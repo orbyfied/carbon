@@ -1,6 +1,7 @@
 package net.orbyfied.carbon.bootstrap;
 
 import net.orbyfied.carbon.Carbon;
+import net.orbyfied.carbon.api.util.Version;
 import net.orbyfied.carbon.content.CMDRegistryService;
 import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
@@ -12,6 +13,7 @@ import net.orbyfied.carbon.element.ModElementRegistry;
 import net.orbyfied.carbon.item.CarbonItem;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.orbyfied.carbon.item.ItemFixer;
+import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
@@ -34,6 +36,11 @@ public abstract class CarbonBootstrap
      * The instance of this plugin.
      */
     protected static CarbonBootstrap instance;
+
+    /**
+     * Logger for bootstrapping information.
+     */
+    protected final BukkitLogger boostrapLogger;
 
     /**
      * The main instance.
@@ -64,12 +71,16 @@ public abstract class CarbonBootstrap
 
     /** Constructor. */
     public CarbonBootstrap() {
+
         this.platformProxy = newPlatformProxy();
-        this.main          = new Carbon(this, platformProxy);
-        this.metrics       = new Metrics(this, bStatsPluginId);
+        this.main = new Carbon(this, platformProxy);
+        this.metrics = new Metrics(this, bStatsPluginId);
 
         this.initStage = new InitStage();
         main.setInitializationStage(initStage);
+
+        this.boostrapLogger = main.getLogger("CarbonBoostrap");
+
     }
 
     /**
@@ -105,37 +116,56 @@ public abstract class CarbonBootstrap
 
     @Override
     public void onEnable() {
+        
+        try {
 
-        // start initialization
-        initStage.next(InitStageGeneral.ENABLE);
+            // start initialization
+            initStage.next(InitStageGeneral.ENABLE);
 
-        // send fancy message
-        ConsoleCommandSender sender = Bukkit.getConsoleSender();
-        sender.sendMessage("");
-        CarbonBranding.applyForEachLine(
-                CarbonBranding.BRAND_ICON_FORMATTED,
-                (n, l) -> sender.sendMessage("  " + l + (n == 3 || n == 4 ? "   " + CarbonBranding.BRAND_MESSAGE_FORMATTED : ""))
-        );
-        sender.sendMessage("");
+            // send fancy message
+            ConsoleCommandSender sender = Bukkit.getConsoleSender();
+            sender.sendMessage("");
+            CarbonBranding.applyForEachLine(
+                    CarbonBranding.BRAND_ICON_FORMATTED,
+                    (n, l) -> sender.sendMessage("  " + l + (n == 3 || n == 4 ? "   " + CarbonBranding.BRAND_MESSAGE_FORMATTED : ""))
+            );
+            sender.sendMessage("");
 
-        // load configuration
-        initStage.next(InitStageGeneral.LOAD_CONFIG);
-        main.getConfigurationHelper()
-                .load();
+            // load configuration
+            initStage.next(InitStageGeneral.LOAD_CONFIG);
+            main.getConfigurationHelper()
+                    .load();
 
-        // start loading mods
-        initStage.next(InitStageGeneral.LOAD_MODS);
-        ModLoader loader = main.getModLoader();
-        loader.loadAll();
+            // start loading mods
+            initStage.next(InitStageGeneral.LOAD_MODS);
+            ModLoader loader = main.getModLoader();
+            loader.loadAll();
 
-        // load user environment
-        initStage.next(InitStageGeneral.LOAD_USER_ENV);
-        main.getUserEnvironment().enable();
+            // load user environment
+            initStage.next(InitStageGeneral.LOAD_USER_ENV);
+            main.getUserEnvironment().enable();
 
-        // prepare to run initialize
-        initStage.next(InitStageGeneral.SCHEDULE_INIT);
-        Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
+            Version.of("hello");
 
+            // prepare to run initialize
+            initStage.next(InitStageGeneral.SCHEDULE_INIT);
+            Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);
+
+        } catch (Exception e) {
+
+            // print error
+            boostrapLogger.err("Critical exception while loading Carbon:");
+            boostrapLogger.errc(e);
+
+            // report exception
+            CarbonReport.reportFile()
+                    .setMessage("Critical exception while loading Carbon")
+                    .setProperty("Boostrap Class", this.getClass())
+                    .withError(e)
+                    .write();
+
+        }
+        
     }
 
     // properly disable everything
@@ -160,68 +190,85 @@ public abstract class CarbonBootstrap
      */
     public void initialize() {
 
-        initStage.next(InitStageGeneral.INIT);
+        try {
 
-        // initialize registries
-        initStage.next(InitStageGeneral.INIT_REGISTRIES);
+            initStage.next(InitStageGeneral.INIT);
 
-        initStage.details("minecraft:items");
-        Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items");
-        itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
-                .addService(new CMDRegistryService<>(itemRegistry));
+            // initialize registries
+            initStage.next(InitStageGeneral.INIT_REGISTRIES);
 
-        initStage.details("minecraft:recipe_types");
-        Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types");
-        RecipeTypes.registerAll(recipeTypeRegistry);
+            initStage.details("minecraft:items");
+            Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items");
+            itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
+                    .addService(new CMDRegistryService<>(itemRegistry));
 
-        initStage.details("minecraft:recipes");
-        Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes");
-        recipeRegistry.addService(new RecipeRegistryService(recipeRegistry));
+            initStage.details("minecraft:recipe_types");
+            Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types");
+            RecipeTypes.registerAll(recipeTypeRegistry);
 
-        initStage.details("Registering...");
-        Registry<Registry<? extends Identifiable>> registries = main.getRegistries();
+            initStage.details("minecraft:recipes");
+            Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes");
+            recipeRegistry.addService(new RecipeRegistryService(recipeRegistry));
 
-        registries
-                .register(itemRegistry)
-                .register(recipeTypeRegistry)
-                .register(recipeRegistry);
+            initStage.details("Registering...");
+            Registry<Registry<? extends Identifiable>> registries = main.getRegistries();
 
-        // initialize services
-        initStage.next(InitStageGeneral.INIT_SERVICES);
-        final ServiceManager sm = main.getServiceManager();
-        sm.initialized();
+            registries
+                    .register(itemRegistry)
+                    .register(recipeTypeRegistry)
+                    .register(recipeRegistry);
 
-        // initialize misc apis
-        initStage.next(InitStageGeneral.INIT_MISC_APIS);
-        initStage.details("CompiledStack: Inject API");
-        CompiledStack.initialize(main.getAPI());
-        initStage.details("ItemFixer: Register Service");
-        sm.addService(new ItemFixer(sm));
+            // initialize services
+            initStage.next(InitStageGeneral.INIT_SERVICES);
+            final ServiceManager sm = main.getServiceManager();
+            sm.initialized();
 
-        // initialize all mods
-        initStage.next(InitStageGeneral.INIT_MODS);
-        ModLoader loader = main.getModLoader();
-        loader.initializeAll();
+            // initialize misc apis
+            initStage.next(InitStageGeneral.INIT_MISC_APIS);
+            initStage.details("CompiledStack: Inject API");
+            CompiledStack.initialize(main.getAPI());
+            initStage.details("ItemFixer: Register Service");
+            sm.addService(new ItemFixer(sm));
 
-        // load everything from registries
-        initStage.next(InitStageGeneral.LOADC_REGISTRIES);
+            // initialize all mods
+            initStage.next(InitStageGeneral.INIT_MODS);
+            ModLoader loader = main.getModLoader();
+            loader.initializeAll();
 
-        RecipeRegistryService recipeRegistryService = recipeRegistry.getService(RecipeRegistryService.class);
-        initStage.details("minecraft:recipe_types : Load workers.");
-        for (RecipeType recipeType : recipeTypeRegistry)
-            recipeRegistryService.addWorker(recipeType.newWorker());
-        initStage.details("minecraft:recipes : Assign workers.");
-        for (Recipe recipe : recipeRegistry)
-            recipeRegistryService.getWorker(recipe.type()).register(recipe);
+            // load everything from registries
+            initStage.next(InitStageGeneral.LOADC_REGISTRIES);
 
-        // build and host resource pack
-        initStage.next(InitStageGeneral.MAKE_RESOURCE_PACK);
-        main.getResourcePackManager()
-                .build()
-                .whenComplete((mgr, _t) -> {
-                    mgr.startHost();
-                    Bukkit.getScheduler().runTask(this, this::initializeNext);
-                });
+            RecipeRegistryService recipeRegistryService = recipeRegistry.getService(RecipeRegistryService.class);
+            initStage.details("minecraft:recipe_types : Load workers.");
+            for (RecipeType recipeType : recipeTypeRegistry)
+                recipeRegistryService.addWorker(recipeType.newWorker());
+            initStage.details("minecraft:recipes : Assign workers.");
+            for (Recipe recipe : recipeRegistry)
+                recipeRegistryService.getWorker(recipe.type()).register(recipe);
+
+            // build and host resource pack
+            initStage.next(InitStageGeneral.MAKE_RESOURCE_PACK);
+            main.getResourcePackManager()
+                    .build()
+                    .whenComplete((mgr, _t) -> {
+                        mgr.startHost();
+                        Bukkit.getScheduler().runTask(this, this::initializeNext);
+                    });
+
+        } catch (Exception e) {
+
+            // print error
+            boostrapLogger.err("Critical exception while initializing Carbon:");
+            boostrapLogger.errc(e);
+
+            // report exception
+            CarbonReport.reportFile()
+                    .setMessage("Critical exception while initializing Carbon")
+                    .setProperty("Boostrap Class", this.getClass())
+                    .withError(e)
+                    .write();
+
+        }
 
     }
 
@@ -229,8 +276,27 @@ public abstract class CarbonBootstrap
      * Second stage of initialization (after resource pack).
      */
     public void initializeNext() {
-        // done
-        initStage.next(InitStageGeneral.INIT_DONE);
+
+        try {
+
+            // done
+            initStage.next(InitStageGeneral.INIT_DONE);
+
+        } catch (Exception e) {
+
+            // print error
+            boostrapLogger.err("Critical exception while initializing Carbon:");
+            boostrapLogger.errc(e);
+
+            // report exception
+            CarbonReport.reportFile()
+                    .setMessage("Critical exception while initializing Carbon")
+                    .setProperty("Boostrap Class", this.getClass())
+                    .withError(e)
+                    .write();
+
+        }
+
     }
 
     /**

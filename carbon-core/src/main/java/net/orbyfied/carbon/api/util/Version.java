@@ -1,5 +1,12 @@
 package net.orbyfied.carbon.api.util;
 
+import net.orbyfied.carbon.command.CommandEngine;
+import net.orbyfied.carbon.command.impl.SystemParameterType;
+import net.orbyfied.carbon.command.minecraft.MinecraftParameterType;
+import org.bukkit.entity.Player;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -50,6 +57,19 @@ public class Version {
             return new Version(major, minor, patch);
         } catch (NumberFormatException | NullPointerException e) {
             throw new MalformedVersionException("for input string: " + s);
+        }
+    }
+
+    public static Version readFromResource(Class<?> ref, String path) {
+        try {
+            if (!path.startsWith("/"))
+                path = "/" + path;
+            InputStream is = ref.getResourceAsStream(path);
+            Version ver = of(new String(is.readAllBytes(), StandardCharsets.UTF_8));
+            is.close();
+            return ver;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
