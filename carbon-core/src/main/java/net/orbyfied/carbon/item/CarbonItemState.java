@@ -2,6 +2,7 @@ package net.orbyfied.carbon.item;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.orbyfied.carbon.util.nbt.CompoundTagSerializer;
 
 import java.util.Objects;
 
@@ -84,5 +85,9 @@ public class CarbonItemState<I extends CarbonItem> {
     public int hashCode() {
         return Objects.hash(item);
     }
+
+    ////////////////////////////////////////
+
+    public static final CompoundTagSerializer<CarbonItemState> COMPOUND_TAG_SERIALIZER = null; // TODO
 
 }

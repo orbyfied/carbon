@@ -6,7 +6,6 @@ import net.orbyfied.carbon.event.exception.InvalidEventException;
 import net.orbyfied.carbon.event.pipeline.BusPipelineFactory;
 import net.orbyfied.carbon.event.pipeline.PipelineAccess;
 import net.orbyfied.carbon.event.service.EventService;
-import net.orbyfied.carbon.event.service.FunctionalEventService;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.lang.reflect.Method;
@@ -38,10 +37,6 @@ public class EventBus {
      */
     private BusPipelineFactory defaultPipelineFactory;
 
-    /* Services. */
-    private final ArrayList<EventService> servicesLinear = new ArrayList<>();
-    private final HashMap<Class<? extends EventService>, EventService> servicesMapped = new HashMap<>();
-
     /**
      * Registers a listener instance by creating
      * a {@link RegisteredListener} and adding it
@@ -57,16 +52,6 @@ public class EventBus {
 
         // parse and register
         rl.parse().register();
-
-        // call services
-        {
-            int l = servicesLinear.size();
-            for (int i = 0; i < l; i++) {
-                EventService service = servicesLinear.get(i);
-                if (service instanceof FunctionalEventService fes) // functional
-                    fes.registered(rl);
-            }
-        }
 
         // return
         return rl;
@@ -138,16 +123,6 @@ public class EventBus {
         // remove from lists
         listeners.remove(listener);
         listenersByClass.remove(listener.klass, listener);
-
-        // call services
-        {
-            int l = servicesLinear.size();
-            for (int i = 0; i < l; i++) {
-                EventService service = servicesLinear.get(i);
-                if (service instanceof FunctionalEventService fes) // functional
-                    fes.unregistered(listener);
-            }
-        }
 
         // return
         return this;
@@ -247,16 +222,21 @@ public class EventBus {
         // get pipeline for event
         final PipelineAccess<E> acc = (PipelineAccess<E>) getPipelineFor(fclass);
 
-        // call services
-        {
-            int l = servicesLinear.size();
-            for (int i = 0; i < l; i++) {
-                EventService service = servicesLinear.get(i);
-                if (service instanceof FunctionalEventService fes) // functional
-                    fes.prePublish(event, acc);
-            }
-        }
+        // post
+        pushSafe(event, acc);
 
+        // return
+        return this;
+    }
+
+    /**
+     * Safely pushes an event down the
+     * given pipeline access.
+     * @param event The event instance.
+     * @param acc The pipeline access.
+     * @param <E> The event type.
+     */
+    protected <E> void pushSafe(E event, PipelineAccess<E> acc) {
         try {
             // post event
             acc.push(event);
@@ -264,9 +244,6 @@ public class EventBus {
             // throw invocation exception
             throw new EventInvocationException(this, "error occurred in event handler", e);
         }
-
-        // return
-        return this;
     }
 
     /**
@@ -316,31 +293,6 @@ public class EventBus {
 
     public EventBus withDefaultPipelineFactory(BusPipelineFactory factory) {
         this.defaultPipelineFactory = factory;
-        return this;
-    }
-
-    public List<EventService> getServicesLinear() {
-        return Collections.unmodifiableList(servicesLinear);
-    }
-
-    public Map<Class<? extends EventService>, EventService> getServicesMapped() {
-        return Collections.unmodifiableMap(servicesMapped);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <S extends EventService> S getService(Class<S> klass) {
-        return (S) servicesMapped.get(klass);
-    }
-
-    public EventBus addService(EventService s) {
-        servicesLinear.add(s);
-        servicesMapped.put(s.getClass(), s);
-        return this;
-    }
-
-    public EventBus removeService(EventService s) {
-        servicesLinear.remove(s);
-        servicesMapped.remove(s.getClass());
         return this;
     }
 

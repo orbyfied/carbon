@@ -25,15 +25,15 @@ public class EventItemBehaviourComponent
         this.main = CarbonJavaAPI.get().getMain();
     }
 
-    protected ItemInteractionAdapter adapter;
+    protected ItemBehaviourAdapter adapter;
 
-    public ItemInteractionAdapter adapter() {
+    public ItemBehaviourAdapter adapter() {
         if (adapter == null)
-            adapter = new ItemInteractionAdapter();
+            adapter = new ItemBehaviourAdapter();
         return adapter;
     }
 
-    public EventItemBehaviourComponent adapter(ItemInteractionAdapter adapter) {
+    public EventItemBehaviourComponent adapter(ItemBehaviourAdapter adapter) {
         this.adapter = adapter;
         return this;
     }
@@ -43,7 +43,7 @@ public class EventItemBehaviourComponent
         if (!main.getServiceManager().hasService(PostService.class))
             main.getServiceManager().addService(new PostService(main.getServiceManager()));
         if (adapter == null)
-            adapter = new ItemInteractionAdapter();
+            adapter = new ItemBehaviourAdapter();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class EventItemBehaviourComponent
         @EventHandler
         void onPlayerInteract(PlayerInteractEvent event) {
 
-            PlayerItemInteraction interaction = ItemInteractionAdapter.interactionOf(event);
+            PlayerItemInteraction interaction = ItemBehaviourAdapter.interactionOf(event);
             if (interaction == null)
                 return;
 

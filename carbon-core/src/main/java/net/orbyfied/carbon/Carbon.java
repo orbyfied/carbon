@@ -11,6 +11,7 @@ import net.orbyfied.carbon.content.pack.ResourcePackManager;
 import net.orbyfied.carbon.core.CarbonJavaAPI;
 import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
+import net.orbyfied.carbon.event.ComplexEventBus;
 import net.orbyfied.carbon.event.EventBus;
 import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
@@ -61,7 +62,7 @@ public class Carbon
         this.modLoader = new ModLoader(this);
         this.processManager = new CarbonProcessManager(this);
         this.serviceManager = new ServiceManager(this);
-        this.coreEventBus = new EventBus();
+        this.coreEventBus = new ComplexEventBus();
         this.resourcePackManager = new ResourcePackManager(this);
         this.commandEngine = new BukkitCommandEngine(this.plugin);
         this.userEnvironment = new CarbonUserEnvironment(this);
@@ -133,7 +134,7 @@ public class Carbon
     /**
      * The base, root or core event bus.
      */
-    protected final EventBus coreEventBus;
+    protected final ComplexEventBus coreEventBus;
 
     /**
      * The stage of initialization Carbon is in.

@@ -174,7 +174,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         S s = stateAllocator.allocate(this);
 
         // load state
-        s.load(nmsStack, stateTag);
+        s.load(stateTag);
 
         // return
         return s;
@@ -194,7 +194,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         S s = stateAllocator.allocate(this);
 
         // load state
-        s.load(nmsStack, stateTag);
+        s.load(stateTag);
 
         // return
         return s;
@@ -219,7 +219,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
         // write default state
         S state = newState();
-        state.save(nmsStack, Nbt.getOrCreateCompound(tag, ITEM_STATE_TAG));
+        state.save(Nbt.getOrCreateCompound(tag, ITEM_STATE_TAG));
 
         // set default name
         nmsStack.setHoverName(new TextComponent("item." + identifier)

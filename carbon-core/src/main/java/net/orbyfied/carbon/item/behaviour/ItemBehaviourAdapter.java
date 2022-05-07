@@ -2,6 +2,7 @@ package net.orbyfied.carbon.item.behaviour;
 
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.core.CarbonJavaAPI;
+import net.orbyfied.carbon.event.BusEvent;
 import net.orbyfied.carbon.event.EventBus;
 import net.orbyfied.carbon.event.EventListener;
 import net.orbyfied.carbon.event.RegisteredListener;
@@ -15,7 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class ItemInteractionAdapter {
+public class ItemBehaviourAdapter {
 
     protected final EventBus bus = new EventBus();
 
@@ -30,12 +31,12 @@ public class ItemInteractionAdapter {
         return bus;
     }
 
-    public ItemInteractionAdapter post(PlayerItemInteraction event) {
+    public ItemBehaviourAdapter post(BusEvent event) {
         bus.post(event);
         return this;
     }
 
-    public ItemInteractionAdapter tryPost(PlayerInteractEvent event) {
+    public ItemBehaviourAdapter tryPost(PlayerInteractEvent event) {
         PlayerItemInteraction i = interactionOf(event);
         if (i == null)
             return this;
@@ -55,12 +56,12 @@ public class ItemInteractionAdapter {
         return genericListener;
     }
 
-    public ItemInteractionAdapter addBehaviour(EventListener o) {
+    public ItemBehaviourAdapter addBehaviour(EventListener o) {
         bus.register(o);
         return this;
     }
 
-    public <E> ItemInteractionAdapter behaviour(Class<E> eClass, Handler<E> handler) {
+    public <E> ItemBehaviourAdapter behaviour(Class<E> eClass, Handler<E> handler) {
         getOrCreateGenericListener().handle(eClass, handler);
         return this;
     }
