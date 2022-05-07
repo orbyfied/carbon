@@ -145,8 +145,6 @@ public abstract class CarbonBootstrap
             initStage.next(InitStageGeneral.LOAD_USER_ENV);
             main.getUserEnvironment().enable();
 
-            Version.of("hello");
-
             // prepare to run initialize
             initStage.next(InitStageGeneral.SCHEDULE_INIT);
             Bukkit.getScheduler().runTaskLater(this, this::initialize, 1);

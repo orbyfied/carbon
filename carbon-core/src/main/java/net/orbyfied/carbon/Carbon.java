@@ -30,7 +30,8 @@ import java.nio.file.Path;
 public class Carbon
         implements Configurable<CarbonConfiguration> {
 
-    public static final Version VERSION = Version.readFromResource(Carbon.class, "/version.txt");
+//    public static final Version VERSION = Version.readFromResource(Carbon.class, "/version.txt");
+    public static final Version VERSION = Version.of("0.1.0");
 
     /* ----------- PLUGIN ------------ */
 

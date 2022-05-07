@@ -2,8 +2,14 @@ package net.orbyfied.carbon.item;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.orbyfied.carbon.core.CarbonJavaAPI;
+import net.orbyfied.carbon.registry.Identifier;
+import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.nbt.CompoundTagSerializer;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -43,22 +49,18 @@ public class CarbonItemState<I extends CarbonItem> {
      * Saves the current item state
      * into the NBT tag. The tag is
      * { CarbonItemState: ... } (the ...)
-     * @param stack The item stack.
      * @param tag The CarbonItemState NBT tag.
      */
-    public void save(ItemStack stack,
-                     CompoundTag tag) {
+    public void save(CompoundTag tag) {
 
     }
 
     /**
-     * Loads the dat from the NBT
+     * Loads the data from the NBT
      * tag into this item state.
-     * @param stack The item stack.
      * @param tag The CarbonItemState NBT tag.
      */
-    public void load(ItemStack stack,
-                     CompoundTag tag) {
+    public void load(CompoundTag tag) {
 
     }
 
@@ -88,6 +90,29 @@ public class CarbonItemState<I extends CarbonItem> {
 
     ////////////////////////////////////////
 
-    public static final CompoundTagSerializer<CarbonItemState> COMPOUND_TAG_SERIALIZER = null; // TODO
+    public static final CompoundTagSerializer<CarbonItemState> NBT_TAG_SERIALIZER = new CompoundTagSerializer<>() {
+
+        private Registry<CarbonItem> ITEM_REGISTRY;
+
+        @Override
+        public void write(DataOutput out, CompoundTag tag, CarbonItemState v) throws IOException {
+            tag.putString(CarbonItem.ITEM_ID_TAG, v.item.getIdentifier().toString());
+            v.save(tag);
+        }
+
+        @Override
+        public CarbonItemState read(DataInput in, CompoundTag tag) throws IOException {
+            if (ITEM_REGISTRY == null)
+                ITEM_REGISTRY = CarbonJavaAPI.get().getMain().getRegistries().getByIdentifier("minecraft:items");
+
+            String itemId = tag.getString(CarbonItem.ITEM_ID_TAG);
+            CarbonItem item = ITEM_REGISTRY.getByIdentifier(itemId);
+
+            CarbonItemState state = item.newState();
+            state.load(tag);
+            return state;
+        }
+
+    };
 
 }

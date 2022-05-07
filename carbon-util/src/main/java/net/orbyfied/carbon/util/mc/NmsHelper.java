@@ -2,6 +2,7 @@ package net.orbyfied.carbon.util.mc;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.orbyfied.carbon.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -41,10 +42,6 @@ public class NmsHelper {
 
     public static ServerPlayer getPlayerHandle(Player player) {
         return queryFieldSafe(player, playerHandleField);
-    }
-
-    public static ServerGamePacketListenerImpl getPlayerConnection(Player player) {
-        return getPlayerHandle(player).connection;
     }
 
 }

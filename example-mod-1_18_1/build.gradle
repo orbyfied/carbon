@@ -48,6 +48,13 @@ dependencies {
 
     compileOnly project(":carbon-core")
 
+    compileOnly project(":carbon-event")
+    compileOnly project(":carbon-process")
+    compileOnly project(":carbon-util")
+    compileOnly project(":carbon-config")
+    compileOnly project(":carbon-command")
+    compileOnly project(":carbon-registry")
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

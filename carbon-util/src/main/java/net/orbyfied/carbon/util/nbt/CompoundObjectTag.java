@@ -8,6 +8,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.StringJoiner;
 
 /**
  * A runtime reference to an object which is
@@ -16,18 +17,25 @@ import java.util.HashMap;
  */
 public class CompoundObjectTag<T> implements Tag {
 
+    public static final String SERIALIZER_FIELD_NAME = "NBT_TAG_SERIALIZER";
+    public static final String CLASS_NAME_TAG        = "_class";
+
     private static CompoundTagSerializer<?> getSerializer(Class<?> klass) {
         CompoundTagSerializer<?> serializer = serializerCache.get(klass);
         if (serializer != null)
             return serializer;
 
         try {
-            Field f = klass.getDeclaredField("COMPOUND_TAG_SERIALIZER");
+            Field f = klass.getField("NBT_TAG_SERIALIZER");
             f.setAccessible(true);
             serializer = (CompoundTagSerializer<?>) f.get(null);
         } catch (Exception e) {
+            System.out.println("For class: " + klass);
             e.printStackTrace();
+            return null;
         }
+
+        serializerCache.put(klass, serializer);
 
         return serializer;
     }
@@ -35,8 +43,10 @@ public class CompoundObjectTag<T> implements Tag {
     public static final TagType<CompoundObjectTag<?>> TAG_TYPE = new TagType<>() {
         @Override
         public CompoundObjectTag<?> load(DataInput input, int depth, NbtAccounter tracker) throws IOException {
+            CompoundTag ctag = CompoundTag.TYPE.load(input, depth + 1, tracker);
+
             // get class
-            String className = input.readUTF();
+            String className = ctag.getString(CLASS_NAME_TAG);
             Class<?> klass;
             try {
                 klass = Class.forName(className);
@@ -47,12 +57,7 @@ public class CompoundObjectTag<T> implements Tag {
             // get serializer
             CompoundTagSerializer<?> serializer = getSerializer(klass);
 
-            // read object
-            int refStat = input.readInt();
-            if (refStat == 0)
-                return new CompoundObjectTag<>(klass);
-            CompoundTag ctag = CompoundTag.TYPE.load(input, depth + 1, tracker);
-            Object obj = serializer.read(ctag);
+            Object obj = serializer.read(input, ctag);
 
             // create and return tag
             CompoundObjectTag<?> tag = new CompoundObjectTag(klass, obj);
@@ -72,14 +77,6 @@ public class CompoundObjectTag<T> implements Tag {
 
         @Override
         public void skip(DataInput input) throws IOException {
-            // skip class name
-            input.readUTF();
-
-            // skip ref status
-            int i = input.readInt();
-            if (i == 0)
-                return;
-
             // skip compound tag
             CompoundTag.TYPE.skip(input);
         }
@@ -122,7 +119,7 @@ public class CompoundObjectTag<T> implements Tag {
         return klass;
     }
 
-    public Object getObject() {
+    public T getObject() {
         return obj;
     }
 
@@ -137,15 +134,9 @@ public class CompoundObjectTag<T> implements Tag {
         String name = klass.getName();
         output.writeUTF(name);
 
-        // write reference status
-        if (obj == null) {
-            output.writeInt(0);
-            return;
-        } else output.writeInt(1);
-
         // compile object
         CompoundTag tag = new CompoundTag();
-        serializer.write(tag, obj);
+        serializer.write(output, tag, obj);
 
         // write object
         tag.write(output);
@@ -153,7 +144,7 @@ public class CompoundObjectTag<T> implements Tag {
 
     @Override
     public byte getId() {
-        return 0;
+        return CompoundTag.TAG_COMPOUND;
     }
 
     @Override
@@ -174,6 +165,11 @@ public class CompoundObjectTag<T> implements Tag {
     @Override
     public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
         return null; // TODO: what
+    }
+
+    @Override
+    public String toString() {
+        return "object<" + klass.getSimpleName() + ">: " + Integer.toHexString(System.identityHashCode(obj));
     }
 
 }

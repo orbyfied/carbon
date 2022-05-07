@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
 import net.orbyfied.carbon.util.mc.Nbt;
+import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
 import org.bukkit.Material;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
@@ -151,33 +152,21 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
     }
 
     /**
-     * Creates a new, empty state for
-     * an item. Should be overridden
-     * to create a new item state for
+     * Creates a new, default state for
      * this item.
      * @return The new state.
      */
-    @SuppressWarnings("unchecked")
     public S newState() {
-        return (S) new CarbonItemState<>(this);
+        return stateAllocator.allocate(this);
     }
 
-    public S loadState(org.bukkit.inventory.ItemStack stack) {
-        // check if it is built
-        checkBuilt();
-
-        // get handle
-        ItemStack nmsStack = ItemUtil.getHandle(stack);
-        CompoundTag stateTag = nmsStack.getOrCreateTag().getCompound(ITEM_STATE_TAG);
-
-        // allocate state
-        S s = stateAllocator.allocate(this);
-
-        // load state
-        s.load(stateTag);
-
-        // return
-        return s;
+    /**
+     * Allocates a new state.
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public S allocateState() {
+        return (S) new CarbonItemState<>(this);
     }
 
     public S loadState(ItemStack nmsStack) {
@@ -188,16 +177,10 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         CompoundTag tag = nmsStack.getTag();
         if (tag == null)
             return null;
-        CompoundTag stateTag = tag.getCompound(ITEM_STATE_TAG);
-
-        // allocate state
-        S s = stateAllocator.allocate(this);
-
-        // load state
-        s.load(stateTag);
+        CompoundObjectTag<S> stateTag = Nbt.getOrCreateObject(tag, ITEM_STATE_TAG, () -> stateAllocator.allocate(this));
 
         // return
-        return s;
+        return stateTag.getObject();
     }
 
     /**
@@ -219,7 +202,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
         // write default state
         S state = newState();
-        state.save(Nbt.getOrCreateCompound(tag, ITEM_STATE_TAG));
+        CompoundObjectTag<S> stag = Nbt.getOrCreateObject(tag, ITEM_STATE_TAG, () -> state);
 
         // set default name
         nmsStack.setHoverName(new TextComponent("item." + identifier)
