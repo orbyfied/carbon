@@ -43,7 +43,7 @@ public class CompoundObjectTag<T> implements Tag {
     public static final TagType<CompoundObjectTag<?>> TAG_TYPE = new TagType<>() {
         @Override
         public CompoundObjectTag<?> load(DataInput input, int depth, NbtAccounter tracker) throws IOException {
-            CompoundTag ctag = CompoundTag.TYPE.load(input, depth + 1, tracker);
+            CompoundTag ctag = CompoundTag.TYPE.load(input, depth, tracker);
 
             // get class
             String className = ctag.getString(CLASS_NAME_TAG);
@@ -66,7 +66,7 @@ public class CompoundObjectTag<T> implements Tag {
 
         @Override
         public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
-            return null;
+            return visitor.visitEnd();
         }
 
         @Override
@@ -163,8 +163,8 @@ public class CompoundObjectTag<T> implements Tag {
     }
 
     @Override
-    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
-        return null; // TODO: what
+    public StreamTagVisitor.@NotNull ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visitEnd(); // TODO: what
     }
 
     @Override

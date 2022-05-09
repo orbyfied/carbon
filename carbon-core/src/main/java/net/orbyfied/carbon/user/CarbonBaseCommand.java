@@ -29,7 +29,7 @@ public class CarbonBaseCommand {
 
     }
 
-    @Subcommand("creativeinv") // creativeinv subcommand
+    @Subcommand("creative") // creativeinv subcommand
     public void creativeInventory(Context ctx, Node node) {
 
         CommandSender sender = ctx.getSender();
@@ -51,7 +51,7 @@ public class CarbonBaseCommand {
 
     }
 
-    @Subcommand("debug dumpReport <system:string path>")
+    @Subcommand("debug dumpreport <system:string path>")
     public void debugListServices(Context ctx, Node node,
 
                                   @CommandParameter("path") String p) {
