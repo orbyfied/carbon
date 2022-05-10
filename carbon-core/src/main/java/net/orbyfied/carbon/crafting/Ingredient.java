@@ -4,17 +4,50 @@ import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
+/**
+ * Represents an ingredient that can be matched.
+ */
 public interface Ingredient {
 
+    /**
+     * Checks if this ingredient matches the
+     * provided item stack in the context of
+     * the provided matrix.
+     * @param stack The item stack.
+     * @param matrix The matrix.
+     * @return If it matches.
+     */
     boolean matches(CompiledStack stack, CraftMatrix matrix);
 
+    /**
+     * Counts the amount of crafts that can be
+     * executed with the provided item stack in
+     * the context of the provided matrix.
+     * @param stack The item stack.
+     * @param matrix The matrix.
+     * @return The count of crafts.
+     */
     int count(CompiledStack stack, CraftMatrix matrix);
 
+    /**
+     * Modifies the provided item stack to 'use it'
+     * once a craft is completed in the context of the
+     * provided matrix.
+     * @param stack The item stack.
+     * @param amount The amount of crafts completed.
+     * @param matrix The matrix.
+     */
     void used(CompiledStack stack, int amount, CraftMatrix matrix);
 
+    /**
+     * Checks if this ingredient is comparable
+     * to the provided other ingredient.
+     * @param ingredient The ingredient to check against.
+     * @return If it is comparable.
+     */
     boolean equals(Ingredient ingredient);
 
     default TaggedIngredient tagged(Object tag) {
@@ -58,7 +91,7 @@ public interface Ingredient {
     };
 
     static Ingredient ofItem(Material material, int amt) {
-        Item item = CraftMagicNumbers.getItem(material);
+        Item item = ItemUtil.getItem(material);
         return new UnspecificItemIngredient(item, amt);
     }
 

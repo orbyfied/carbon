@@ -443,7 +443,7 @@ public class SystemParameterType {
 
             /* suggester */
             ((TriConsumer<Context, SuggestionAccumulator, LinkedHashMap<String, ParameterType>>)(context, suggestions, types) -> {
-                StringReader reader = context.getReader();
+                StringReader reader = context.reader();
                 suggestions.suggest("]");
                 suggestions.suggest(",");
 
@@ -460,7 +460,7 @@ public class SystemParameterType {
 
     public static final ParameterType<ParameterType> TYPE = of(ParameterType.class, "system:type",
             (context, reader) -> true,
-            (context, reader) -> context.getEngine().getTypeResolver().compile(TYPE_IDENTIFIER.parse(context, reader)),
+            (context, reader) -> context.engine().getTypeResolver().compile(TYPE_IDENTIFIER.parse(context, reader)),
             (context, builder, o) -> builder.append(o.getIdentifier())
     );
 

@@ -8,7 +8,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
 import java.util.Objects;
 
@@ -73,12 +72,12 @@ public class CompiledStack {
     }
 
     public CompiledStack fill(Material material) {
-        stack = new ItemStack(CraftMagicNumbers.getItem(material)); // TODO
+        stack = new ItemStack(ItemUtil.getItem(material));
         return this;
     }
 
     public CompiledStack fill(Material material, int count) {
-        stack = new ItemStack(CraftMagicNumbers.getItem(material), count); // <- here too
+        stack = new ItemStack(ItemUtil.getItem(material), count);
         return this;
     }
 

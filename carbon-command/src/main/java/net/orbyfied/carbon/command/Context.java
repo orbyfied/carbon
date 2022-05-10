@@ -15,113 +15,154 @@ public class Context {
         this.sender = sender;
     }
 
+    /**
+     * The sender of the command.
+     */
     protected final CommandSender sender;
 
+    /**
+     * The purspose of this invocation.
+     */
     protected Destiny destiny;
 
+    /**
+     * The root command node.
+     */
     protected Node rootCommand;
 
-    protected final HashMap<Identifier, Object> args = new HashMap<>();
+    /**
+     * The list of arguments, parameters and symbols.
+     */
+    protected final HashMap<Identifier, Object> symbols = new HashMap<>();
 
+    /**
+     * The command engine.
+     */
     protected final CommandEngine engine;
 
+    /**
+     * The intermediate status text.
+     */
     protected String intermediateText;
 
+    /**
+     * If the text can be formatted.
+     */
     protected boolean canFormat = true;
 
-    protected boolean successful;
+    /**
+     * If the invocation was successful.
+     */
+    protected Boolean successful;
 
     protected StringReader reader;
 
+    /**
+     * The current node we are at.
+     */
     protected Node current;
 
+    /**
+     * The last/current executable node.
+     */
     protected Executable currentExecutable;
 
-    public Context setCanFormat(boolean canFormat) {
+    /* ----- Basic Manipulation ----- */
+
+    public Context canFormat(boolean canFormat) {
         this.canFormat = canFormat;
         return this;
     }
 
-    public CommandEngine getEngine() {
+    public CommandEngine engine() {
         return engine;
     }
 
-    public CommandSender getSender() {
+    public CommandSender sender() {
         return sender;
     }
 
-    public Destiny getDestiny() {
+    public Destiny destiny() {
         return destiny;
     }
 
-    public String getIntermediateText() {
+    public String intermediateText() {
         return intermediateText;
     }
 
-    public Context setIntermediateText(String text) {
+    public Context intermediateText(String text) {
         if (!canFormat)
             text = ChatColor.stripColor(text);
         this.intermediateText = text;
         return this;
     }
 
-    public Context setSuccessful(boolean b) {
+    public Context successful(boolean b) {
         this.successful = b;
         return this;
     }
 
-    public boolean isSuccessful() {
+    public Boolean successful() {
         return successful;
     }
 
-    public Context setDestiny(Destiny destiny) {
+    public Context destiny(Destiny destiny) {
         this.destiny = destiny;
         return this;
     }
 
-    public Node getRootCommand() {
+    public Node rootCommand() {
         return rootCommand;
     }
 
-    public HashMap<Identifier, Object> getArgs() {
-        return args;
-    }
-
-    public StringReader getReader() {
+    public StringReader reader() {
         return reader;
     }
 
-    public Executable getCurrentExecutable() {
+    public Executable currentExecutable() {
         return currentExecutable;
     }
 
-    public Node getCurrent() {
+    public Node currentNode() {
         return current;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getArg(Identifier identifier) {
-        return (T) args.get(identifier);
-    }
+    /* ----- Symbols ----- */
 
-    public <T> T getArg(String id) {
-        return getArg(Identifier.of(id));
+    public HashMap<Identifier, Object> getSymbols() {
+        return symbols;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getArg(Identifier identifier, Class<T> tClass) {
-        return (T) args.get(identifier);
+    public <T> T getSymbol(Identifier identifier) {
+        return (T) symbols.get(identifier);
     }
 
-    public <T> T getArg(String id, Class<T> tClass) {
-        return getArg(Identifier.of(id), tClass);
+    public <T> T getSymbol(String id) {
+        return getSymbol(Identifier.of(id));
     }
 
-    public Context setArg(Identifier id, Object o) {
-        args.put(id, o);
+    @SuppressWarnings("unchecked")
+    public <T> T getSymbol(Identifier identifier, Class<T> tClass) {
+        return (T) symbols.get(identifier);
+    }
+
+    public <T> T getSymbol(String id, Class<T> tClass) {
+        return getSymbol(Identifier.of(id), tClass);
+    }
+
+    public Context setSymbol(Identifier id, Object o) {
+        symbols.put(id, o);
         return this;
     }
 
+    ///////////////////////////////////
+
+    /**
+     * Declares the purposes/destinies
+     * of an invocation.
+     * @see Context#destiny
+     */
     public enum Destiny {
 
         SUGGEST,

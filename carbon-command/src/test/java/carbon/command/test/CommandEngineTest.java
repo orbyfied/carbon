@@ -40,11 +40,11 @@ public class CommandEngineTest {
         // register command "test"
         Node command = new Node("test", null, null);
         command
-                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getArg("ghello:hello").toString()))
-                .childExecutable("ghello", (ctx, cmd) -> System.out.println(ctx.getArgs()))
+                .makeExecutable((ctx, cmd) -> System.out.println(ctx.getSymbol("ghello:hello").toString()))
+                .childExecutable("ghello", (ctx, cmd) -> System.out.println(ctx.getSymbols()))
                 .childParameter("hello",  SystemParameterType.LONG)
                 .childParameter("hello2", SystemParameterType.INT)
-                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getArg("ghello:hello2").toString()));
+                .childExecutable("print", (ctx, cmd) -> System.out.println(ctx.getSymbol("ghello:hello2").toString()));
 
         CommandDebug.traverseAndPrintChildren(command, 0);
 
@@ -56,7 +56,7 @@ public class CommandEngineTest {
                 null
         );
 
-        System.out.println("+ MESSAGE: " + result.getIntermediateText());
+        System.out.println("+ MESSAGE: " + result.intermediateText());
     }
 
 }

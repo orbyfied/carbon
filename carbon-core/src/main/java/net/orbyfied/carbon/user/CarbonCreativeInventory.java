@@ -8,39 +8,82 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * A wrapper for the creative inventory
+ * allowing for storage of more data and
+ * shit.
+ * @see CreativeInventoryManager
+ */
 public class CarbonCreativeInventory {
 
-    private final CreativeInventoryFactory factory;
+    /**
+     * Factory reference.
+     */
+    private final CreativeInventoryManager factory;
 
-    public final Inventory inv;
+    /**
+     * The Minecraft inventory that the player sees.
+     */
+    private final Inventory inv;
 
-    public final Player player;
+    /**
+     * The player this inventory is assigned to.
+     */
+    private final Player player;
 
+    /**
+     * If it is currently open.
+     */
     public boolean isOpen;
 
-    public CarbonCreativeInventory(final CreativeInventoryFactory factory,
+    public CarbonCreativeInventory(final CreativeInventoryManager factory,
                                    final Player player) {
         this.factory = factory;
         this.player  = player;
         this.inv = factory.createInventory(player);
     }
 
+    /* Getters. */
+
+    public Inventory getInventory() {
+        return inv;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    /* Features. */
+
     public CarbonCreativeInventory initialize() {
+        // populate inventory
         fillItems();
+
         return this;
     }
 
     public CarbonCreativeInventory open(Player player) {
+        // open inventory
         player.openInventory(inv);
+
+        // set open status
         isOpen = true;
         factory.open.put(player, this);
+
         return this;
     }
 
     public void close(boolean forceClosePlayer) {
+        // close player inventory
         if (player.getOpenInventory().getTopInventory() == inv && forceClosePlayer) {
             player.closeInventory();
         }
+
+        // set open status
         isOpen = false;
         factory.open.remove(player);
     }

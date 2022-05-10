@@ -1,19 +1,35 @@
 package net.orbyfied.carbon.command.annotation;
 
-import net.orbyfied.carbon.command.CommandEngine;
-import net.orbyfied.carbon.command.Node;
+import net.orbyfied.carbon.command.*;
 import net.orbyfied.carbon.command.parameter.Parameter;
 import net.orbyfied.carbon.command.parameter.ParameterType;
 import net.orbyfied.carbon.command.parameter.TypeIdentifier;
 import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.util.StringReader;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Map;
 
 public class SubcommandParser {
 
+    /**
+     * The command engine.
+     */
     protected final CommandEngine engine;
 
+    /**
+     * The root command node.
+     */
     protected final Node root;
 
+    /**
+     * The raw string to parse.
+     */
     protected final String raw;
 
     public SubcommandParser(CommandEngine engine,
@@ -102,6 +118,10 @@ public class SubcommandParser {
                 current = paramNode;
             }
         }
+
+        // make sure to always set executable
+        if (current.getComponentOf(Selecting.class) == null)
+            current.makeExecutable(null);
 
         // return
         return last;

@@ -128,10 +128,10 @@ public abstract class CommandEngine {
 
         // create context
         Context context = new Context(this, sender);
-        context.setDestiny(destiny);
+        context.destiny(destiny);
         if (ctxConsumer != null)
             ctxConsumer.accept(context);
-        context.setSuccessful(true);
+        context.successful(true);
 
         // parse alias and get command
         String alias = reader.collect(c -> c != ' ', 0);
@@ -215,7 +215,7 @@ public abstract class CommandEngine {
                 );
 
             // execute
-            if (lastExecutable != null && !isSuggesting && context.isSuccessful()) {
+            if (lastExecutable != null && !isSuggesting && context.successful()) {
                 try {
                     // execute final command
                     lastExecutable.execute(context);
@@ -237,8 +237,8 @@ public abstract class CommandEngine {
                 e.printStackTrace();
 
             // communicate with sender
-            context.setIntermediateText(e.getFormattedString());
-            context.setSuccessful(false); // fail
+            context.intermediateText(e.getFormattedString());
+            context.successful(false); // fail
         }
 
         // return

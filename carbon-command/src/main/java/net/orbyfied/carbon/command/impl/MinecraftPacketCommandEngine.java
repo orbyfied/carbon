@@ -130,7 +130,7 @@ public class MinecraftPacketCommandEngine extends CommandEngine
                         null
                 );
 
-                if (ctx.getRootCommand() != null) {
+                if (ctx.rootCommand() != null) {
                     ClientboundCommandSuggestionsPacket result =
                             new ClientboundCommandSuggestionsPacket(0, suggestions);
 

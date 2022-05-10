@@ -12,11 +12,24 @@ import java.util.ArrayList;
 
 public class BaseAnnotationProcessor {
 
+    /**
+     * The command engine.
+     */
     protected final CommandEngine engine;
 
+    /**
+     * The descriptor object.
+     */
     protected final Object obj;
+
+    /**
+     * The descriptor class.
+     */
     protected final Class<?> klass;
 
+    /**
+     * The root node to parse from/onto.
+     */
     protected Node root;
 
     public BaseAnnotationProcessor(CommandEngine engine, Object obj) {
@@ -52,8 +65,6 @@ public class BaseAnnotationProcessor {
             if (!m.isAnnotationPresent(Subcommand.class)) continue;
             m.setAccessible(true);
             Subcommand desc = m.getAnnotation(Subcommand.class);
-            SubcommandParser parser = new SubcommandParser(engine, root, desc.value());
-            Node sub = parser.parse();
 
             // parse parameters
             final ArrayList<String> paramNames = new ArrayList<>(m.getParameterCount());
@@ -71,12 +82,12 @@ public class BaseAnnotationProcessor {
                 paramNames.add(name);
             }
 
+            Method initializerSub = null;
             try {
-                // get the initializer method and invoke it
-                Method initializerSub = klass.getDeclaredMethod(m.getName(), Node.class);
+                // get the initializer method
+                initializerSub = klass.getDeclaredMethod(m.getName(), Node.class);
                 if (initializerSub.isAnnotationPresent(SubInitializer.class)) {
                     initializerSub.setAccessible(true);
-                    initializerSub.invoke(obj, sub);
                 }
             } catch (NoSuchMethodException e) {
                 // ignore
@@ -84,26 +95,38 @@ public class BaseAnnotationProcessor {
                 e.printStackTrace();
             }
 
-            // set the actual method executor
-            sub.getComponent(Executable.class).setExecutor((ctx, cmd) -> {
+            // register all subcommands
+            for (String subcommandStr : desc.value()) {
+                SubcommandParser parser = new SubcommandParser(engine, root, subcommandStr);
+                Node sub = parser.parse();
+
+                // invoke initializer
                 try {
-                    ArrayList<Object> args = new ArrayList<>();
-                    args.add(ctx);
-                    args.add(cmd);
-                    for (String paramn : paramNames) {
-                        Identifier pid = new Identifier(null, paramn);
-                        args.add(ctx.getArg(pid));
-                    }
-
-//                    System.out.println("ctx.args: " + ctx.getArgs() + ", methodargs: " + args);
-
-                    // invoke
-                    m.invoke(obj, args.toArray());
-                } catch (Throwable e) {
-                    // throw node execution exception
-                    throw new NodeExecutionException(cmd.getRoot(), cmd, e);
+                    if (initializerSub != null)
+                        initializerSub.invoke(obj, sub);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+
+                // set the actual method executor
+                sub.getComponent(Executable.class).setExecutor((ctx, cmd) -> {
+                    try {
+                        ArrayList<Object> args = new ArrayList<>();
+                        args.add(ctx);
+                        args.add(cmd);
+                        for (String paramn : paramNames) {
+                            Identifier pid = new Identifier(null, paramn);
+                            args.add(ctx.getSymbol(pid));
+                        }
+
+                        // invoke
+                        m.invoke(obj, args.toArray());
+                    } catch (Throwable e) {
+                        // throw node execution exception
+                        throw new NodeExecutionException(cmd.getRoot(), cmd, e);
+                    }
+                });
+            }
         }
 
         // return

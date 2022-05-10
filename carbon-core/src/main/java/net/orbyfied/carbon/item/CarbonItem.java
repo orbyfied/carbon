@@ -13,7 +13,6 @@ import net.orbyfied.carbon.util.mc.Nbt;
 import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
 import org.bukkit.Material;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +84,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     public CarbonItem<S> setBaseMaterial(Material material) {
         this.baseMaterial = material;
-        this.baseItem     = CraftMagicNumbers.getItem(material);
+        this.baseItem     = ItemUtil.getItem(material);
         return this;
     }
 

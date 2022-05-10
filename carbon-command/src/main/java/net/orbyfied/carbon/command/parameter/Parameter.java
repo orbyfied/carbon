@@ -61,7 +61,7 @@ public class Parameter
 
         }
 
-        ctx.setArg(identifier, v);
+        ctx.setSymbol(identifier, v);
     }
 
     @Override

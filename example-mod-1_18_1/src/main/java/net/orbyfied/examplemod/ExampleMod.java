@@ -74,7 +74,11 @@ public class ExampleMod
                         // read more at the documentation
                         // for MaterialTag and MaterialAPI
                         (item, mic) -> mic.tag("gem.ruby")
-                )
+                );
+
+        System.out.println("AHAHHAAHHAHH");
+
+        ruby
                 .register(itemRegistry) // first register our item
                 .build(); // VERY IMPORTANT: then build the item
 

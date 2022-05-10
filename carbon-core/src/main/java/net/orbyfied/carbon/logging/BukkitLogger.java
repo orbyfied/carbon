@@ -139,6 +139,14 @@ public class BukkitLogger {
         return stage(stage).log(0, msg);
     }
 
+    public BukkitLogger okc(Object msg) {
+        return logc(0, msg);
+    }
+
+    public BukkitLogger okc(String stage, Object msg) {
+        return stage(stage).logc(0, msg);
+    }
+
     public BukkitLogger warn(Object msg) {
         return log(1, msg);
     }

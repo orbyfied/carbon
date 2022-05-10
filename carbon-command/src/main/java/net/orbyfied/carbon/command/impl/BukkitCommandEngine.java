@@ -98,7 +98,7 @@ public class BukkitCommandEngine extends CommandEngine {
         public boolean execute(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
             String str = stitchArgs(alias, args);
             Context ctx = engine.dispatch(sender, str, null, null);
-            return ctx.isSuccessful();
+            return ctx.successful();
         }
 
         @Override
