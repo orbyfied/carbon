@@ -9,8 +9,18 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Utilities for working with reflection
+ * safely.
+ */
 public class ReflectionUtil {
 
+    /**
+     * Get the caller class at the provided offset.
+     * @see ReflectionUtil#getCallerFrame(int)
+     * @param off The offset into the call stack.
+     * @return The caller class.
+     */
     public static Class<?> getCallerClass(int off) {
         try {
             return Class.forName(getCallerFrame(off).getClassName());
@@ -19,6 +29,11 @@ public class ReflectionUtil {
         }
     }
 
+    /**
+     * Get the caller stack trace element at the provided offset.
+     * @param off The offset into the call stack.
+     * @return The stack trace element.
+     */
     public static StackTraceElement getCallerFrame(int off) {
         StackTraceElement[] elem;
         try {

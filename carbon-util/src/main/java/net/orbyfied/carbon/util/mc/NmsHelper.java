@@ -11,9 +11,21 @@ import java.lang.reflect.Field;
 import static net.orbyfied.carbon.util.ReflectionUtil.getDeclaredFieldSafe;
 import static net.orbyfied.carbon.util.ReflectionUtil.queryFieldSafe;
 
+/**
+ * Utilities for working with NMS.
+ */
 public class NmsHelper {
 
+    /**
+     * The Minecraft/CraftBukkit server version.
+     */
     private static final String VERSION;
+
+    /**
+     * The CraftBukkit root package with the
+     * correct version inlined. Used for
+     * reflection.
+     */
     private static final String CRAFT_BUKKIT_PACKAGE;
 
     static {
@@ -34,6 +46,8 @@ public class NmsHelper {
             throw new RuntimeException(e);
         }
     }
+
+    /* ---- Player Handles. ---- */
 
     private static Field playerHandleField = getDeclaredFieldSafe(
             getCraftBukkitClass("entity.CraftEntity"),

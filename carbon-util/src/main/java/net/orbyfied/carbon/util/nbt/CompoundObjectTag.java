@@ -8,7 +8,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.StringJoiner;
 
 /**
  * A runtime reference to an object which is
@@ -17,29 +16,68 @@ import java.util.StringJoiner;
  */
 public class CompoundObjectTag<T> implements Tag {
 
+    /**
+     * The name of the field that compound tag serializable
+     * classes should define and initialize with their serializer.
+     */
     public static final String SERIALIZER_FIELD_NAME = "NBT_TAG_SERIALIZER";
-    public static final String CLASS_NAME_TAG        = "_class";
 
+    /**
+     * The key used to store the class name in the
+     * serialized compound tags.
+     */
+    public static final String CLASS_NAME_TAG = "_class";
+
+    /**
+     * The serializers loaded mapped by class.
+     * Used mainly as a cache, but can also be
+     * used to define or overwrite serializers
+     * for other classes.
+     */
+    public static final HashMap<Class<?>, CompoundTagSerializer<?>> LOADED_SERIALIZERS = new HashMap<>();
+
+    /**
+     * Tries to retrieve the serializer for the
+     * given class. First checks the loaded serializers.
+     * If it contains it, no further logic is done and
+     * the result is returned. Otherwise, the serializer
+     * is gotten from the static serializer field in the class.
+     * @see CompoundObjectTag#SERIALIZER_FIELD_NAME
+     * @see CompoundObjectTag#LOADED_SERIALIZERS
+     * @param klass The class to get a serializer for.
+     * @return The serializer instance or null if something failed.
+     */
     private static CompoundTagSerializer getSerializer(Class<?> klass) {
-        CompoundTagSerializer<?> serializer = serializerCache.get(klass);
+        CompoundTagSerializer<?> serializer = LOADED_SERIALIZERS.get(klass);
         if (serializer != null)
             return serializer;
 
         try {
-            Field f = klass.getField("NBT_TAG_SERIALIZER");
+            // try to get field
+            Field f = klass.getField(SERIALIZER_FIELD_NAME);
             f.setAccessible(true);
+
+            // try to get serializer from field
             serializer = (CompoundTagSerializer<?>) f.get(null);
         } catch (Exception e) {
+            // handle exception, kinda scuffed but whatever
             System.out.println("For class: " + klass);
             e.printStackTrace();
             return null;
         }
 
-        serializerCache.put(klass, serializer);
+        // cache for later
+        LOADED_SERIALIZERS.put(klass, serializer);
 
         return serializer;
     }
 
+    /**
+     * Tries to load an object from the
+     * given compound tag.
+     * @param ctag The compound tag to load.
+     * @return The object tag or null if it failed.
+     */
     public static CompoundObjectTag<?> loadFromCompound(CompoundTag ctag) {
         try {
             // get class
@@ -48,13 +86,14 @@ public class CompoundObjectTag<T> implements Tag {
             try {
                 klass = Class.forName(className);
             } catch (Exception e) {
-                throw new IllegalArgumentException(e);
+                System.out.println("Invalid class name: " + className);
+                return null;
             }
 
             // get serializer
             CompoundTagSerializer<?> serializer = getSerializer(klass);
 
-            Object obj = serializer.read(null, ctag);
+            Object obj = serializer.read(ctag);
 
             // create and return tag
             CompoundObjectTag<?> tag = new CompoundObjectTag(obj);
@@ -65,6 +104,9 @@ public class CompoundObjectTag<T> implements Tag {
         }
     }
 
+    /**
+     * Tag type.
+     */
     public static final TagType<CompoundObjectTag<?>> TAG_TYPE = new TagType<>() {
         @Override
         public CompoundObjectTag<?> load(DataInput input, int depth, NbtAccounter tracker) throws IOException {
@@ -91,23 +133,27 @@ public class CompoundObjectTag<T> implements Tag {
 
         @Override
         public String getName() {
-            return "CompoundObjectTag";
+            return CompoundTag.TYPE.getName();
         }
 
         @Override
         public String getPrettyName() {
-            return "CompoundObject";
+            return CompoundTag.TYPE.getPrettyName();
         }
     };
 
     ///////////////////////////////////////
 
-    private static final HashMap<Class<?>, CompoundTagSerializer<?>> serializerCache = new HashMap<>();
+    /**
+     * The instance this tag holds.
+     */
     T obj;
 
     public CompoundObjectTag(T obj) {
         this.obj  = obj;
     }
+
+    /* Getters and setters. */
 
     public Class<?> getObjectType() {
         return obj.getClass();
@@ -122,10 +168,16 @@ public class CompoundObjectTag<T> implements Tag {
         return this;
     }
 
+    /**
+     * Attempts to serialize this object tag
+     * into the provided compound tag.
+     * @param tag The output compound tag.
+     * @return The output compound tag.
+     */
     @SuppressWarnings("unchecked")
     public CompoundTag writeCompoundTag(CompoundTag tag) {
         try {
-            getSerializer(obj.getClass()).write(null, tag, obj);
+            getSerializer(obj.getClass()).write(tag, obj);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,18 +185,26 @@ public class CompoundObjectTag<T> implements Tag {
         return tag;
     }
 
+    /**
+     * Attempts to serialize this object tag
+     * into a new compound tag.
+     * @see CompoundObjectTag#writeCompoundTag(CompoundTag)
+     * @return The output compound tag.
+     */
     @SuppressWarnings("unchecked")
     public CompoundTag writeCompoundTag() {
         CompoundTag tag = new CompoundTag();
 
         try {
-            getSerializer(obj.getClass()).write(null, tag, obj);
+            getSerializer(obj.getClass()).write(tag, obj);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return tag;
     }
+
+    /* ---- NBT ---- */
 
     @Override
     @SuppressWarnings("unchecked")
@@ -161,7 +221,7 @@ public class CompoundObjectTag<T> implements Tag {
 
         // compile object
         CompoundTag tag = new CompoundTag();
-        serializer.write(output, tag, obj);
+        serializer.write(tag, obj);
 
         // write object
         tag.write(output);
@@ -194,7 +254,7 @@ public class CompoundObjectTag<T> implements Tag {
 
     @Override
     public String toString() {
-        return "0x" + Integer.toHexString(System.identityHashCode(obj)) + " '" + obj.toString() + "'";
+        return obj.toString();
     }
 
 }
