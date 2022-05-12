@@ -1,11 +1,13 @@
 package net.orbyfied.carbon.command.annotation;
 
 import net.orbyfied.carbon.command.CommandEngine;
+import net.orbyfied.carbon.command.CommandProperties;
 import net.orbyfied.carbon.command.Executable;
 import net.orbyfied.carbon.command.Node;
 import net.orbyfied.carbon.command.exception.NodeExecutionException;
 import net.orbyfied.carbon.registry.Identifier;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -59,6 +61,9 @@ public class BaseAnnotationProcessor {
         root = new Node(baseCommandDesc.name(), null, null)
                 .addAliases(baseCommandDesc.aliases());
 
+        // parse base node properties
+        parseExecutableNodeProperties(root, klass);
+
         // creates the executables
         // and the parameters for them
         for (Method m : klass.getDeclaredMethods()) {
@@ -97,8 +102,11 @@ public class BaseAnnotationProcessor {
 
             // register all subcommands
             for (String subcommandStr : desc.value()) {
-                SubcommandParser parser = new SubcommandParser(engine, root, subcommandStr);
+                SubcommandParser parser = new SubcommandParser(this, engine, root, subcommandStr);
                 Node sub = parser.parse();
+
+                // parse node properties
+                parseExecutableNodeProperties(sub, m);
 
                 // invoke initializer
                 try {
@@ -132,6 +140,23 @@ public class BaseAnnotationProcessor {
         // return
         return this;
 
+    }
+
+    protected BaseAnnotationProcessor parseExecutableNodeProperties(Node node,
+                                                                    AnnotatedElement element) {
+        // parse properties (CommandProperties)
+        CommandUsage commandUsage;
+        if ((commandUsage = element.getAnnotation(CommandUsage.class)) != null)
+            node.component(CommandProperties.class, CommandProperties::new, (n1, cp) -> cp.usage(commandUsage.value()));
+        CommandDescription commandDescription;
+        if ((commandDescription = element.getAnnotation(CommandDescription.class)) != null)
+            node.component(CommandProperties.class, CommandProperties::new, (n1, cp) -> cp.description(commandDescription.value()));
+        CommandLabel commandLabel;
+        if ((commandLabel = element.getAnnotation(CommandLabel.class)) != null)
+            node.component(CommandProperties.class, CommandProperties::new, (n1, cp) -> cp.label(commandLabel.value()));
+
+        // return this
+        return this;
     }
 
     public BaseAnnotationProcessor register() {

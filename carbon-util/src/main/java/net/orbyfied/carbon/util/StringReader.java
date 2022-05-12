@@ -86,6 +86,26 @@ public class StringReader {
                 b.append(c);
             }
         }
+
+        return b.toString();
+    }
+
+    public String pcollect(Predicate<Character> pred) {
+        return pcollect(pred, null);
+    }
+
+    public String pcollect(Predicate<Character> pred, Predicate<Character> skip) {
+        if (pred == null)
+            pred = ONPRED;
+        StringBuilder b = new StringBuilder();
+        int off = 0;
+        char c;
+        while ((c = peek(off++)) != DONE && pred.test(c)) {
+            if (skip == null || !skip.test(c)) {
+                b.append(c);
+            }
+        }
+
         return b.toString();
     }
 

@@ -7,10 +7,7 @@ import net.orbyfied.carbon.command.parameter.TypeIdentifier;
 import net.orbyfied.carbon.command.parameter.TypeResolver;
 import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.util.StringReader;
-import net.orbyfied.carbon.util.functional.QuadConsumer;
-import net.orbyfied.carbon.util.functional.TriConsumer;
-import net.orbyfied.carbon.util.functional.TriFunction;
-import net.orbyfied.carbon.util.functional.TriPredicate;
+import net.orbyfied.carbon.util.functional.*;
 import net.orbyfied.carbon.util.math.Vec3i;
 import net.orbyfied.carbon.command.parameter.ParameterType;
 
@@ -248,6 +245,8 @@ public class SystemParameterType {
         return parser.apply(reader.collect(c -> isDigit(c, rdx), c -> c == '_'), radix);
     }
 
+    public static final String KEY_PROVIDER_OPTION = "key_provider";
+
     /* ----------------------------------------------- */
 
     /**
@@ -357,6 +356,25 @@ public class SystemParameterType {
             }),
             (context, builder, s) -> builder.append("'").append(s).append("'")
     );
+
+    /**
+     * {@link Identifier}
+     * Utilizes {@link SystemParameterType#STRING}
+     * for parsing the initial text.
+     */
+    public static final ParameterType<Identifier> IDENTIFIER = of(Identifier.class, "system:identifier",
+            (context, stringReader) -> true,
+            (Context context, StringReader reader) -> Identifier.of(STRING.parse(context, reader)),
+            (context, builder, s) -> builder.append(s.toString()),
+
+            /* suggester */
+            ((BiConsumer<Context, SuggestionAccumulator>)(context, suggestions) -> {
+                context.<KeyProvider<Identifier>>getLocalOption(KEY_PROVIDER_OPTION).ifPresent(
+                    p -> p.provideKeys(suggestions::suggest)
+                );
+            })
+    );
+
 
     /**
      * {@link Path}

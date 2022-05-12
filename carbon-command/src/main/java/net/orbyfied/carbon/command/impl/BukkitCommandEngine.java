@@ -1,9 +1,6 @@
 package net.orbyfied.carbon.command.impl;
 
-import net.orbyfied.carbon.command.CommandEngine;
-import net.orbyfied.carbon.command.Context;
-import net.orbyfied.carbon.command.Node;
-import net.orbyfied.carbon.command.SuggestionAccumulator;
+import net.orbyfied.carbon.command.*;
 import net.orbyfied.carbon.command.minecraft.MinecraftParameterType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -84,14 +81,30 @@ public class BukkitCommandEngine extends CommandEngine {
     static class RegisteredBukkitCommand extends BukkitCommand {
 
         protected final CommandEngine engine;
+        protected final Node node;
 
         protected RegisteredBukkitCommand(CommandEngine engine,
                                           Node node) {
+
             super(node.getName(),
-                    /* TODO */ "TODO",
-                    /* TODO */ "TODO",
+                    "",
+                    "",
                     node.getAliases());
+
+            // set fields
             this.engine = engine;
+            this.node   = node;
+
+            // set properties
+            CommandProperties rcp = node.getComponentOf(CommandProperties.class);
+            if (rcp != null) {
+                if (rcp.description() != null)
+                    this.setDescription(rcp.description());
+                if (rcp.label() != null)
+                    this.setLabel(rcp.label());
+                if (rcp.usage() != null)
+                    this.setUsage(rcp.usage());
+            }
         }
 
         @Override

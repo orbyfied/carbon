@@ -1,5 +1,8 @@
 package net.orbyfied.carbon.registry;
 
+import net.orbyfied.carbon.util.functional.Accumulator;
+import net.orbyfied.carbon.util.functional.KeyProvider;
+import net.orbyfied.carbon.util.functional.ValueProvider;
 import net.orbyfied.carbon.util.ops.EntryOperation;
 
 import java.lang.reflect.Constructor;
@@ -21,7 +24,8 @@ import java.util.function.Function;
  *            Restricted to <? extends Identifiable>
  */
 public class Registry<T extends Identifiable>
-        implements Identifiable, Iterable<T> {
+        implements Identifiable, Iterable<T>,
+        KeyProvider<Identifier>, ValueProvider<T> {
 
     /* ---- ITEMS ---- */
 
@@ -444,6 +448,18 @@ public class Registry<T extends Identifiable>
     }
 
     ///////////////////////////////
+
+    @Override
+    public void provideKeys(Accumulator<Identifier> acc) {
+        for (T v : linear)
+            acc.add(v.getIdentifier());
+    }
+
+    @Override
+    public void provideValues(Accumulator<T> acc) {
+        for (T v : linear)
+            acc.add(v);
+    }
 
     class RegistryIterator implements Iterator<T> {
         int i = 0;

@@ -9,7 +9,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R2.util.CraftMagicNumbers;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Constructor;
@@ -25,16 +24,20 @@ import static net.orbyfied.carbon.util.ReflectionUtil.*;
  */
 public class ItemUtil {
 
+    private ItemUtil() { throw new UnsupportedOperationException(); }
+
     /* ---- Reflection ---- */
 
-    private static final Class<?> craftItemStackClass = NmsHelper.getCraftBukkitClass("inventory.CraftItemStack");
+    private static final Class<?> craftItemStackClass =
+            NmsHelper.getCraftBukkitClass("inventory.CraftItemStack");
     private static final Field    craftItemStackHandleField =
             getDeclaredFieldSafe(craftItemStackClass, "handle");
     private static final Constructor<?> newCraftItemStack =
             getDeclaredConstructorSafe(craftItemStackClass,
                     Material.class, Integer.TYPE, Short.TYPE, ItemMeta.class);
 
-    private static final Class<?> craftMagicNumbersClass = NmsHelper.getCraftBukkitClass("util.CraftMagicNumbers");
+    private static final Class<?> craftMagicNumbersClass =
+            NmsHelper.getCraftBukkitClass("util.CraftMagicNumbers");
     private static final Method cmnGetItemMethod =
             getDeclaredMethodSafe(craftMagicNumbersClass,
                     "getItem", Material.class);
@@ -167,19 +170,30 @@ public class ItemUtil {
      * @param b If it should glint.
      */
     public static void setHasGlint(CompoundTag tag, boolean b) {
+        // get enchantment list
         ListTag enchantmentList = Nbt.getOrCreateList(tag, "Enchantments", CompoundTag.TAG_COMPOUND);
 
         if (b) {
+            // create and add enchantment tag
             CompoundTag enchTag = new CompoundTag();
+
             enchTag.putString("id", GLINT_FAKE_ENCH_ID);
             enchTag.putInt("lvl", 1);
+
             enchantmentList.add(enchTag);
         } else {
+            // get index of the entry by
+            // iterating over the list of enchantments
+            // until we find an enchantment entry
+            // with an id matching our fake enchantment id
             int theIndex = -1;
             int i = 0;
             for (Tag t : enchantmentList) {
+                // check if it is a compound tag
                 if (t instanceof CompoundTag ench) {
+                    // check enchantment id
                     if (ench.getString("id").equals(GLINT_FAKE_ENCH_ID)) {
+                        // we found it
                         theIndex = i;
                         break;
                     }
@@ -187,6 +201,8 @@ public class ItemUtil {
 
                 i++;
             }
+
+            // if index has been found, remove it
             if (theIndex != -1)
                 enchantmentList.remove(i);
         }

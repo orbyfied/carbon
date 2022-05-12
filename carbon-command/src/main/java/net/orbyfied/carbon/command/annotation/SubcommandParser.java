@@ -32,9 +32,16 @@ public class SubcommandParser {
      */
     protected final String raw;
 
-    public SubcommandParser(CommandEngine engine,
+    /**
+     * The base annotation processor.
+     */
+    protected final BaseAnnotationProcessor bap;
+
+    public SubcommandParser(BaseAnnotationProcessor bap,
+                            CommandEngine engine,
                             Node root,
                             String raw) {
+        this.bap    = bap;
         this.engine = engine;
         this.root   = root;
         this.raw    = raw;

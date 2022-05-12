@@ -7,6 +7,7 @@ import net.orbyfied.carbon.command.parameter.ParameterType;
 import net.orbyfied.carbon.util.ReflectionUtil;
 import net.orbyfied.carbon.util.StringReader;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -132,10 +133,27 @@ public class Node {
     }
 
     public <T extends NodeComponent> Node makeComponent(Function<Node, T> constructor,
-                                                       Consumer<T> consumer) {
+                                                        Consumer<T> consumer) {
         T it = addComponent(constructor.apply(this));
         if (consumer != null)
             consumer.accept(it);
+        return this;
+    }
+
+    public <T extends NodeComponent> Node component(Class<T> tClass,
+                                                    Function<Node, T> constructor,
+                                                    BiConsumer<Node, T> consumer) {
+        T c = getComponent(tClass);
+        if (c != null) {
+            if (consumer != null)
+                consumer.accept(this, c);
+            return this;
+        }
+
+        c = constructor.apply(this);
+        addComponent(c);
+        if (consumer != null)
+            consumer.accept(this, c);
         return this;
     }
 
@@ -173,7 +191,7 @@ public class Node {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends AbstractNodeComponent> T getComponent(Class<T> klass) {
+    public <T extends NodeComponent> T getComponent(Class<T> klass) {
         return (T) componentsByClass.get(klass);
     }
 
@@ -186,7 +204,7 @@ public class Node {
     public Node addChild(Node node) {
         Objects.requireNonNull(node, "node cannot be null");
         children.add(node);
-        childrenByName.put(node.getName(), node);
+        childrenByName.put(node.name, node);
         if (node.componentsByClass.containsKey(Executable.class))
             fastMappedChildren.put(node.name, node);
         return node;
@@ -203,6 +221,17 @@ public class Node {
         if (node.componentsByClass.containsKey(Executable.class))
             fastMappedChildren.remove(node.name);
         return this;
+    }
+
+    public Node getChildByName(String name) {
+        return childrenByName.get(name);
+    }
+
+    public Node getChildByPath(String... path) {
+        Node curr = this;
+        for (String p : path)
+            curr = curr.getChildByName(p);
+        return curr;
     }
 
     public Node getSubnode(String name) {
@@ -232,6 +261,18 @@ public class Node {
     }
 
     /* QOL Methods. */
+
+    public Node propertied(String desc, String label, String usage) {
+        component(
+                CommandProperties.class,
+                CommandProperties::new,
+                (node, rcp) -> rcp
+                        .description(desc)
+                        .label(label)
+                        .usage(usage)
+        );
+        return this;
+    }
 
     public Node makeExecutable(CommandNodeExecutor executor) {
         addComponent(new Executable(this)).setExecutor(executor);
@@ -277,6 +318,31 @@ public class Node {
         node.makeExecutable(executor, walked);
         this.addChild(node);
         return node;
+    }
+
+    ////////////////////////////////////////////////
+
+    public void printTreeFancy(PrintStream stream) {
+        printTreeFancyNext(stream, 0);
+    }
+
+    private void printTreeFancyNext(PrintStream stream,
+                                    int depth) {
+        if (depth >= 50) {
+            System.out.println(" ".repeat(depth) + " /!\\ Tree goes too deep! Over 50 entries deep.");
+            return;
+        }
+
+        Parameter param;
+        if ((param = getComponent(Parameter.class)) != null) { // is parameter
+            stream.println(" ".repeat(depth) + "\\" + name + " <" + param.getType().getIdentifier() + " " + param.getIdentifier() + ">");
+        } else {
+            stream.println(" ".repeat(depth) + "/" + name);
+        }
+
+        for (Node child : children) {
+            child.printTreeFancyNext(stream, depth + 1);
+        }
     }
 
 }

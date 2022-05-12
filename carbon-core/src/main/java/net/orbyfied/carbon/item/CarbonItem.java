@@ -13,8 +13,13 @@ import net.orbyfied.carbon.util.mc.Nbt;
 import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
 import org.bukkit.Material;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.units.qual.C;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -101,10 +106,25 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends ItemComponent<S>> CarbonItem<S> component(Function<CarbonItem<S>, T> constructor,
                                                                 BiConsumer<CarbonItem<S>, T> consumer) {
         T it = constructor.apply(this);
+        component(it);
+        consumer.accept(this, it);
+        return this;
+    }
+
+    public <T extends ItemComponent<S>> CarbonItem<S> component(Class<T> tClass,
+                                                                Function<CarbonItem<S>, T> constructor,
+                                                                BiConsumer<CarbonItem<S>, T> consumer) {
+        T it = component(tClass);
+        if (it != null) {
+            consumer.accept(this, it);
+            return this;
+        }
+
+
+        it = constructor.apply(this);
         component(it);
         consumer.accept(this, it);
         return this;

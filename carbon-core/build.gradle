@@ -1,4 +1,5 @@
 import org.apache.commons.io.Charsets
+import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'java' // java
@@ -38,6 +39,7 @@ tasks {
 }
 
 processResources {
+
     // replace placeholders for epicness
     // (and streamlining) but mostly epicness
     // (and other processing)
@@ -52,43 +54,11 @@ processResources {
             '**/*.jar',
             '**/*.class'
     ] as Iterable<String>) {
-        // expand placeholders
-        def placeholders = [
-                'carbonProjectVersion' : project.version
+        filter ReplaceTokens, tokens: [
+                carbonProjectVersion: project.version,
         ]
-
-        // filter for placeholder expansion
-        // From: https://stackoverflow.com/questions/17274107/how-to-expand-property-references-in-jar-resources
-        filter { String line ->
-            line.findAll(/\$\$\{([a-z,A-Z,0-9,\.]+)\}/).each {
-                // get the key from the expression
-                String key      = it.replace("\$\${", "").replace("}", "")
-                String keyParts = key.split("\\.");
-                System.out.println(keyParts)
-
-                // iterate over key
-                Object currentValue = placeholders;
-                for (String keyPart : keyParts) {
-                    // check if we can continue
-                    if (!(currentValue instanceof Map)) {
-                        System.out.println("[WARN] Could not resolve property for key: " + key)
-                        return;
-                    }
-
-                    // get next value
-                    currentValue = ((Map<String,Object>)currentValue).get(keyPart);
-                }
-
-                if (currentValue != null) {
-                    // replace
-                    line = line.replace(it, currentValue)
-                } else System.out.println("[WARN] No property defined for key: " + key)
-            }
-
-            // return line
-            line
-        }
     }
+
 }
 
 // Dependencies
@@ -99,6 +69,8 @@ repositories {
 
     // tried to use mixins lol
     maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+
+    maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
 }
 
 dependencies {
@@ -117,6 +89,8 @@ dependencies {
 
     // External Libraries
     implementation 'org.bstats:bstats-bukkit:3.0.0'
+
+    compileOnly 'me.clip:placeholderapi:2.11.1'
 
     compileOnly 'org.zeroturnaround:zt-zip:1.15'
     compileOnly 'org.javassist:javassist:3.28.0-GA'

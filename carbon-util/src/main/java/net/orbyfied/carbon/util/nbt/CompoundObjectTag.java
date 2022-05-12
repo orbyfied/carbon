@@ -20,7 +20,7 @@ public class CompoundObjectTag<T> implements Tag {
     public static final String SERIALIZER_FIELD_NAME = "NBT_TAG_SERIALIZER";
     public static final String CLASS_NAME_TAG        = "_class";
 
-    private static CompoundTagSerializer<?> getSerializer(Class<?> klass) {
+    private static CompoundTagSerializer getSerializer(Class<?> klass) {
         CompoundTagSerializer<?> serializer = serializerCache.get(klass);
         if (serializer != null)
             return serializer;
@@ -40,11 +40,8 @@ public class CompoundObjectTag<T> implements Tag {
         return serializer;
     }
 
-    public static final TagType<CompoundObjectTag<?>> TAG_TYPE = new TagType<>() {
-        @Override
-        public CompoundObjectTag<?> load(DataInput input, int depth, NbtAccounter tracker) throws IOException {
-            CompoundTag ctag = CompoundTag.TYPE.load(input, depth, tracker);
-
+    public static CompoundObjectTag<?> loadFromCompound(CompoundTag ctag) {
+        try {
             // get class
             String className = ctag.getString(CLASS_NAME_TAG);
             Class<?> klass;
@@ -57,11 +54,22 @@ public class CompoundObjectTag<T> implements Tag {
             // get serializer
             CompoundTagSerializer<?> serializer = getSerializer(klass);
 
-            Object obj = serializer.read(input, ctag);
+            Object obj = serializer.read(null, ctag);
 
             // create and return tag
-            CompoundObjectTag<?> tag = new CompoundObjectTag(klass, obj);
+            CompoundObjectTag<?> tag = new CompoundObjectTag(obj);
             return tag;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static final TagType<CompoundObjectTag<?>> TAG_TYPE = new TagType<>() {
+        @Override
+        public CompoundObjectTag<?> load(DataInput input, int depth, NbtAccounter tracker) throws IOException {
+            CompoundTag ctag = CompoundTag.TYPE.load(input, depth, tracker);
+            return loadFromCompound(ctag);
         }
 
         @Override
@@ -95,28 +103,14 @@ public class CompoundObjectTag<T> implements Tag {
     ///////////////////////////////////////
 
     private static final HashMap<Class<?>, CompoundTagSerializer<?>> serializerCache = new HashMap<>();
-
-    final Class<T> klass;
-    CompoundTagSerializer<T> serializer;
     T obj;
 
-    public CompoundObjectTag(Class<T> type) {
-        this(type, null);
-    }
-
-    public CompoundObjectTag(Class<T> type, T obj) {
-        this.klass = type;
+    public CompoundObjectTag(T obj) {
         this.obj  = obj;
-        loadSerializer();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadSerializer() {
-        serializer = (CompoundTagSerializer<T>) getSerializer(klass);
     }
 
     public Class<?> getObjectType() {
-        return klass;
+        return obj.getClass();
     }
 
     public T getObject() {
@@ -128,11 +122,42 @@ public class CompoundObjectTag<T> implements Tag {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
+    public CompoundTag writeCompoundTag(CompoundTag tag) {
+        try {
+            getSerializer(obj.getClass()).write(null, tag, obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return tag;
+    }
+
+    @SuppressWarnings("unchecked")
+    public CompoundTag writeCompoundTag() {
+        CompoundTag tag = new CompoundTag();
+
+        try {
+            getSerializer(obj.getClass()).write(null, tag, obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return tag;
+    }
+
     @Override
+    @SuppressWarnings("unchecked")
     public void write(DataOutput output) throws IOException {
+        // get class
+        Class<?> klass = obj.getClass();
+
         // write class name
         String name = klass.getName();
         output.writeUTF(name);
+
+        // get serializer
+        CompoundTagSerializer<T> serializer = (CompoundTagSerializer<T>) getSerializer(klass);
 
         // compile object
         CompoundTag tag = new CompoundTag();
@@ -154,7 +179,7 @@ public class CompoundObjectTag<T> implements Tag {
 
     @Override
     public @NotNull Tag copy() {
-        return new CompoundObjectTag<>(klass, obj);
+        return new CompoundObjectTag<>(obj);
     }
 
     @Override
@@ -169,7 +194,7 @@ public class CompoundObjectTag<T> implements Tag {
 
     @Override
     public String toString() {
-        return "object<" + klass.getSimpleName() + ">: " + Integer.toHexString(System.identityHashCode(obj));
+        return "0x" + Integer.toHexString(System.identityHashCode(obj)) + " '" + obj.toString() + "'";
     }
 
 }

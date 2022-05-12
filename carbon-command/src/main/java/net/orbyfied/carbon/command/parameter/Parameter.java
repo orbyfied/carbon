@@ -5,6 +5,10 @@ import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.util.StringReader;
 import net.orbyfied.carbon.command.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 public class Parameter
         extends AbstractNodeComponent
         implements Functional, Selecting, Completer {
@@ -13,11 +17,23 @@ public class Parameter
 
     protected ParameterType<?> type;
 
+    protected LinkedHashMap<String, Supplier<Object>> options = new LinkedHashMap<>();
+
     public Parameter(Node node) {
         super(node);
         Node parent = node;
         while ((parent = parent.parent()).hasComponentOf(Parameter.class)) { }
         identifier = new Identifier(parent.getName(), node.getName());
+    }
+
+    public Parameter setOption(String id, Supplier<Object> supplier) {
+        options.put(id, supplier);
+        return this;
+    }
+
+    public Parameter setOption(String id, Object supplied) {
+        options.put(id, () -> supplied);
+        return this;
     }
 
     public Parameter setIdentifier(Identifier id) {
@@ -38,10 +54,22 @@ public class Parameter
         return type;
     }
 
+    private void putOptions(Context context) {
+        for (Map.Entry<String, Supplier<Object>> entry : options.entrySet())
+            context.setLocalOption(entry.getKey(), entry.getValue().get());
+    }
+
+    private void remOptions(Context context) {
+        for (String key : options.keySet())
+            context.unsetLocalOption(key);
+    }
+
     @Override
     public void walked(Context ctx, StringReader reader) {
         int startIndex = reader.index();
         Object v;
+
+        putOptions(ctx);
 
         try {
             // parse value
@@ -61,6 +89,8 @@ public class Parameter
 
         }
 
+        remOptions(ctx);
+
         ctx.setSymbol(identifier, v);
     }
 
@@ -69,12 +99,17 @@ public class Parameter
 
     @Override
     public boolean selects(Context ctx, StringReader reader) {
-        return type.accepts(ctx, reader);
+        putOptions(ctx);
+        boolean b = type.accepts(ctx, reader);
+        remOptions(ctx);
+        return b;
     }
 
     @Override
     public void completeSelf(Context context, Node from, SuggestionAccumulator suggestions) {
+        putOptions(context);
         type.suggest(context, suggestions);
+        remOptions(context);
     }
 
 }

@@ -1,1 +1,1 @@
-$${carbonProjectVersion}
+@carbonProjectVersion@

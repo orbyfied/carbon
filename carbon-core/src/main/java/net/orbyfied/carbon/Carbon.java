@@ -13,6 +13,7 @@ import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
 import net.orbyfied.carbon.event.ComplexEventBus;
 import net.orbyfied.carbon.event.EventBus;
+import net.orbyfied.carbon.integration.IntegrationManager;
 import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.process.ProcessManager;
@@ -67,6 +68,7 @@ public class Carbon
         this.resourcePackManager = new ResourcePackManager(this);
         this.commandEngine = new BukkitCommandEngine(this.plugin);
         this.userEnvironment = new CarbonUserEnvironment(this);
+        this.integrationManager = new IntegrationManager(this);
 
     }
 
@@ -142,6 +144,11 @@ public class Carbon
      */
     protected Object initStage;
 
+    /**
+     * The integration manager.
+     */
+    protected final IntegrationManager integrationManager;
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -197,6 +204,10 @@ public class Carbon
 
     public EventBus getCoreEventBus() {
         return coreEventBus;
+    }
+
+    public IntegrationManager getIntegrationManager() {
+        return integrationManager;
     }
 
     public Path getDirectory() { return directory; }

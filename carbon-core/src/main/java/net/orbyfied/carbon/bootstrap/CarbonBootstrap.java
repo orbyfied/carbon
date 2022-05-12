@@ -10,6 +10,9 @@ import net.orbyfied.carbon.crafting.RecipeRegistryService;
 import net.orbyfied.carbon.crafting.type.RecipeType;
 import net.orbyfied.carbon.crafting.type.RecipeTypes;
 import net.orbyfied.carbon.element.ModElementRegistry;
+import net.orbyfied.carbon.integration.Integration;
+import net.orbyfied.carbon.integration.IntegrationManager;
+import net.orbyfied.carbon.integration.impl.PapiIntegration;
 import net.orbyfied.carbon.item.CarbonItem;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.orbyfied.carbon.item.ItemFixer;
@@ -23,6 +26,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,6 +36,13 @@ import java.util.Objects;
  */
 public abstract class CarbonBootstrap
         extends JavaPlugin implements Listener {
+
+    /**
+     * List of default integrations to try and load.
+     */
+    public static final List<Class<? extends Integration>> DEFAULT_INTEGRATION_CLASSES = Arrays.asList(
+            PapiIntegration.class // placeholder api
+    );
 
     /**
      * The instance of this plugin.
@@ -141,6 +153,12 @@ public abstract class CarbonBootstrap
             ModLoader loader = main.getModLoader();
             loader.loadAll();
 
+            // load integrations
+            initStage.next(InitStageGeneral.LOAD_INTEGRATIONS);
+            IntegrationManager im = main.getIntegrationManager();
+            for (Class<? extends Integration> ingKlass : DEFAULT_INTEGRATION_CLASSES)
+                im.constructAndRegister(ingKlass);
+
             // load user environment
             initStage.next(InitStageGeneral.LOAD_USER_ENV);
             main.getUserEnvironment().enable();
@@ -177,6 +195,9 @@ public abstract class CarbonBootstrap
 
         // disable all mods
         main.getModLoader().disableAll();
+
+        // disable all integrations
+        main.getIntegrationManager().disable();
 
         // disable services
         main.getServiceManager().disable();
@@ -243,6 +264,11 @@ public abstract class CarbonBootstrap
             initStage.details("minecraft:recipes : Assign workers.");
             for (Recipe recipe : recipeRegistry)
                 recipeRegistryService.getWorker(recipe.type()).register(recipe);
+
+            // enable integrations
+            initStage.next(InitStageGeneral.INIT_INTEGRATIONS);
+            IntegrationManager im = main.getIntegrationManager();
+            im.enable();
 
             // build and host resource pack
             initStage.next(InitStageGeneral.MAKE_RESOURCE_PACK);
@@ -346,7 +372,7 @@ public abstract class CarbonBootstrap
 
         @Override
         public String toString() {
-            return gen + (details != null ? "/[" + details + "]" : "");
+            return gen + (details != null ? ": " + details + "" : "");
         }
 
     }
@@ -370,6 +396,11 @@ public abstract class CarbonBootstrap
          * Started loading mods.
          */
         LOAD_MODS,
+
+        /**
+         * Started loading/registering integrations.
+         */
+        LOAD_INTEGRATIONS,
 
         /**
          * Started loading user environment.
@@ -411,6 +442,11 @@ public abstract class CarbonBootstrap
          * Started loading registry content.
          */
         LOADC_REGISTRIES,
+
+        /**
+         * Started initializing/enabling integrations.
+         */
+        INIT_INTEGRATIONS,
 
         /**
          * Started making/hosting the resource pack.

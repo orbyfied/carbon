@@ -6,6 +6,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 public class Context {
 
@@ -36,6 +37,11 @@ public class Context {
     protected final HashMap<Identifier, Object> symbols = new HashMap<>();
 
     /**
+     * Options usable in parsing.
+     */
+    protected final HashMap<Identifier, Object> options = new HashMap<>();
+
+    /**
      * The command engine.
      */
     protected final CommandEngine engine;
@@ -55,6 +61,9 @@ public class Context {
      */
     protected Boolean successful;
 
+    /**
+     * The current string reader used for parsing.
+     */
     protected StringReader reader;
 
     /**
@@ -153,6 +162,69 @@ public class Context {
 
     public Context setSymbol(Identifier id, Object o) {
         symbols.put(id, o);
+        return this;
+    }
+
+    public Context setSymbol(String id, Object o) {
+        return setOption(Identifier.of(id), o);
+    }
+
+    public Context unsetSymbol(Identifier id) {
+        symbols.remove(id);
+        return this;
+    }
+
+    public Context unsetSymbol(String id) {
+        return unsetSymbol(Identifier.of(id));
+    }
+
+    /* ----- Options ----- */
+
+    public HashMap<Identifier, Object> getOptions() {
+        return symbols;
+    }
+
+    public <T> Optional<T> getLocalOption(String identifier, Class<T> tClass) {
+        return getOption(new Identifier(current.name, identifier));
+    }
+
+    public <T> Optional<T> getLocalOption(String identifier) {
+        return getOption(new Identifier(current.name, identifier));
+    }
+
+    public Context setLocalOption(String identifier, Object o) {
+        return setOption(new Identifier(current.name, identifier), o);
+    }
+
+    public Context unsetLocalOption(String identifier) {
+        return unsetOption(new Identifier(current.name, identifier));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getOption(Identifier identifier) {
+        return (Optional<T>) Optional.ofNullable(options.get(identifier));
+    }
+
+    public <T> Optional<T> getOption(String identifier) {
+        return getOption(Identifier.of(identifier));
+    }
+
+    public Context setOption(Identifier identifier, Object o) {
+        options.put(identifier, o);
+        return this;
+    }
+
+    public Context setOption(String id, Object o) {
+        return setOption(Identifier.of(id), o);
+    }
+
+    public Context unsetOption(Identifier id) {
+        options.remove(id);
+        return this;
+    }
+
+    public Context unsetOption(String id) {
+        options.remove(Identifier.of(id));
         return this;
     }
 
