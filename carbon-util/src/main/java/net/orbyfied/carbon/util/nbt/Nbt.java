@@ -1,9 +1,8 @@
-package net.orbyfied.carbon.util.mc;
+package net.orbyfied.carbon.util.nbt;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
 
 import java.util.function.Supplier;
 
@@ -46,31 +45,53 @@ public class Nbt {
             sourceTag.put(key, tag);
             // return
             return tag;
-        } else {
-            // try to get tag
-            Tag tag = sourceTag.get(key);
+        } else return getOrLoadObject(sourceTag, key);
+    }
 
-            // if we already loaded this tag, we return it
-            if (tag instanceof CompoundObjectTag cot)
-                return cot;
+    /**
+     * Tries to get an object tag with the provided
+     * key from the source tag.
+     *
+     * If a tag with that key already exists, it will
+     * first check if it has already been loaded as an object,
+     * and if so, return it immediately. Otherwise, it will load
+     * the object tag, replace the existent one with the new
+     * object tag and return afterwards.
+     *
+     * @param sourceTag The source tag to get from.
+     * @param key The key in the source tag.
+     * @param <T> The object type.
+     * @return The retrieved tag or null.
+     */
+    @SuppressWarnings({"unchecked", "typesRaw"})
+    public static <T> CompoundObjectTag<T> getOrLoadObject(CompoundTag sourceTag,
+                                                           String key) {
+        // try to get tag
+        // return null if the tag could not be found
+        Tag tag = sourceTag.get(key);
+        if (tag == null)
+            return null;
 
-            // otherwise we need to load the object tag
-            if (!(tag instanceof CompoundTag))
-                throw new IllegalStateException("Tag '" + key + "' is not a compound tag and has to be loaded.");
-            CompoundTag ctag = (CompoundTag) tag;
-            CompoundObjectTag cot;
-            try {
-                cot = CompoundObjectTag.loadFromCompound(ctag);
-            } catch (Exception e) {
-                // pass through error
-                throw new RuntimeException("Exception while loading object tag '" + key + "'", e);
-            }
-
-            if (cot == null) // error occurred
-                return null;
-            sourceTag.put(key, cot); // put newly loaded tag
+        // if we already loaded this tag, we return it
+        if (tag instanceof CompoundObjectTag cot)
             return cot;
+
+        // otherwise we need to load the object tag
+        if (!(tag instanceof CompoundTag))
+            throw new IllegalStateException("Tag '" + key + "' is not a compound tag and has to be loaded.");
+        CompoundTag ctag = (CompoundTag) tag;
+        CompoundObjectTag cot;
+        try {
+            cot = CompoundObjectTag.loadFromCompound(ctag);
+        } catch (Exception e) {
+            // pass through error
+            throw new RuntimeException("Exception while loading object tag '" + key + "'", e);
         }
+
+        if (cot == null) // error occurred
+            return null;
+        sourceTag.put(key, cot); // put newly loaded tag
+        return cot;
     }
 
     /**

@@ -98,10 +98,12 @@ public class ModelItemDisplayComponent
         if (hasGlint)
             ItemUtil.setHasGlint(nmsStack.getOrCreateTag(), true);
 
-        MutableComponent displayNameComponent = new TextComponent(displayName);
-        displayNameComponent.setStyle(Style.EMPTY.withItalic(false));
+        if (displayName != null) {
+            MutableComponent displayNameComponent = new TextComponent(displayName);
+            displayNameComponent.setStyle(Style.EMPTY.withItalic(false));
+            nmsStack.setHoverName(displayNameComponent);
+        }
 
-        nmsStack.setHoverName(displayNameComponent);
         tag.putInt("CustomModelData", cmdStart + getModelIdFrom(state));
     }
 

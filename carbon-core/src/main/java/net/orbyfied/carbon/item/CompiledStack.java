@@ -15,8 +15,13 @@ public class CompiledStack {
 
     // TODO: this. is. fucking. shit.
     private static Registry<CarbonItem> itemRegistry;
-    public static void initialize(CarbonAPI api) {
+
+    static void initializeApi(CarbonAPI api) {
         itemRegistry = api.getRegistries().getByIdentifier("minecraft:items");
+    }
+
+    static void disableApi(CarbonAPI api) {
+        itemRegistry = null;
     }
 
     /////////////////////////////////////////

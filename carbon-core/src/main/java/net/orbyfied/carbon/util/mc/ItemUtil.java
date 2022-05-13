@@ -8,6 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.orbyfied.carbon.util.nbt.Nbt;
 import org.bukkit.Material;
 import org.bukkit.inventory.meta.ItemMeta;
 

@@ -1,5 +1,6 @@
 package net.orbyfied.carbon.item;
 
+import net.minecraft.network.chat.TranslatableComponent;
 import net.orbyfied.carbon.element.RegistrableElement;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Identifier;
@@ -9,17 +10,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
-import net.orbyfied.carbon.util.mc.Nbt;
+import net.orbyfied.carbon.util.nbt.Nbt;
 import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
 import org.bukkit.Material;
 import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.units.qual.C;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -196,7 +192,9 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         CompoundTag tag = nmsStack.getTag();
         if (tag == null)
             return null;
-        CompoundObjectTag<S> stateTag = Nbt.getOrCreateObject(tag, ITEM_STATE_TAG, () -> stateAllocator.allocate(this));
+        CompoundObjectTag<S> stateTag = Nbt.getOrLoadObject(tag, ITEM_STATE_TAG);
+        if (stateTag == null)
+            return null;
 
         // return
         return stateTag.getObject();
@@ -224,8 +222,11 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         CompoundObjectTag<S> stag = Nbt.getOrCreateObject(tag, ITEM_STATE_TAG, () -> state);
 
         // set default name
-        nmsStack.setHoverName(new TextComponent("item." + identifier)
-                .setStyle(Style.EMPTY.withItalic(false)));
+        nmsStack.setHoverName(
+                new TranslatableComponent("item." + identifier.getNamespace() + "." + identifier.getPath()).setStyle(
+                        Style.EMPTY.withItalic(false)
+                )
+        );
 
         // compile stack
         CompiledStack compiledStack = new CompiledStack()
@@ -261,7 +262,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
             throw new IllegalStateException("item " + identifier + " has not been built yet!");
     }
 
-     /////////////////////////////
+    /////////////////////////////////
 
     @Override
     public String toString() {

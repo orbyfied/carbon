@@ -12,6 +12,7 @@ import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.IOUtil;
 import net.orbyfied.carbon.util.Verbose;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -186,6 +187,25 @@ public class CarbonReport {
         return this;
     }
 
+    public CarbonReport disabled() {
+        // get plugin
+        Plugin plugin;
+        try {
+            plugin = CarbonJavaAPI.get().getMain().getPlugin();
+        } catch (Exception e) {
+            plugin = Bukkit.getPluginManager().getPlugin("Carbon");
+        }
+
+        if (plugin == null)
+            throw new IllegalStateException("Carbon plugin not found.");
+
+        // disable plugin
+        Bukkit.getPluginManager().disablePlugin(plugin);
+
+        // return
+        return this;
+    }
+
     public static final Writer STDOUT_WRITER = new PrintWriter(System.out);
 
     public static CarbonReport reportFileAndStdout() {
@@ -205,8 +225,6 @@ public class CarbonReport {
                 IOUtil.toIOFriendlyString(now) + ".log");
         return reportFile(file).setTime(now);
     }
-
-
 
     public static CarbonReport reportFile(Path file) {
         if (file == null)

@@ -1,7 +1,7 @@
 package net.orbyfied.carbon.bootstrap;
 
 import net.orbyfied.carbon.Carbon;
-import net.orbyfied.carbon.api.util.Version;
+import net.orbyfied.carbon.api.CarbonAPI;
 import net.orbyfied.carbon.content.CMDRegistryService;
 import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
@@ -26,6 +26,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +43,14 @@ public abstract class CarbonBootstrap
      */
     public static final List<Class<? extends Integration>> DEFAULT_INTEGRATION_CLASSES = Arrays.asList(
             PapiIntegration.class // placeholder api
+    );
+
+    /**
+     * List of API classes that should be initialized
+     * with dependency references.
+     */
+    private static final List<Class<?>> API_CLASSES = Arrays.asList(
+            CompiledStack.class
     );
 
     /**
@@ -178,7 +187,8 @@ public abstract class CarbonBootstrap
                     .setMessage("Critical exception while loading Carbon")
                     .setProperty("Boostrap Class", this.getClass())
                     .withError(e)
-                    .write();
+                    .write()
+                    .disabled();
 
         }
         
@@ -195,6 +205,10 @@ public abstract class CarbonBootstrap
 
         // disable all mods
         main.getModLoader().disableAll();
+
+        // disable all api classes
+        for (Class<?> klass : API_CLASSES)
+            disableAPIClass(klass);
 
         // disable all integrations
         main.getIntegrationManager().disable();
@@ -244,8 +258,9 @@ public abstract class CarbonBootstrap
 
             // initialize misc apis
             initStage.next(InitStageGeneral.INIT_MISC_APIS);
-            initStage.details("CompiledStack: Inject API");
-            CompiledStack.initialize(main.getAPI());
+            initStage.details("Initialize API classes");
+            for (Class<?> apiKlass : API_CLASSES)
+                initializeAPIClass(apiKlass);
             initStage.details("ItemFixer: Register Service");
             sm.addService(new ItemFixer(sm));
 
@@ -290,10 +305,59 @@ public abstract class CarbonBootstrap
                     .setMessage("Critical exception while initializing Carbon")
                     .setProperty("Boostrap Class", this.getClass())
                     .withError(e)
-                    .write();
+                    .write()
+                    .disabled();
 
         }
 
+    }
+
+    /**
+     * Initializes a single API class.
+     * @param klass The API class.
+     */
+    public void initializeAPIClass(Class<?> klass) {
+        // set stage
+        initStage.details("Initialize API Class " + klass.getSimpleName());
+
+        try {
+
+            // call initialize method
+            Method method = klass.getDeclaredMethod("initializeApi", CarbonAPI.class);
+            method.setAccessible(true);
+
+            // invoke
+            method.invoke(null, main.getAPI());
+
+        } catch (NoSuchMethodException ignore) {
+            // ignore
+        } catch (Exception e) {
+            // pass through exception
+            // to trigger report
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Disables a single API class.
+     * @param klass The API class.
+     */
+    public void disableAPIClass(Class<?> klass) {
+        try {
+
+            // call initialize method
+            Method method = klass.getDeclaredMethod("disableApi", CarbonAPI.class);
+            method.setAccessible(true);
+
+            // invoke
+            method.invoke(null, main.getAPI());
+
+        } catch (NoSuchMethodException ignore) {
+            // ignore
+        } catch (Exception e) {
+            // pass through exception
+            throw new RuntimeException(e);
+        }
     }
 
     /**

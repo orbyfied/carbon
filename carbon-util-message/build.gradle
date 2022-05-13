@@ -53,7 +53,7 @@ dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
     // Utilities
-    implementation project(":carbon-util-message")
+    compileOnly project(":carbon-util")
 
     // External Libraries
     // ...
