@@ -57,4 +57,44 @@ public class Context {
         return this;
     }
 
+    public Context fill(Object... params) {
+        if (params.length == 0)
+            return this;
+        parseContext(this, params);
+        return this;
+    }
+
+    ////////////////////////////////////////////////////
+
+    public static Context parseContext(Context context,
+                                       Object... params) {
+        String key = null;
+        int l = params.length;
+        for (int i = 0; i < l; i++) {
+            Object o = params[i];
+            if (i % 2 == 0) { // key
+                if (!(o instanceof String))
+                    throw new IllegalArgumentException("Expected key at parameter index " + i);
+                key = (String) params[i];
+            } else { // value
+                // get key type
+                char first = key.charAt(0);
+                key = key.substring(1);
+
+                switch (first) {
+                    case '%' -> { // value
+                        context.value(key, o);
+                    }
+
+                    case '!' -> { // option
+                        context.option(key, o);
+                    }
+                }
+            }
+        }
+
+        // return
+        return context;
+    }
+
 }

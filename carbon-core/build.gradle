@@ -86,6 +86,7 @@ dependencies {
     implementation project(":carbon-config")
     implementation project(":carbon-command")
     implementation project(":carbon-registry")
+    implementation project(":carbon-util-message")
 
     // External Libraries
     implementation 'org.bstats:bstats-bukkit:3.0.0'

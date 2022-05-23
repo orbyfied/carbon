@@ -6,6 +6,7 @@ import net.orbyfied.carbon.util.message.Slice;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+// TODO: fix for new writer system
 public interface Styled extends Slice {
 
     Style style();
@@ -17,13 +18,6 @@ public interface Styled extends Slice {
     default <T extends Style> Styled styled(Supplier<T> supplier, Consumer<T> consumer) {
         styled(supplier.get()).style(consumer);
         return this;
-    }
-
-    default void writeRaw(Context ctx, StringBuilder builder) { }
-
-    @Override
-    default void write(Context ctx, StringBuilder builder) {
-        style().write(b -> writeRaw(ctx, b), builder);
     }
 
 }

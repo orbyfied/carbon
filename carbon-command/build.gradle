@@ -54,6 +54,7 @@ dependencies {
 
     implementation project(":carbon-registry")
     implementation project(":carbon-util")
+    implementation project(":carbon-util-message")
 
     // External Libraries
     // ...

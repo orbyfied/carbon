@@ -4,12 +4,20 @@ import net.orbyfied.carbon.util.message.Context;
 import net.orbyfied.carbon.util.message.Sliced;
 import net.orbyfied.carbon.util.message.style.Style;
 import net.orbyfied.carbon.util.message.style.Styled;
+import net.orbyfied.carbon.util.message.writer.CWF;
+import net.orbyfied.carbon.util.message.writer.ComponentWriter;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Placeholder implements Styled {
+
+    // writer map
+    public static final Map<Class, ComponentWriter<Placeholder, ?>> WRITERS = ComponentWriter.writers(Placeholder.class,
+            String.class, (CWF<Placeholder, String>) (ctx, wrt, ph) -> Objects.toString(ph.resolve(ctx))
+    );
 
     /**
      * The key of the value to look up.
@@ -39,12 +47,11 @@ public class Placeholder implements Styled {
         return or;
     }
 
-    @Override
-    public void writeRaw(Context ctx, StringBuilder builder) {
+    public Object resolve(Context ctx) {
         Object val = ctx.value(key);
         if (val == null)
             val = or;
-        builder.append(val);
+        return val;
     }
 
     @Override

@@ -1,54 +1,48 @@
 package net.orbyfied.carbon.util.message;
 
-public interface Slice {
+import net.orbyfied.carbon.util.message.writer.MessageWritable;
+import net.orbyfied.carbon.util.message.writer.MessageWriter;
+import net.orbyfied.carbon.util.message.writer.StringMessageWriter;
 
-    /**
-     * Should write the contents of this
-     * slice to the string builder potentially
-     * using the values and options provided by
-     * the given context.
-     * @param ctx The context.
-     * @param builder The result builder.
-     */
-    void write(Context ctx, StringBuilder builder);
+public interface Slice extends MessageWritable {
 
-    default String getString(Object... params) {
-        // build context
-        Context context = new Context();
-
-        String key = null;
-        int l = params.length;
-        for (int i = 0; i < l; i++) {
-            Object o = params[i];
-            if (i % 2 == 0) { // key
-                if (!(o instanceof String))
-                    throw new IllegalArgumentException("Expected key at parameter index " + i);
-                key = (String) params[i];
-            } else { // value
-                // get key type
-                char first = key.charAt(0);
-                key = key.substring(1);
-
-                switch (first) {
-                    case '%' -> { // value
-                        context.value(key, o);
-                    }
-
-                    case '!' -> { // option
-                        context.option(key, o);
-                    }
-                }
-            }
-        }
-
+    default String getString(Context context) {
         // create string builder
-        StringBuilder builder = new StringBuilder();
+        StringMessageWriter writer = new StringMessageWriter()
+                .contextual(context);
 
         // write
-        write(context, builder);
+        writer.append(this);
 
         // return
-        return builder.toString();
+        return writer.build();
+    }
+
+    default String getString() {
+        return getString(new Context());
+    }
+
+    default String getString(Object... params) {
+        Context context = new Context()
+                .fill(params);
+        return getString(context);
+    }
+
+    default <R> R write(MessageWriter<?, R> writer, Context context) {
+        // configure writer
+        writer.contextual(context);
+
+        // write
+        writer.append(this);
+
+        // return
+        return writer.build();
+    }
+
+    default <R> R write(MessageWriter<?, R> writer, Object... params) {
+        return write(writer, new Context()
+                .fill(params)
+        );
     }
 
 }
