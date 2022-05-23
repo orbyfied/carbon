@@ -1,5 +1,7 @@
 package net.orbyfied.carbon.util.message;
 
+import net.orbyfied.carbon.util.Provider;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,8 +31,18 @@ public class Context {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T value(String key) {
+    public <T> T rawValue(String key) {
         return (T) values.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T value(String key) {
+        Object o = values.get(key);
+        if (o instanceof Provider provider) {
+            o = provider.provide(this, key);
+        }
+
+        return (T) o;
     }
 
     public Context option(String key, Object v) {
@@ -70,27 +82,40 @@ public class Context {
                                        Object... params) {
         String key = null;
         int l = params.length;
+
+        int p = 0;
+
         for (int i = 0; i < l; i++) {
             Object o = params[i];
-            if (i % 2 == 0) { // key
-                if (!(o instanceof String))
-                    throw new IllegalArgumentException("Expected key at parameter index " + i);
-                key = (String) params[i];
-            } else { // value
-                // get key type
-                char first = key.charAt(0);
-                key = key.substring(1);
+            switch (p) {
+                case 0 -> {
+                    if (!(o instanceof String))
+                        throw new IllegalArgumentException("Expected key at parameter index " + i);
+                    key = (String) params[i];
+                }
 
-                switch (first) {
-                    case '%' -> { // value
-                        context.value(key, o);
+                case 1 -> {
+                    // get key type
+                    char first = key.charAt(0);
+                    key = key.substring(1);
+
+                    switch (first) {
+                        case '%' -> { // value
+                            context.value(key, o);
+                        }
+
+                        case '!' -> { // option
+                            context.option(key, o);
+                        }
                     }
 
-                    case '!' -> { // option
-                        context.option(key, o);
-                    }
+                    // advance
+                    p = 0;
+                    continue;
                 }
             }
+
+            p++;
         }
 
         // return

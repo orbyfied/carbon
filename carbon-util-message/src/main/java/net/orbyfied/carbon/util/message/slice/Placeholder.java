@@ -1,11 +1,12 @@
 package net.orbyfied.carbon.util.message.slice;
 
+import net.md_5.bungee.api.ChatColor;
 import net.orbyfied.carbon.util.message.Context;
-import net.orbyfied.carbon.util.message.Sliced;
 import net.orbyfied.carbon.util.message.style.Style;
 import net.orbyfied.carbon.util.message.style.Styled;
 import net.orbyfied.carbon.util.message.writer.CWF;
 import net.orbyfied.carbon.util.message.writer.ComponentWriter;
+import net.orbyfied.carbon.util.message.writer.EffectKey;
 
 import java.util.Map;
 import java.util.Objects;
@@ -15,8 +16,8 @@ import java.util.function.Supplier;
 public class Placeholder implements Styled {
 
     // writer map
-    public static final Map<Class, ComponentWriter<Placeholder, ?>> WRITERS = ComponentWriter.writers(Placeholder.class,
-            String.class, (CWF<Placeholder, String>) (ctx, wrt, ph) -> Objects.toString(ph.resolve(ctx))
+    public static final Map<EffectKey<Placeholder, ?>, ComponentWriter<Placeholder, ?>> WRITERS = ComponentWriter.writers(Placeholder.class,
+            String.class, (CWF<Placeholder, String>) (ctx, wrt, ph) -> Objects.toString(ph.resolve(ctx)) + ChatColor.RESET
     );
 
     /**

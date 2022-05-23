@@ -1,5 +1,6 @@
 package net.orbyfied.carbon.util.message.slice;
 
+import net.md_5.bungee.api.ChatColor;
 import net.orbyfied.carbon.util.message.Context;
 import net.orbyfied.carbon.util.message.Slice;
 import net.orbyfied.carbon.util.message.Sliced;
@@ -7,6 +8,7 @@ import net.orbyfied.carbon.util.message.style.Style;
 import net.orbyfied.carbon.util.message.style.Styled;
 import net.orbyfied.carbon.util.message.writer.CWF;
 import net.orbyfied.carbon.util.message.writer.ComponentWriter;
+import net.orbyfied.carbon.util.message.writer.EffectKey;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -15,8 +17,8 @@ import java.util.function.Supplier;
 public class Literal implements Slice, Styled {
 
     // writer map
-    public static final Map<Class, ComponentWriter<Literal, ?>> WRITERS = ComponentWriter.writers(Literal.class,
-            String.class, (CWF<Literal, String>) (ctx, wrt, lit) -> lit.text
+    public static final Map<EffectKey<Literal, ?>, ComponentWriter<Literal, ?>> WRITERS = ComponentWriter.writers(Literal.class,
+            String.class, (CWF<Literal, String>) (ctx, wrt, lit) -> lit.text + ChatColor.RESET
     );
 
     /**

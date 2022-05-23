@@ -20,12 +20,18 @@ import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
+import net.orbyfied.carbon.util.message.Message;
+import net.orbyfied.carbon.util.message.slice.Literal;
+import net.orbyfied.carbon.util.message.slice.Placeholder;
+import net.orbyfied.carbon.util.message.style.Style;
+import net.orbyfied.carbon.util.message.style.color.Shaders;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;

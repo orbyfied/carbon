@@ -1,8 +1,8 @@
 package net.orbyfied.carbon.util.message;
 
-import net.orbyfied.carbon.util.message.writer.MessageWritable;
-import net.orbyfied.carbon.util.message.writer.MessageWriter;
-import net.orbyfied.carbon.util.message.writer.StringMessageWriter;
+import net.orbyfied.carbon.util.message.style.Style;
+import net.orbyfied.carbon.util.message.style.Styled;
+import net.orbyfied.carbon.util.message.writer.*;
 
 public interface Slice extends MessageWritable {
 
@@ -16,6 +16,10 @@ public interface Slice extends MessageWritable {
 
         // return
         return writer.build();
+    }
+
+    default String toString(Object... params) {
+        return getString(params);
     }
 
     default String getString() {
@@ -43,6 +47,33 @@ public interface Slice extends MessageWritable {
         return write(writer, new Context()
                 .fill(params)
         );
+    }
+
+    default <T> T serialize(Context ctx, MessageWriter<T, ?> writer, Class<T> target) {
+        // write string
+        T it = ComponentWriter.serializeStatic(
+                ctx,
+                target,
+                this,
+                writer
+        );
+
+        if (it == null)
+            return null;
+
+        // apply transform if available
+        if (this instanceof Styled styled) {
+            Style style = styled.style();
+            if (style != null)
+                // apply transform
+                it = ComponentTransform.transformStatic(
+                        ctx, writer,
+                        this, style, it
+                );
+        }
+
+        // return
+        return it;
     }
 
 }
