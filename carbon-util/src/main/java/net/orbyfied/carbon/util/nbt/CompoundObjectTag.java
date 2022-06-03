@@ -223,12 +223,7 @@ public class CompoundObjectTag<T> implements Tag {
      */
     @SuppressWarnings("unchecked")
     public CompoundTag writeCompoundTag(CompoundTag tag) {
-        try {
-            getSerializer(obj.getClass()).write(tag, obj);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        saveToCompound(this, tag);
         return tag;
     }
 
@@ -241,13 +236,7 @@ public class CompoundObjectTag<T> implements Tag {
     @SuppressWarnings("unchecked")
     public CompoundTag writeCompoundTag() {
         CompoundTag tag = new CompoundTag();
-
-        try {
-            getSerializer(obj.getClass()).write(tag, obj);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        saveToCompound(this, tag);
         return tag;
     }
 
@@ -279,7 +268,10 @@ public class CompoundObjectTag<T> implements Tag {
     @Override
     @SuppressWarnings("unchecked")
     public @NotNull Tag copy() {
-        return new CompoundObjectTag<>(getSerializer(obj.getClass()).copy(obj));
+        return new CompoundObjectTag<>(
+                getSerializer(obj.getClass())
+                        .copy(obj)
+        );
     }
 
     @Override
