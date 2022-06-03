@@ -50,7 +50,7 @@ public interface Slot {
      * If this slot accepts the given
      * item stack. Used for filling.
      * Should check if the item stack is
-     * similar (type & nbt same, but not amount),
+     * similar (type and nbt same, but not amount),
      * and if the slot hasn't reached it's
      * maximum capacity/stack size.
      * @return True/false.

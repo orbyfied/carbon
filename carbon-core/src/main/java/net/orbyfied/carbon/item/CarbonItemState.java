@@ -109,6 +109,11 @@ public class CarbonItemState<I extends CarbonItem> {
             return state;
         }
 
+        @Override
+        public CarbonItemState copy(CarbonItemState original) {
+            return new CarbonItemState(original.item);
+        }
+
     };
 
 }

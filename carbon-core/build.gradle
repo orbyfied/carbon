@@ -20,6 +20,12 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
+// Javadocs
+javadoc {
+    source = sourceSets.main.allJava
+    destinationDir new File("./docs/javadocs/")
+}
+
 // Task Configuration
 
 tasks {

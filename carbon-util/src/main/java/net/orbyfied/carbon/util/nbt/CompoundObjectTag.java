@@ -8,6 +8,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * A runtime reference to an object which is
@@ -60,11 +61,19 @@ public class CompoundObjectTag<T> implements Tag {
             // try to get serializer from field
             serializer = (CompoundTagSerializer<?>) f.get(null);
         } catch (Exception e) {
-            // handle exception, kinda scuffed but whatever
-            System.out.println("For class: " + klass);
-            e.printStackTrace();
-            return null;
+            // handle exception
+            throw new IllegalStateException(
+                    "Failed to load serializer for: " + klass,
+                    e
+            );
         }
+
+        // check if a serializer could be
+        // loaded real quick
+        if (serializer == null)
+            throw new IllegalStateException(
+                    "No serializer was provided for: " + klass
+            );
 
         // cache for later
         LOADED_SERIALIZERS.put(klass, serializer);
@@ -82,6 +91,8 @@ public class CompoundObjectTag<T> implements Tag {
         try {
             // get class
             String className = ctag.getString(CLASS_NAME_TAG);
+            if ("null".equals(className)) // handle null
+                return new CompoundObjectTag<>(null);
             Class<?> klass;
             try {
                 klass = Class.forName(className);
@@ -102,6 +113,42 @@ public class CompoundObjectTag<T> implements Tag {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Saves the provided compound object tag to
+     * the specified compound tag and returns it
+     * (the compound tag) back to you.
+     * @param otag The object tag to write.
+     * @param ctag The compound tag to write to.
+     * @return The (same) compound tag.
+     */
+    @SuppressWarnings("unchecked")
+    public static CompoundTag saveToCompound(CompoundObjectTag<?> otag, CompoundTag ctag) {
+        // get object
+        Object obj = otag.getObject();
+        // handle null
+        if (obj == null) {
+            ctag.putString(CLASS_NAME_TAG, "null");
+            return ctag;
+        }
+
+        // get class
+        Class<?> objKlass = obj.getClass();
+
+        // set class name
+        ctag.putString(CLASS_NAME_TAG, objKlass.getName());
+
+        try {
+            // serialize
+            CompoundTagSerializer serializer = getSerializer(objKlass);
+            serializer.write(ctag, obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return ctag;
     }
 
     /**
@@ -211,17 +258,9 @@ public class CompoundObjectTag<T> implements Tag {
     public void write(DataOutput output) throws IOException {
         // get class
         Class<?> klass = obj.getClass();
-
-        // write class name
-        String name = klass.getName();
-        output.writeUTF(name);
-
-        // get serializer
-        CompoundTagSerializer<T> serializer = (CompoundTagSerializer<T>) getSerializer(klass);
-
         // compile object
         CompoundTag tag = new CompoundTag();
-        serializer.write(tag, obj);
+        saveToCompound(this, tag);
 
         // write object
         tag.write(output);
@@ -238,8 +277,9 @@ public class CompoundObjectTag<T> implements Tag {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public @NotNull Tag copy() {
-        return new CompoundObjectTag<>(obj);
+        return new CompoundObjectTag<>(getSerializer(obj.getClass()).copy(obj));
     }
 
     @Override
@@ -255,6 +295,19 @@ public class CompoundObjectTag<T> implements Tag {
     @Override
     public String toString() {
         return obj.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CompoundObjectTag<?> that = (CompoundObjectTag<?>) o;
+        return Objects.equals(obj, that.obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(obj);
     }
 
 }

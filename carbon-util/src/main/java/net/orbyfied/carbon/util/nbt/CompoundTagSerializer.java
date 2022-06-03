@@ -1,6 +1,7 @@
 package net.orbyfied.carbon.util.nbt;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 import java.io.IOException;
 
@@ -28,5 +29,13 @@ public interface CompoundTagSerializer<T> {
      * @return The value.
      */
     T read(CompoundTag tag) throws IOException;
+
+    /**
+     * Should (possibly deep-) clone the object
+     * to be used in {@link Tag#copy()}.
+     * @param original The original object.
+     * @return The clone.
+     */
+    T copy(T original);
 
 }

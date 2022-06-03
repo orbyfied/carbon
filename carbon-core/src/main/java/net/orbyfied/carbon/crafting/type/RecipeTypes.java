@@ -171,8 +171,6 @@ public class RecipeTypes {
         public void onItemPrepareCraft(WrappedPrepareCraftEvent we) {
             if (we.<Boolean>carried(EVENT_HANDLED_FLAG, false))
                 return;
-            if (true)
-                return;
 
             PrepareItemCraftEvent event = we.getEvent();
 
