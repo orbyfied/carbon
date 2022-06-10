@@ -8,7 +8,7 @@ import org.bukkit.World;
 import java.util.List;
 
 /**
- * Represents a chunk
+ * Represents a chunk in a Carbon data world.
  */
 public class CarbonChunk {
 
@@ -18,14 +18,9 @@ public class CarbonChunk {
     public static int CHUNK_WIDTH = 16;
 
     /**
-     * The NMS world handle.
+     * The world handle.
      */
-    Level level;
-
-    /**
-     * The Bukkit world handle.
-     */
-    World world;
+    CarbonWorld world;
 
     /**
      * The NMS chunk handle.
@@ -59,6 +54,15 @@ public class CarbonChunk {
      */
     List<CarbonBlockState> tickableStates;
 
+    /**
+     * Resizes and reallocates the active
+     * area of the chunk.
+     * @param minY The minimum Y.
+     * @param maxY The maximum Y.
+     * @return This.
+     *
+     * TODO: allow shrinking of chunks (currently not possible)
+     */
     public CarbonChunk reallocate(int minY, int maxY) {
         // store old min Y
         int oldMinY = minY;
@@ -84,11 +88,7 @@ public class CarbonChunk {
 
     /* Getters. */
 
-    public Level getLevel() {
-        return level;
-    }
-
-    public World getWorld() {
+    public CarbonWorld getWorld() {
         return world;
     }
 

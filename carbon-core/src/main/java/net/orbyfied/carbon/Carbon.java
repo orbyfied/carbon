@@ -21,6 +21,7 @@ import net.orbyfied.carbon.process.CarbonProcessManager;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.user.CarbonUserEnvironment;
+import net.orbyfied.carbon.world.CarbonWorldManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.nio.file.Path;
@@ -69,6 +70,7 @@ public class Carbon
         this.commandEngine = new BukkitCommandEngine(this.plugin);
         this.userEnvironment = new CarbonUserEnvironment(this);
         this.integrationManager = new IntegrationManager(this);
+        this.worldManager = new CarbonWorldManager(this);
 
     }
 
@@ -149,6 +151,11 @@ public class Carbon
      */
     protected final IntegrationManager integrationManager;
 
+    /**
+     * The world manager.
+     */
+    protected final CarbonWorldManager worldManager;
+
     public CarbonJavaAPI getAPI() {
         return api;
     }
@@ -208,6 +215,10 @@ public class Carbon
 
     public IntegrationManager getIntegrationManager() {
         return integrationManager;
+    }
+
+    public CarbonWorldManager getWorldManager() {
+        return worldManager;
     }
 
     public Path getDirectory() { return directory; }
