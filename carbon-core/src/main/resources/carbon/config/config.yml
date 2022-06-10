@@ -43,3 +43,13 @@ resource-pack-host:
     # Generate this at https://filebin.net
     bin: 0
 
+# Minecraft Vanilla content definitions
+minecraft-definitions:
+
+  # Item definitions
+  items:
+
+    stone: { "tags" : ["stone"] }
+    iron_ingot: { "tags" : ["ingot.iron"] }
+    gold_ingot: { "tags" : ["ingot.gold"] }
+    diamond: { "tags" : ["gem.diamond", "diamond"] }

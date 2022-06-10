@@ -1,6 +1,7 @@
 package net.orbyfied.carbon.item;
 
 import net.minecraft.nbt.CompoundTag;
+import net.orbyfied.carbon.api.CarbonAPI;
 import net.orbyfied.carbon.core.CarbonJavaAPI;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.nbt.CompoundTagSerializer;
@@ -86,9 +87,17 @@ public class CarbonItemState<I extends CarbonItem> {
 
     ////////////////////////////////////////
 
-    public static final CompoundTagSerializer<CarbonItemState> NBT_TAG_SERIALIZER = new CompoundTagSerializer<>() {
+    private static Registry<CarbonItem> ITEM_REGISTRY;
 
-        private Registry<CarbonItem> ITEM_REGISTRY;
+    static void initializeApi(CarbonAPI api) {
+        ITEM_REGISTRY = api.getRegistries().getByIdentifier("minecraft:items");
+    }
+
+    static void disableApi(CarbonAPI api) {
+        ITEM_REGISTRY = null;
+    }
+
+    public static final CompoundTagSerializer<CarbonItemState> NBT_TAG_SERIALIZER = new CompoundTagSerializer<>() {
 
         @Override
         public void write(CompoundTag tag, CarbonItemState v) throws IOException {

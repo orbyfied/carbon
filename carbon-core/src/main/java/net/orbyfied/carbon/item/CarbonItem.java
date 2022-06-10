@@ -8,7 +8,6 @@ import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.mc.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
 import net.orbyfied.carbon.util.nbt.Nbt;
 import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
@@ -38,21 +37,27 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
      */
     protected final Identifier identifier;
 
-    /**
-     * The base material of the item.
-     */
+    // base material and item
     protected Material baseMaterial;
-
     protected Item baseItem;
 
-    // TODO: this is really inefficient help me
+    // components
     protected HashMap<Class<? extends ItemComponent<S>>, ItemComponent<S>> componentsMapped = new HashMap<>();
     protected ArrayList<ItemComponent<S>> componentsLinear = new ArrayList<>();
 
-    protected StateAllocator<S> stateAllocator;
+    /**
+     * The state allocator.
+     */
+    protected ItemStateAllocator<S> stateAllocator;
 
+    /**
+     * The runtime state type.
+     */
     protected final Class<S> runtimeStateType;
 
+    /**
+     * Is it built?
+     */
     protected boolean isBuilt = false;
 
     /**
@@ -131,11 +136,11 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         return (T) componentsMapped.get(tClass);
     }
 
-    public StateAllocator<S> getStateAllocator() {
+    public ItemStateAllocator<S> getStateAllocator() {
         return stateAllocator;
     }
 
-    public CarbonItem<S> setStateAllocator(StateAllocator<S> stateAllocator) {
+    public CarbonItem<S> setStateAllocator(ItemStateAllocator<S> stateAllocator) {
         this.stateAllocator = stateAllocator;
         return this;
     }
@@ -157,7 +162,7 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
         if (baseMaterial == null)
             throw new IllegalArgumentException("base material is null");
         if (stateAllocator == null)
-            stateAllocator = StateAllocator.blank(this);
+            stateAllocator = ItemStateAllocator.blank(this);
 
         // set built
         isBuilt = true;
@@ -177,13 +182,19 @@ public class CarbonItem<S extends CarbonItemState> extends RegistrableElement {
 
     /**
      * Allocates a new state.
-     * @return
+     * @return The new state.
      */
     @SuppressWarnings("unchecked")
     public S allocateState() {
         return (S) new CarbonItemState<>(this);
     }
 
+    /**
+     * Attempts to load the state from
+     * the given NMS item stack.
+     * @param nmsStack The item stack to load from.
+     * @return The state object.
+     */
     public S loadState(ItemStack nmsStack) {
         // check if it is built
         checkBuilt();

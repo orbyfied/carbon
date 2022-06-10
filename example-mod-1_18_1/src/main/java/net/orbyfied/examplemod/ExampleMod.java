@@ -69,7 +69,7 @@ public class ExampleMod
                         (item, ibc) -> ibc.adapter()
                             // define a behaviour handler for our item
                             .behaviour(PlayerItemInteraction.class, interaction -> {
-                                interaction.getEvent().getPlayer().sendMessage(interaction.getItem().toString());
+                                interaction.getEvent().getPlayer().sendMessage(interaction.getState().toString());
                             })
                 )
                 .component(MaterialItemComponent::new,

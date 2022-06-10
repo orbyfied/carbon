@@ -6,34 +6,40 @@ import net.orbyfied.carbon.item.CompiledStack;
 import net.orbyfied.carbon.item.ItemComponent;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MaterialItemComponent extends ItemComponent<CarbonItemState> {
 
     public MaterialItemComponent(CarbonItem<CarbonItemState> element) {
         super(element);
     }
 
-    protected MaterialTag tag;
+    protected List<MaterialTag> tags = new ArrayList<>();
 
-    public MaterialTag tag() {
-        return tag;
+    public List<MaterialTag> tags() {
+        return tags;
     }
 
     public MaterialItemComponent tag(MaterialTag tag) {
-        this.tag = tag;
+        this.tags.add(tag);
         return this;
     }
 
     public MaterialItemComponent tag(String tag) {
-        this.tag = MaterialTag.of(tag);
-        return this;
-    }
-
-    public boolean is(String tag) {
-        return this.tag.is(tag);
+        return tag(MaterialTag.of(tag));
     }
 
     public boolean is(MaterialTag tag) {
-        return this.tag.is(tag);
+        int s = tags.size();
+        for (int i = 0; i < s; i++)
+            if (tags.get(i).is(tag))
+                return true;
+        return false;
+    }
+
+    public boolean is(String tag) {
+        return is(MaterialTag.of(tag));
     }
 
     @Override

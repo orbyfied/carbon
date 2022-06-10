@@ -2,6 +2,7 @@ package net.orbyfied.carbon.bootstrap;
 
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.api.CarbonAPI;
+import net.orbyfied.carbon.block.CarbonBlock;
 import net.orbyfied.carbon.content.CMDRegistryService;
 import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
@@ -241,6 +242,10 @@ public abstract class CarbonBootstrap
             itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
                     .addService(new CMDRegistryService<>(itemRegistry));
 
+            initStage.details("minecraft:blocks");
+            Registry<CarbonBlock<?>> blockRegistry = new Registry<>("minecraft:blocks");
+            blockRegistry.addService(new ModElementRegistry<>(blockRegistry));
+
             initStage.details("minecraft:recipe_types");
             Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types");
             RecipeTypes.registerAll(recipeTypeRegistry);
@@ -254,6 +259,7 @@ public abstract class CarbonBootstrap
 
             registries
                     .register(itemRegistry)
+                    .register(blockRegistry)
                     .register(recipeTypeRegistry)
                     .register(recipeRegistry);
 
