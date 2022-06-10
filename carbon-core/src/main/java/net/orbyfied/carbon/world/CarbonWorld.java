@@ -3,6 +3,7 @@ package net.orbyfied.carbon.world;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.level.Level;
+import net.orbyfied.carbon.block.CarbonBlockState;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * A world for Carbon data corresponding
  * to a Minecraft world.
  */
+@SuppressWarnings(/* sorry lol */ "rawtypes")
 public class CarbonWorld {
 
     public static long getPositionCompound(int x, int z) {
@@ -85,6 +87,23 @@ public class CarbonWorld {
 
     public CarbonChunk getChunk(int x, int z) {
         return getChunk(getPositionCompound(x, z));
+    }
+
+    public CarbonChunk getChunkAt(int x, int z) {
+        return getChunk(x / CarbonChunk.CHUNK_WIDTH, z / CarbonChunk.CHUNK_WIDTH);
+    }
+
+    public CarbonBlockState getBlockState(int x, int y, int z) {
+        int cx = x % 16;
+        int cz = z % 16;
+        return getChunkAt(x, z).getBlockState(cx, y, cz);
+    }
+
+    public CarbonWorld setBlockState(int x, int y, int z, CarbonBlockState state) {
+        int cx = x % 16;
+        int cz = z % 16;
+        getChunkAt(x, z).setBlockState(cx, y, cz, state);
+        return this;
     }
 
     /* Getters. */
