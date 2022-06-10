@@ -10,7 +10,6 @@ import org.bukkit.block.Block;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class CarbonBlock<S extends CarbonBlockState> extends RegistrableElement {
 
     /**

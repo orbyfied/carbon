@@ -3,6 +3,8 @@ package net.orbyfied.carbon.bootstrap;
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.api.CarbonAPI;
 import net.orbyfied.carbon.block.CarbonBlock;
+import net.orbyfied.carbon.block.CarbonBlockState;
+import net.orbyfied.carbon.content.BehaviourAdapter;
 import net.orbyfied.carbon.content.CMDRegistryService;
 import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
@@ -15,8 +17,10 @@ import net.orbyfied.carbon.integration.Integration;
 import net.orbyfied.carbon.integration.IntegrationManager;
 import net.orbyfied.carbon.integration.impl.PapiIntegration;
 import net.orbyfied.carbon.item.CarbonItem;
+import net.orbyfied.carbon.item.CarbonItemState;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.orbyfied.carbon.item.ItemFixer;
+import net.orbyfied.carbon.item.behaviour.ItemBehaviourAdapter;
 import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
@@ -57,7 +61,16 @@ public abstract class CarbonBootstrap
      * with dependency references.
      */
     private static final List<Class<?>> API_CLASSES = Arrays.asList(
-            CompiledStack.class
+            // misc
+            CompiledStack.class,
+
+            // state classes
+            CarbonBlockState.class,
+            CarbonItemState.class,
+
+            // behaviour adapters
+            BehaviourAdapter.class,
+            ItemBehaviourAdapter.class
     );
 
     /**
