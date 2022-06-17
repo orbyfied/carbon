@@ -1,7 +1,7 @@
 package net.orbyfied.carbon.crafting.type;
 
 import net.orbyfied.carbon.core.CarbonJavaAPI;
-import net.orbyfied.carbon.crafting.Ingredient;
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
 import net.orbyfied.carbon.crafting.Recipe;
 import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.crafting.inventory.Slot;
@@ -96,6 +96,13 @@ public class RecipeTypes {
             this.worker = worker;
         }
 
+        /**
+         * Stores all crafting inventories currently completing a
+         * craft. This is to make sure that the craft preparation
+         * doesn't fuck up the result.
+         */
+        HashSet<CraftingInventory> craftsInCompletion = new HashSet<>();
+
         public void prepareCraft(PrepareCraftWrapper event,
                                  int amount) {
 
@@ -174,6 +181,16 @@ public class RecipeTypes {
 
             PrepareItemCraftEvent event = we.getEvent();
 
+            // handle completion
+            CraftingInventory inv = event.getInventory();
+            // if this is a craft completion, stop and
+            // dont try to handle the event because
+            // that will fuck up the result
+            if (craftsInCompletion.contains(inv)) {
+                craftsInCompletion.remove(inv);
+                return;
+            }
+
             // prepare
             long t1 = System.nanoTime();
 
@@ -207,11 +224,10 @@ public class RecipeTypes {
                 return;
             InventoryClickEvent event = we.getEvent();
 
-            if (!(event.getClickedInventory() instanceof CraftingInventory)) return;
+            if (!(event.getClickedInventory() instanceof CraftingInventory inv)) return;
             if (event.getSlotType() != InventoryType.SlotType.RESULT) return;
 
             // prepare first
-            CraftingInventory inv = (CraftingInventory) event.getClickedInventory();
             PrepareCraftWrapper w = new PrepareCraftWrapper(inv);
             prepareCraft(w, -1);
 
@@ -248,6 +264,9 @@ public class RecipeTypes {
                     w.recipe,
                     amount - 1
             );
+
+            // handle completion fix
+            craftsInCompletion.add(inv);
         }
 
     }

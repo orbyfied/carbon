@@ -11,7 +11,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     /**
      * The configurable that this
-     * configuration is for.
+     * configuration is for. Can be null.
      */
     protected final Configurable<?> configurable;
 

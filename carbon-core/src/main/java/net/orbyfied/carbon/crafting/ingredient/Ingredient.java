@@ -1,15 +1,23 @@
-package net.orbyfied.carbon.crafting;
+package net.orbyfied.carbon.crafting.ingredient;
 
+import net.orbyfied.carbon.crafting.TaggedIngredient;
 import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.orbyfied.carbon.registry.Identifier;
+import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Material;
+
+import java.nio.file.Paths;
+
+import static net.orbyfied.carbon.crafting.ingredient.IngredientInterchangeAdapter.continueIfNo;
 
 /**
  * Represents an ingredient that can be matched.
  */
+@SuppressWarnings("rawtypes")
 public interface Ingredient {
 
     /**
@@ -48,13 +56,26 @@ public interface Ingredient {
      * @param ingredient The ingredient to check against.
      * @return If it is comparable.
      */
-    boolean equals(Ingredient ingredient);
+    @SuppressWarnings("unchecked")
+    default boolean equals(Ingredient ingredient) {
+        return ((IngredientType)getType()).canMerge(this, ingredient);
+    }
+
+    /**
+     * Get the ingredient type.
+     * @return The ingredient type.
+     */
+    IngredientType<? extends Ingredient> getType();
 
     default TaggedIngredient tagged(Object tag) {
         return TaggedIngredient.of(this, tag);
     }
 
     ////////////////////////////////////////
+
+    // no need to register an interchange as
+    // true identity is automatically accounted for
+    IngredientType I_TYPE_EMPTY = new IngredientType("empty");
 
     /**
      * An empty slot.
@@ -69,8 +90,8 @@ public interface Ingredient {
         }
 
         @Override
-        public boolean equals(Ingredient ingredient) {
-            return ingredient == this;
+        public IngredientType<? extends Ingredient> getType() {
+            return I_TYPE_EMPTY;
         }
 
         @Override
@@ -95,12 +116,21 @@ public interface Ingredient {
         return new UnspecificItemIngredient(item, amt);
     }
 
+    static void registerAllTypes(Registry<IngredientType> registry) {
+        registry
+                .register(I_TYPE_EMPTY)
+                .register(I_TYPE_UNSPECIFIC);
+    }
+
     /* ---- Implementations ---- */
+
+    IngredientType<UnspecificItemIngredient> I_TYPE_UNSPECIFIC = new IngredientType<UnspecificItemIngredient>("unspecific_item")
+            .putSelfInterchangeLast(continueIfNo((ing, other) -> ing.item == other.item && ing.amtNeeded == other.amtNeeded));
 
     class UnspecificItemIngredient implements Ingredient {
 
-        private final Item item;
-        private final int amtNeeded;
+        final Item item;
+        final int amtNeeded;
 
         public UnspecificItemIngredient(Item item, int amtNeeded) {
             this.item = item;
@@ -113,12 +143,8 @@ public interface Ingredient {
         }
 
         @Override
-        public boolean equals(Ingredient ingredient) {
-            if (ingredient == this)
-                return true;
-            if (ingredient instanceof UnspecificItemIngredient uii)
-                return uii.item == item && uii.amtNeeded == amtNeeded;
-            return false;
+        public IngredientType<? extends Ingredient> getType() {
+            return I_TYPE_UNSPECIFIC;
         }
 
         @Override

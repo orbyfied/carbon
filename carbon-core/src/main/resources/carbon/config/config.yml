@@ -43,10 +43,26 @@ resource-pack-host:
     # Generate this at https://filebin.net
     bin: 0
 
+# Configuration and properties for world
+# data management, with things like chunk
+# loading, data fixing, etc.
+world-manager:
+
+  # Asynchronous chunk loading configuration.
+  async-chunk-loading:
+
+    # The amount of threads to use
+    # for asynchronous chunk loading.
+    # NOTE: The server REQUIRES a restart for
+    #   any changes to this property to take effect
+    #   Simply reloading the configuration won't work.
+    threads: 8
+
 # Minecraft Vanilla content definitions
 minecraft-definitions:
 
   # Item definitions
+  # TODO: implement
   items:
 
     stone: { "tags" : ["stone"] }

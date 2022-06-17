@@ -9,7 +9,7 @@ import java.lang.ref.WeakReference;
  * A block location in a world and chunk.
  */
 @SuppressWarnings("rawtypes")
-public abstract class BlockLocation {
+public class BlockLocation {
 
     /**
      * Weak reference to the Carbon world instance.
@@ -187,7 +187,7 @@ public abstract class BlockLocation {
 
     /////////////////////////////
 
-    static FastBlockLocation fast(CarbonWorld world, int x, int y, int z) {
+    public static FastBlockLocation fast(CarbonWorld world, int x, int y, int z) {
         return new FastBlockLocation(world, x, y, z);
     }
 

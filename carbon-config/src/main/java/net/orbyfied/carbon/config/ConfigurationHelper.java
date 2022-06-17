@@ -8,6 +8,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -98,6 +100,33 @@ public class ConfigurationHelper<S extends ConfigurationSection> {
         configurables.add(c);
         configurablesByClass.put(c.getClass(), c);
         return this;
+    }
+
+    // TODO: move
+    void tryDiscoverChildConfigurables(Configurable<?> c) {
+
+        try {
+
+            Class<?> klass = c.getClass();
+            for (Field field : klass.getFields()) {
+                if (Configurable.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    Object o;
+                    if (Modifier.isStatic(field.getModifiers()))
+                        o = field.get(null);
+                    else
+                        o = field.get(c);
+                    if (o == null)
+                        continue;
+                    Configurable<?> conf = (Configurable<?>) o;
+                    addConfigurable(conf);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

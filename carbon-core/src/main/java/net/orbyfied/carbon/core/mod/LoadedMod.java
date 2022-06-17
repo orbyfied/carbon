@@ -130,10 +130,10 @@ public class LoadedMod {
         // call loaded
         try {
             modInitializer.modLoaded(this);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // catch exceptions in there
-            throw new ModLoaderException(this, "exception occurred in load handler "
-                    + modInitializerClass.getName() + ".modLoaded(...)", e);
+            throw new ModLoaderException(this, "Exception occurred in load handler "
+                    + modInitializerClass.getName() + "#modLoaded(...)", e);
         }
 
         // return
@@ -158,10 +158,10 @@ public class LoadedMod {
         try {
             // call initialized
             modInitializer.modInitialize(api);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // catch exceptions in there
             throw new ModLoaderException(this, "Exception occurred in initialization handler "
-                    + modInitializerClass.getName() + ".modInitialize(...)", e);
+                    + modInitializerClass.getName() + "#modInitialize(...)", e);
         }
 
         // return

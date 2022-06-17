@@ -10,6 +10,8 @@ import net.orbyfied.carbon.core.ServiceManager;
 import net.orbyfied.carbon.core.mod.ModLoader;
 import net.orbyfied.carbon.crafting.Recipe;
 import net.orbyfied.carbon.crafting.RecipeRegistryService;
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
+import net.orbyfied.carbon.crafting.ingredient.IngredientType;
 import net.orbyfied.carbon.crafting.type.RecipeType;
 import net.orbyfied.carbon.crafting.type.RecipeTypes;
 import net.orbyfied.carbon.element.ModElementRegistry;
@@ -30,6 +32,9 @@ import net.orbyfied.carbon.util.message.slice.Literal;
 import net.orbyfied.carbon.util.message.slice.Placeholder;
 import net.orbyfied.carbon.util.message.style.Style;
 import net.orbyfied.carbon.util.message.style.color.Shaders;
+import net.orbyfied.carbon.world.BlockLocation;
+import net.orbyfied.carbon.world.CarbonWorldManager;
+import net.orbyfied.carbon.world.FastBlockLocation;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -182,6 +187,11 @@ public abstract class CarbonBootstrap
             ModLoader loader = main.getModLoader();
             loader.loadAll();
 
+            // load world manager
+            initStage.next(InitStageGeneral.LOAD_WORLD_MANAGER);
+            CarbonWorldManager worldManager = main.getWorldManager();
+            worldManager.initialize();
+
             // load integrations
             initStage.next(InitStageGeneral.LOAD_INTEGRATIONS);
             IntegrationManager im = main.getIntegrationManager();
@@ -250,6 +260,7 @@ public abstract class CarbonBootstrap
             // initialize registries
             initStage.next(InitStageGeneral.INIT_REGISTRIES);
 
+
             initStage.details("minecraft:items");
             Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items");
             itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
@@ -266,6 +277,10 @@ public abstract class CarbonBootstrap
             initStage.details("minecraft:recipes");
             Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes");
             recipeRegistry.addService(new RecipeRegistryService(recipeRegistry));
+
+            initStage.details("minecraft:recipe_ingredient_types");
+            Registry<IngredientType> ingredientTypeRegistry = new Registry<>("minecraft:recipe_ingredient_types");
+            Ingredient.registerAllTypes(ingredientTypeRegistry);
 
             initStage.details("Registering...");
             Registry<Registry<? extends Identifiable>> registries = main.getRegistries();
@@ -485,6 +500,11 @@ public abstract class CarbonBootstrap
          * Started loading mods.
          */
         LOAD_MODS,
+
+        /**
+         * Started loading the world manager.
+         */
+        LOAD_WORLD_MANAGER,
 
         /**
          * Started loading/registering integrations.

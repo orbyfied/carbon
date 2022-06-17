@@ -3,6 +3,7 @@ package net.orbyfied.carbon.world;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.orbyfied.carbon.block.CarbonBlockState;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -10,6 +11,7 @@ import org.bukkit.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * A world for Carbon data corresponding
@@ -103,6 +105,31 @@ public class CarbonWorld {
         int cx = x % 16;
         int cz = z % 16;
         getChunkAt(x, z).setBlockState(cx, y, cz, state);
+        return this;
+    }
+
+    public CarbonChunk createChunk(LevelChunk nmsChunk) {
+        CarbonChunk chunk = new CarbonChunk(
+                this,
+                nmsChunk.locX, nmsChunk.locZ,
+                nmsChunk
+        );
+
+        chunks.add(chunk);
+        chunksByPosition.put(getPositionCompound(chunk.cx, chunk.cz), chunk);
+        chunk.isLoaded = true;
+        return chunk;
+    }
+
+    public CarbonWorld createChunk(LevelChunk nmsChunk, BiConsumer<CarbonWorld, CarbonChunk> consumer) {
+        CarbonChunk chunk = createChunk(nmsChunk);
+        if (consumer != null)
+            consumer.accept(this, chunk);
+        return this;
+    }
+
+    public CarbonWorld loadChunkAsync(CarbonChunk chunk) {
+        manager.loadChunkAsync(chunk);
         return this;
     }
 

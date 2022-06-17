@@ -116,7 +116,7 @@ public class ModLoader {
             try {
                 mod.initialize();
                 success++;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.err("Error while initializing " + mod.getId() + ";");
                 e.printStackTrace();
                 failed++;

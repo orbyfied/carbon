@@ -42,6 +42,11 @@ public class MultiTaskProcessTests {
     @Test
     public void testProcesses1() {
 
+        if (true) {
+            System.out.println(Math.log(4 * 4 * 4 * 4 * 4) / Math.log(4));
+            return;
+        }
+
         final BiConsumer<Process<Object>, Object> myWorkExecutor =
                 (p, o) -> System.out.println("from " + Thread.currentThread().getName() + ": " + o);
 

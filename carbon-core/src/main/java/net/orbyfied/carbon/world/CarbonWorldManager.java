@@ -3,15 +3,21 @@ package net.orbyfied.carbon.world;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.level.Level;
 import net.orbyfied.carbon.Carbon;
+import net.orbyfied.carbon.config.AbstractConfiguration;
+import net.orbyfied.carbon.config.Configurable;
+import net.orbyfied.carbon.config.Configuration;
+import net.orbyfied.carbon.config.Configure;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 /**
  * Manager for the Carbon worlds and linking
  * them to the Minecraft worlds.
  */
-public class CarbonWorldManager {
+public class CarbonWorldManager implements Configurable {
 
     /**
      * Carbon main instance handle.
@@ -35,8 +41,25 @@ public class CarbonWorldManager {
      */
     final ArrayList<CarbonWorld> worlds = new ArrayList<>();
 
+    /**
+     * Executor for asynchronous chunk loading.
+     */
+    Executor asyncChunkLoadExecutor;
+
     public CarbonWorldManager(Carbon main) {
         this.main = main;
+
+        main.getConfigurationHelper()
+                .addConfigurable(this);
+    }
+
+    public CarbonWorldManager initialize() {
+        // init async chunk executor
+        asyncChunkLoadExecutor = Executors.newFixedThreadPool(
+                config.asyncChunkLoadConfig.numThreads
+        );
+
+        return this;
     }
 
     public CarbonWorld getWorld(String name) {
@@ -79,7 +102,13 @@ public class CarbonWorldManager {
         return unloadWorld(getWorld(name));
     }
 
-    /* Getters. */
+    /* Chunk Loading */
+
+    void loadChunkAsync(CarbonChunk chunk) {
+        asyncChunkLoadExecutor.execute(chunk::load);
+    }
+
+    /* Getters */
 
     public Object2ObjectOpenHashMap<String, CarbonWorld> getWorldsByName() {
         return worldsByName;
@@ -92,4 +121,41 @@ public class CarbonWorldManager {
     public ArrayList<CarbonWorld> getWorlds() {
         return worlds;
     }
+
+    //////////////////////////////////
+
+    @Override
+    public String getConfigurationPath() {
+        return "world-manager";
+    }
+
+    Config config = new Config(this);
+
+    @Override
+    public Configuration getConfiguration() {
+        return config;
+    }
+
+    static class Config extends AbstractConfiguration {
+
+        public Config(Configurable<?> configurable) {
+            super(configurable);
+        }
+
+        @Configure(name = "async-chunk-loading")
+        AsyncChunkLoadConfig asyncChunkLoadConfig = new AsyncChunkLoadConfig();
+
+    }
+
+    static class AsyncChunkLoadConfig extends AbstractConfiguration {
+
+        public AsyncChunkLoadConfig() {
+            super(null);
+        }
+
+        @Configure(name = "threads")
+        int numThreads = 4;
+
+    }
+
 }

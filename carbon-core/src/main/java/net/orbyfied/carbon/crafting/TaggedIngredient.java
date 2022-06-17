@@ -1,5 +1,7 @@
 package net.orbyfied.carbon.crafting;
 
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
+import net.orbyfied.carbon.crafting.ingredient.IngredientType;
 import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.crafting.inventory.Slot;
 import net.orbyfied.carbon.item.CompiledStack;
@@ -16,7 +18,7 @@ public interface TaggedIngredient extends Ingredient {
         return new TaggedIngredient() {
             @Override
             public void tag(CraftMatrix matrix, Slot slot) {
-                matrix.put(matrix, slot);
+                matrix.put(tag, slot);
             }
 
             @Override
@@ -27,6 +29,11 @@ public interface TaggedIngredient extends Ingredient {
             @Override
             public boolean equals(Ingredient ingredient) {
                 return in.equals(ingredient);
+            }
+
+            @Override
+            public IngredientType<? extends Ingredient> getType() {
+                return in.getType();
             }
 
             @Override
@@ -85,6 +92,11 @@ public interface TaggedIngredient extends Ingredient {
         @Override
         public boolean equals(Ingredient ingredient) {
             return in.equals(ingredient);
+        }
+
+        @Override
+        public IngredientType<? extends Ingredient> getType() {
+            return in.getType();
         }
 
     }

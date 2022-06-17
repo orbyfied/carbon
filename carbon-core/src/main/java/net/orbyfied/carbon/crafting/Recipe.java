@@ -1,5 +1,6 @@
 package net.orbyfied.carbon.crafting;
 
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
 import net.orbyfied.carbon.crafting.type.RecipeType;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Identifier;

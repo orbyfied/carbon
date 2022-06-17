@@ -3,7 +3,7 @@ package net.orbyfied.examplemod;
 import net.orbyfied.carbon.api.CarbonModAPI;
 import net.orbyfied.carbon.api.mod.CarbonMod;
 import net.orbyfied.carbon.api.mod.CarbonModInitializer;
-import net.orbyfied.carbon.crafting.Ingredient;
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
 import net.orbyfied.carbon.crafting.Recipe;
 import net.orbyfied.carbon.crafting.Result;
 import net.orbyfied.carbon.crafting.match.RecipeDimensions;
@@ -16,14 +16,10 @@ import net.orbyfied.carbon.item.display.ModelItemDisplayComponent;
 import net.orbyfied.carbon.item.material.MaterialItemComponent;
 import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.registry.Registry;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.concurrent.CompletableFuture;
-
-import static net.orbyfied.carbon.crafting.Ingredient.EMPTY;
+import static net.orbyfied.carbon.crafting.ingredient.Ingredient.EMPTY;
 
 // indicate that this is a Carbon mod
 @CarbonMod(

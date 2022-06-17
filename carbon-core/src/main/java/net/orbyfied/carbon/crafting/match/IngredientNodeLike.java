@@ -1,6 +1,6 @@
 package net.orbyfied.carbon.crafting.match;
 
-import net.orbyfied.carbon.crafting.Ingredient;
+import net.orbyfied.carbon.crafting.ingredient.Ingredient;
 import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.item.CompiledStack;
 

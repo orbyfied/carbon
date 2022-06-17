@@ -11,12 +11,12 @@ public class ModLoaderException extends RuntimeException {
         this.mod = mod;
     }
 
-    public ModLoaderException(LoadedMod mod, Exception e) {
+    public ModLoaderException(LoadedMod mod, Throwable e) {
         super(e);
         this.mod = mod;
     }
 
-    public ModLoaderException(LoadedMod mod, String s, Exception e) {
+    public ModLoaderException(LoadedMod mod, String s, Throwable e) {
         super(s, e);
         this.mod = mod;
     }
