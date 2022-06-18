@@ -4,7 +4,6 @@ import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.util.data.LinkedMultiHashMap;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 @SuppressWarnings("rawtypes")
@@ -94,7 +93,7 @@ public class IngredientType<T extends Ingredient> implements Identifiable {
         LinkedList<IngredientInterchangeAdapter<T, ? extends Ingredient>> adapters = getOrCreateInterchangeAdapters(other.getType());
         for (IngredientInterchangeAdapter adapter : adapters) {
             int r = adapter.testMerge(a, other);
-            if (r == /* yes */ 1)       return true;
+            if (r      == /* yes */ 1) return true;
             else if (r == /* no */ -1) return false;
             // otherwise continue
         }

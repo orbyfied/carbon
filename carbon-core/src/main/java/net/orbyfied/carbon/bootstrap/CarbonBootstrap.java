@@ -27,21 +27,13 @@ import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
-import net.orbyfied.carbon.util.message.Message;
-import net.orbyfied.carbon.util.message.slice.Literal;
-import net.orbyfied.carbon.util.message.slice.Placeholder;
-import net.orbyfied.carbon.util.message.style.Style;
-import net.orbyfied.carbon.util.message.style.color.Shaders;
-import net.orbyfied.carbon.world.BlockLocation;
 import net.orbyfied.carbon.world.CarbonWorldManager;
-import net.orbyfied.carbon.world.FastBlockLocation;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -262,34 +254,38 @@ public abstract class CarbonBootstrap
 
 
             initStage.details("minecraft:items");
-            Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items");
+            Registry<CarbonItem<?>> itemRegistry = new Registry<>("minecraft:items", CarbonItem.class);
             itemRegistry.addService(new ModElementRegistry<>(itemRegistry))
                     .addService(new CMDRegistryService<>(itemRegistry));
 
             initStage.details("minecraft:blocks");
-            Registry<CarbonBlock<?>> blockRegistry = new Registry<>("minecraft:blocks");
+            Registry<CarbonBlock<?>> blockRegistry = new Registry<>("minecraft:blocks", CarbonBlock.class);
             blockRegistry.addService(new ModElementRegistry<>(blockRegistry));
 
             initStage.details("minecraft:recipe_types");
-            Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types");
+            Registry<RecipeType> recipeTypeRegistry = new Registry<>("minecraft:recipe_types", RecipeType.class);
             RecipeTypes.registerAll(recipeTypeRegistry);
 
             initStage.details("minecraft:recipes");
-            Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes");
+            Registry<Recipe> recipeRegistry = new Registry<>("minecraft:recipes", Recipe.class);
             recipeRegistry.addService(new RecipeRegistryService(recipeRegistry));
 
             initStage.details("minecraft:recipe_ingredient_types");
-            Registry<IngredientType> ingredientTypeRegistry = new Registry<>("minecraft:recipe_ingredient_types");
-            Ingredient.registerAllTypes(ingredientTypeRegistry);
+            Registry<IngredientType> ingredientTypeRegistry = new Registry<IngredientType>("minecraft:recipe_ingredient_types", IngredientType.class)
+                    .autoRegisterFrom(Ingredient.class);
 
-            initStage.details("Registering...");
+            System.out.println(ingredientTypeRegistry);
+
+            initStage.details("Registering registries");
             Registry<Registry<? extends Identifiable>> registries = main.getRegistries();
 
             registries
                     .register(itemRegistry)
                     .register(blockRegistry)
                     .register(recipeTypeRegistry)
-                    .register(recipeRegistry);
+                    .register(recipeRegistry)
+                    .register(ingredientTypeRegistry)
+                    ;
 
             // initialize services
             initStage.next(InitStageGeneral.INIT_SERVICES);

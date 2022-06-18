@@ -6,9 +6,13 @@ import net.orbyfied.carbon.util.functional.ValueProvider;
 import net.orbyfied.carbon.util.ops.EntryOperation;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Class for mapped and linear storage
@@ -83,19 +87,26 @@ public class Registry<T extends Identifiable>
     private final Identifier identifier;
 
     /**
+     * The runtime type of T.
+     */
+    private final Class<T> runtimeType;
+
+    /**
      * Base constructor.
      * @param identifier The identifier of this registry.
      */
-    public Registry(Identifier identifier) {
-        this.identifier = identifier;
+    @SuppressWarnings("unchecked")
+    public Registry(Identifier identifier, Class<?> runtimeType) {
+        this.identifier  = identifier;
+        this.runtimeType = (Class<T>) runtimeType;
     }
 
     /**
      * Base constructor.
      * @param identifier The identifier in string form.
      */
-    public Registry(String identifier) {
-        this(Identifier.of(identifier));
+    public Registry(String identifier, Class<?> runtimeType) {
+        this(Identifier.of(identifier), runtimeType);
     }
 
     /**
@@ -447,6 +458,79 @@ public class Registry<T extends Identifiable>
         return servicesLinear.size();
     }
 
+    /* ------ Auto Register ------ */
+
+    private static final HashMap<Class<?>, BiFunction<Registry, Object, ? extends Identifiable>> fieldHandlers = new HashMap<>();
+
+    static {
+        fieldHandlers.put(Supplier.class, (registry, o) -> ((Supplier<? extends Identifiable>)o).get());
+    }
+
+    /**
+     * Registers all registrable items which allow it
+     * across the static fields and instance fields which
+     * are retrieved for every instance.
+     * @param klass The class.
+     * @param instances The instances.
+     * @return This.
+     */
+    @SuppressWarnings("unchecked")
+    public Registry<T> autoRegisterFrom(Class<?> klass, Object... instances) {
+        try {
+
+            // go over every field
+            for (Field field : klass.getDeclaredFields()) {
+                // process annotation if present
+                AutoRegister ann;
+                if ((ann = field.getAnnotation(AutoRegister.class)) != null) {
+                    // check allow
+                    if (!ann.allow())
+                        continue;
+                }
+
+                // check type
+                Class<?> type = field.getType();
+                boolean isT = runtimeType.isAssignableFrom(type);
+                BiFunction<Registry, Object, ? extends Identifiable> handler = fieldHandlers.get(type);
+                if (
+                        !isT &&
+                        handler == null
+                )
+                    continue;
+
+                // set accessible
+                field.setAccessible(true);
+
+                // check modifiers
+                if (Modifier.isStatic(field.getModifiers())) {
+                    // handle once
+                    if (isT)
+                        this.register((T) field.get(null));
+                    else
+                        this.register((T) handler.apply(this, field.get(null)));
+                } else {
+                    // handle for every instance
+                    if (isT)
+                        for (Object instance : instances)
+                            this.register((T) field.get(instance));
+                    else
+                        for (Object instance : instances)
+                            this.register((T) handler.apply(this, field.get(instance)));
+                }
+
+            }
+
+        } catch (Exception e) {
+            // simply handle error
+            // nothing special
+            System.out.println("error while auto registering for class: " + klass + " with " + instances.length + " instances provided");
+            e.printStackTrace();
+        }
+
+        // return
+        return this;
+    }
+
     ///////////////////////////////
 
     @Override
@@ -482,7 +566,7 @@ public class Registry<T extends Identifiable>
 
     @Override
     public String toString() {
-        return "registry/" + identifier + ": " + mapped;
+        return "Registry(" + identifier + "): " + mapped;
     }
 
     @Override

@@ -61,7 +61,7 @@ public class Carbon
         configurationHelper.addConfigurable(this);
 
         this.api = new CarbonJavaAPI(this);
-        this.registries = new Registry<>("carbon:registries");
+        this.registries = new Registry<>("carbon:registries", Registry.class);
         this.modLoader = new ModLoader(this);
         this.processManager = new CarbonProcessManager(this);
         this.serviceManager = new ServiceManager(this);

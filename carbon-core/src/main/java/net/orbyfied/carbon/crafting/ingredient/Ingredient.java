@@ -5,12 +5,14 @@ import net.orbyfied.carbon.crafting.inventory.CraftMatrix;
 import net.orbyfied.carbon.item.CompiledStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.orbyfied.carbon.registry.AutoRegister;
 import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Material;
 
 import java.nio.file.Paths;
+import java.util.function.Supplier;
 
 import static net.orbyfied.carbon.crafting.ingredient.IngredientInterchangeAdapter.continueIfNo;
 
@@ -75,6 +77,7 @@ public interface Ingredient {
 
     // no need to register an interchange as
     // true identity is automatically accounted for
+    @AutoRegister(allow = true)
     IngredientType I_TYPE_EMPTY = new IngredientType("empty");
 
     /**
@@ -116,14 +119,9 @@ public interface Ingredient {
         return new UnspecificItemIngredient(item, amt);
     }
 
-    static void registerAllTypes(Registry<IngredientType> registry) {
-        registry
-                .register(I_TYPE_EMPTY)
-                .register(I_TYPE_UNSPECIFIC);
-    }
-
     /* ---- Implementations ---- */
 
+    @AutoRegister(allow = true)
     IngredientType<UnspecificItemIngredient> I_TYPE_UNSPECIFIC = new IngredientType<UnspecificItemIngredient>("unspecific_item")
             .putSelfInterchangeLast(continueIfNo((ing, other) -> ing.item == other.item && ing.amtNeeded == other.amtNeeded));
 
