@@ -1,14 +1,25 @@
 package net.orbyfied.carbon.world;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.orbyfied.carbon.block.CarbonBlock;
 import net.orbyfied.carbon.block.CarbonBlockState;
+import net.orbyfied.carbon.logging.BukkitLogger;
+import net.orbyfied.carbon.util.StringReader;
+import net.orbyfied.carbon.util.nbt.CompoundObjectTag;
+import net.orbyfied.carbon.util.nbt.Nbt;
 import org.bukkit.World;
 
+import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a chunk in a Carbon data world.
@@ -66,6 +77,11 @@ public class CarbonChunk {
      * The Z index of this chunk.
      */
     final int cz;
+
+    /**
+     * A cache for speed of saving.
+     */
+    CompoundTag cacheTag = new CompoundTag();
 
     public CarbonChunk(final CarbonWorld world, int x, int z, LevelChunk nmsChunk) {
         this.world = world;
@@ -220,6 +236,8 @@ public class CarbonChunk {
     public CarbonChunk setBlockState(int x, int y, int z, CarbonBlockState state) {
         CarbonBlockState[] sect = getOrCreateSubSectionByY(y);
         sect[get1dInSub(x, getYInSub(y), z)] = state;
+        if (cacheTag != null)
+            cacheTag.put(x + "," + y + "," + z, new CompoundObjectTag<>(state));
         return this;
     }
 
@@ -228,16 +246,103 @@ public class CarbonChunk {
         return this;
     }
 
+    public CarbonChunk saveAsync() {
+        world.saveChunkAsync(this);
+        return this;
+    }
+
     /* Loading */
 
+    void loadBlockState(String loc, CompoundTag statesTag) {
+        // parse location
+        StringReader reader = new StringReader(loc, 0);
+        int x = Integer.parseInt(reader.collect(c -> c != ','));
+        int y = Integer.parseInt(reader.collect(c -> c != ','));
+        int z = Integer.parseInt(reader.collect(             ));
+
+        // load object
+        CompoundObjectTag<CarbonBlockState> stateTag = Nbt.getOrLoadObject(statesTag, loc);
+        if (stateTag == null)
+            return;
+        CarbonBlockState state = stateTag.getObject();
+
+        // set state
+        setBlockState(x, y, z, state);
+    }
+
     synchronized void load() {
-        //
+        // check if it should still load
+        if (!isLoaded) return;
+
+        // get manager reference
+        // and other references
+        final CarbonWorldManager manager = world.manager;
+        final BukkitLogger logger = manager.logger;
+
+        // get data file
+        Path data = manager.getChunkNBTFile(this);
+        // check if the file is available, of if the chunk is new
+        if (!Files.exists(data))
+            return;
+
+        try {
+
+            // open data file
+            InputStream fileIn = Files.newInputStream(data);
+            DataInput   dataIn = new DataInputStream(fileIn);
+
+            // load data
+            NbtAccounter accounter = new NbtAccounter(Integer.MAX_VALUE);
+            CompoundTag dataTag = CompoundTag.TYPE.load(dataIn, 0, accounter);
+
+            fileIn.close();
+
+            // get block states tag
+            CompoundTag statesTag = dataTag.getCompound("BlockStates");
+            for (Map.Entry<String, Tag> entry : statesTag.tags.entrySet()) {
+                // load block state
+                loadBlockState(entry.getKey(), statesTag);
+            }
+
+        } catch (IOException e) {
+            // handle exception
+            logger.errt("Failed to load chunk (" + cx + ", " + cz + ") (async)", e);
+        }
     }
 
     /* Saving */
 
-    void save() {
+    synchronized void save() {
+        // get manager reference
+        // and other references
+        final CarbonWorldManager manager = world.manager;
+        final BukkitLogger logger = manager.logger;
 
+        // get data file
+        Path data = manager.getChunkNBTFile(this);
+
+        try {
+
+            // create data file
+            if (!Files.exists(data))
+                Files.createFile(data);
+
+            // open data file
+            OutputStream fileOut = Files.newOutputStream(data);
+            DataOutput   dataOut = new DataOutputStream(fileOut);
+
+            // save data
+            CompoundTag dataTag = new CompoundTag();
+            dataTag.put("BlockStates", cacheTag);
+
+            dataTag.write(dataOut);
+
+            fileOut.close();
+
+        } catch (IOException e) {
+            // handle exception
+            logger.errt("Failed to load chunk (" + cx + ", " + cz + ") (async)", e);
+        }
     }
 
     /* Getters */

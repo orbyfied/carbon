@@ -486,6 +486,35 @@ public class Registry<T extends Identifiable>
                     // check allow
                     if (!ann.allow())
                         continue;
+
+                    // check if it is auto register all
+                    if (ann.all()) {
+                        // set accessible and get
+                        field.setAccessible(true);
+
+                        // check modifiers
+                        if (Modifier.isStatic(field.getModifiers())) {
+                            // handle only static
+                            if (ann.allStatic())
+                                this.autoRegisterFrom(field.getType());
+                            else
+                                this.autoRegisterFrom(field.getType(), field.get(null));
+                        } else {
+                            // handle only static
+                            if (ann.allStatic())
+                                // only have to register once as it
+                                // ignores the instance and only looks at the class
+                                // which will of course always be the same
+                                // across all instances
+                                this.autoRegisterFrom(field.getType());
+                            else
+                                for (Object instance : instances)
+                                    this.autoRegisterFrom(field.getType(), field.get(instance));
+                        }
+
+                        // skip rest
+                        continue;
+                    }
                 }
 
                 // check type

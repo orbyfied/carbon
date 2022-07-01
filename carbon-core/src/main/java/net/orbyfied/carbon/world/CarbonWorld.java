@@ -133,6 +133,11 @@ public class CarbonWorld {
         return this;
     }
 
+    public CarbonWorld saveChunkAsync(CarbonChunk chunk) {
+        manager.saveChunkAsync(chunk);
+        return this;
+    }
+
     /* Getters. */
 
     public Long2ObjectOpenHashMap<CarbonChunk> getChunksByPosition() {

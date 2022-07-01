@@ -4,6 +4,7 @@ import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.api.CarbonAPI;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.registry.Identifiable;
+import net.orbyfied.carbon.test.TestManager;
 import net.orbyfied.carbon.util.security.AccessValidator;
 
 /**
@@ -42,6 +43,11 @@ public class CarbonJavaAPI implements CarbonAPI {
 
     public Registry<Registry<? extends Identifiable>> getRegistries() {
         return main.getRegistries();
+    }
+
+    @Override
+    public TestManager getTestManager() {
+        return main.getTestManager();
     }
 
     /////////////////////////////////////////////////

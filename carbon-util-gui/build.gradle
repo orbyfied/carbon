@@ -84,24 +84,11 @@ dependencies {
     // Minecraft
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
 
-    // TODO: may separate it later
     //  Modules
-    implementation project(":carbon-event")
-    implementation project(":carbon-process")
     implementation project(":carbon-util")
-    implementation project(":carbon-config")
-    implementation project(":carbon-command")
-    implementation project(":carbon-registry")
     implementation project(":carbon-util-message")
-    implementation project(":carbon-util-gui")
 
     // External Libraries
-    implementation 'org.bstats:bstats-bukkit:3.0.0'
-
-    compileOnly 'me.clip:placeholderapi:2.11.1'
-
-    compileOnly 'org.zeroturnaround:zt-zip:1.15'
-    compileOnly 'org.javassist:javassist:3.28.0-GA'
 
 }
 

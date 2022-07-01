@@ -27,6 +27,7 @@ import net.orbyfied.carbon.logging.BukkitLogger;
 import net.orbyfied.carbon.platform.PlatformProxy;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
+import net.orbyfied.carbon.test.TestManager;
 import net.orbyfied.carbon.world.CarbonWorldManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -306,7 +307,7 @@ public abstract class CarbonBootstrap
             loader.initializeAll();
 
             // load everything from registries
-            initStage.next(InitStageGeneral.LOADC_REGISTRIES);
+            initStage.next(InitStageGeneral.LOAD_REGISTRY_CONTENT);
 
             RecipeRegistryService recipeRegistryService = recipeRegistry.getService(RecipeRegistryService.class);
             initStage.details("minecraft:recipe_types : Load workers.");
@@ -405,6 +406,14 @@ public abstract class CarbonBootstrap
 
             // done
             initStage.next(InitStageGeneral.INIT_DONE);
+
+            // run tests
+            initStage.next(InitStageGeneral.EXECUTE_TESTS);
+
+            TestManager testManager = main.getTestManager();
+            testManager
+                    .compileAll()
+                    .runAll();
 
         } catch (Exception e) {
 
@@ -546,7 +555,7 @@ public abstract class CarbonBootstrap
         /**
          * Started loading registry content.
          */
-        LOADC_REGISTRIES,
+        LOAD_REGISTRY_CONTENT,
 
         /**
          * Started initializing/enabling integrations.
@@ -561,7 +570,12 @@ public abstract class CarbonBootstrap
         /**
          * Initialization done.
          */
-        INIT_DONE
+        INIT_DONE,
+
+        /**
+         * Executing tests.
+         */
+        EXECUTE_TESTS
 
     }
 

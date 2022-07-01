@@ -1,9 +1,9 @@
 package net.orbyfied.carbon.util.mc;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.orbyfied.carbon.util.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -47,7 +47,7 @@ public class NmsHelper {
         }
     }
 
-    /* ---- Player Handles. ---- */
+    /* ---- Player Handles ---- */
 
     private static Field playerHandleField = getDeclaredFieldSafe(
             getCraftBukkitClass("entity.CraftEntity"),
@@ -56,6 +56,17 @@ public class NmsHelper {
 
     public static ServerPlayer getPlayerHandle(Player player) {
         return queryFieldSafe(player, playerHandleField);
+    }
+
+    /* ---- World Handles ---- */
+
+    private static Field worldHandleField = getDeclaredFieldSafe(
+            getCraftBukkitClass("CraftWorld"),
+            "world"
+    );
+
+    public static ServerLevel getWorldHandle(World world) {
+        return queryFieldSafe(world, worldHandleField);
     }
 
 }

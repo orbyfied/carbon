@@ -7,7 +7,11 @@ import net.orbyfied.carbon.config.AbstractConfiguration;
 import net.orbyfied.carbon.config.Configurable;
 import net.orbyfied.carbon.config.Configuration;
 import net.orbyfied.carbon.config.Configure;
+import net.orbyfied.carbon.logging.BukkitLogger;
+import org.bukkit.World;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -42,12 +46,18 @@ public class CarbonWorldManager implements Configurable {
     final ArrayList<CarbonWorld> worlds = new ArrayList<>();
 
     /**
+     * Internal logger.
+     */
+    final BukkitLogger logger;
+
+    /**
      * Executor for asynchronous chunk loading.
      */
     Executor asyncChunkLoadExecutor;
 
     public CarbonWorldManager(Carbon main) {
-        this.main = main;
+        this.main   = main;
+        this.logger = main.getLogger("CarbonWorldManager");
 
         main.getConfigurationHelper()
                 .addConfigurable(this);
@@ -104,8 +114,31 @@ public class CarbonWorldManager implements Configurable {
 
     /* Chunk Loading */
 
+    Path getDataDirectory(CarbonWorld world) {
+        Path p = world.getWorld().getWorldFolder().toPath()
+                .resolve("carbon_data");
+        if (!Files.exists(p)) {
+            try {
+                Files.createDirectory(p);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        return p;
+    }
+
+    Path getChunkNBTFile(CarbonChunk chunk) {
+        return getDataDirectory(chunk.world).resolve(chunk.cx + "#" + chunk.cz + ".ccnbt");
+    }
+
     void loadChunkAsync(CarbonChunk chunk) {
         asyncChunkLoadExecutor.execute(chunk::load);
+    }
+
+    void saveChunkAsync(CarbonChunk chunk) {
+        asyncChunkLoadExecutor.execute(chunk::save);
     }
 
     /* Getters */

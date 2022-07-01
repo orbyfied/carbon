@@ -209,6 +209,46 @@ public interface Slot {
         };
     }
 
+    static Slot onlyAdd(final Consumer<ItemStack> setter) {
+        return new Slot() {
+            @Override
+            public boolean isVirtual() {
+                return true;
+            }
+
+            @Override
+            public int getIndex() {
+                return -1;
+            }
+
+            @Override
+            public CompiledStack getItem() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ItemStack getBukkitItem() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void setItem(CompiledStack stack) {
+                setter.accept(stack.getBukkitStack());
+            }
+
+            @Override
+            public boolean accepts(CompiledStack stack) {
+                return true;
+            }
+
+            @Override
+            public CompiledStack add(CompiledStack stack) {
+                setter.accept(stack.getBukkitStack());
+                return null;
+            }
+        };
+    }
+
     ////////////////////////////////////////////////////
 
     private static boolean acceptsDefaultImpl(CompiledStack stack, ItemStack bss) {

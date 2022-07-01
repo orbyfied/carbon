@@ -171,6 +171,14 @@ public class BukkitLogger {
         return stage(stage).log(2, msg);
     }
 
+    public BukkitLogger errt(Object msg, Throwable err) {
+        return log(2, msg);
+    }
+
+    public BukkitLogger errt(String stage, Object msg, Throwable err) {
+        return stage(stage).log(2, msg);
+    }
+
     public BukkitLogger errc(Object msg) {
         return logc(2, msg);
     }

@@ -3,6 +3,7 @@ package net.orbyfied.carbon.api;
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
+import net.orbyfied.carbon.test.TestManager;
 
 /**
  * The abstract Carbon API.
@@ -25,5 +26,11 @@ public interface CarbonAPI {
      * @return The registry of registries.
      */
     Registry<Registry<? extends Identifiable>> getRegistries();
+
+    /**
+     * Get the test manager.
+     * @return The test manager.
+     */
+    TestManager getTestManager();
 
 }

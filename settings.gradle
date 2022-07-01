@@ -20,4 +20,5 @@ include 'carbon-config'
 include 'carbon-command'
 include 'carbon-registry'
 include 'carbon-util-message'
+include 'carbon-util-gui'
 

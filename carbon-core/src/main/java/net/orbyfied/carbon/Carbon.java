@@ -20,6 +20,7 @@ import net.orbyfied.carbon.process.ProcessManager;
 import net.orbyfied.carbon.process.CarbonProcessManager;
 import net.orbyfied.carbon.registry.Identifiable;
 import net.orbyfied.carbon.registry.Registry;
+import net.orbyfied.carbon.test.TestManager;
 import net.orbyfied.carbon.user.CarbonUserEnvironment;
 import net.orbyfied.carbon.world.CarbonWorldManager;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -71,6 +72,7 @@ public class Carbon
         this.userEnvironment = new CarbonUserEnvironment(this);
         this.integrationManager = new IntegrationManager(this);
         this.worldManager = new CarbonWorldManager(this);
+        this.testManager = new TestManager(this);
 
     }
 
@@ -142,6 +144,11 @@ public class Carbon
     protected final ComplexEventBus coreEventBus;
 
     /**
+     * The test manager.
+     */
+    protected final TestManager testManager;
+
+    /**
      * The stage of initialization Carbon is in.
      */
     protected Object initStage;
@@ -174,6 +181,10 @@ public class Carbon
 
     public ServiceManager getServiceManager() {
         return serviceManager;
+    }
+
+    public TestManager getTestManager() {
+        return testManager;
     }
 
     public Carbon setInitializationStage(Object o) {

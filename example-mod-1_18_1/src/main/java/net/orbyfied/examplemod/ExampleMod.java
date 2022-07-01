@@ -44,6 +44,8 @@ public class ExampleMod
     @Override
     public void modInitialize(CarbonModAPI api) {
 
+        api.getMainAPI().getTestManager().addToCompile(DefaultCarbonTests.class);
+
         // get item registry
         final Registry<CarbonItem<?>> itemRegistry = api.getRegistry("minecraft:items");
 

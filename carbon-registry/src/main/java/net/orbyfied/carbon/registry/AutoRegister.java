@@ -9,6 +9,20 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface AutoRegister {
 
+    /**
+     * If it should be auto registered.
+     */
     boolean allow();
+
+    /**
+     * If it should be treated as an all-auto registrable
+     * collection class/instance.
+     */
+    boolean all() default false;
+
+    /**
+     * If it should ignore the instance when registering all.
+     */
+    boolean allStatic() default false;
 
 }

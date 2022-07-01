@@ -1,5 +1,6 @@
 package net.orbyfied.carbon.crafting.type;
 
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.orbyfied.carbon.core.CarbonJavaAPI;
 import net.orbyfied.carbon.crafting.ingredient.Ingredient;
 import net.orbyfied.carbon.crafting.Recipe;
@@ -18,6 +19,7 @@ import net.orbyfied.carbon.registry.Identifier;
 import net.orbyfied.carbon.registry.Registry;
 import net.orbyfied.carbon.util.mc.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftArmorStand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
@@ -218,24 +220,7 @@ public class RecipeTypes {
             we.carry(EVENT_HANDLED_FLAG, true);
         }
 
-        @BasicHandler
-        public void onItemCraft(WrappedInventoryClickEvent we) {
-            if (we.<Boolean>carried(EVENT_HANDLED_FLAG, false))
-                return;
-            InventoryClickEvent event = we.getEvent();
-
-            if (!(event.getClickedInventory() instanceof CraftingInventory inv)) return;
-            if (event.getSlotType() != InventoryType.SlotType.RESULT) return;
-
-            // prepare first
-            PrepareCraftWrapper w = new PrepareCraftWrapper(inv);
-            prepareCraft(w, -1);
-
-            if (w.recipe == null)
-                return;
-
-            we.carry(EVENT_HANDLED_FLAG, true);
-
+        void executeCraft(InventoryClickEvent event, PrepareCraftWrapper w, SlotContainer out) {
             // execute
             Recipe recipe = w.recipe;
             int amount = w.amount;
@@ -260,10 +245,33 @@ public class RecipeTypes {
 
             recipe.result().write(
                     w.matrix,
-                    w.matrix.output(),
+                    out,
                     w.recipe,
                     amount - 1
             );
+        }
+
+        @BasicHandler
+        public void onItemCraft(WrappedInventoryClickEvent we) {
+            if (we.<Boolean>carried(EVENT_HANDLED_FLAG, false))
+                return;
+            InventoryClickEvent event = we.getEvent();
+
+            if (!(event.getClickedInventory() instanceof CraftingInventory inv)) return;
+            if (event.getSlotType() != InventoryType.SlotType.RESULT) return;
+
+            // prepare first
+            PrepareCraftWrapper w = new PrepareCraftWrapper(inv);
+            prepareCraft(w, -1);
+
+            if (w.recipe == null)
+                return;
+
+            we.carry(EVENT_HANDLED_FLAG, true);
+
+            // execute craft
+            executeCraft(event, w, w.matrix.output());
+            // TODO: try again when shift clicked until the counted amount is 0 or less
 
             // handle completion fix
             craftsInCompletion.add(inv);

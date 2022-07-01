@@ -59,6 +59,10 @@ public class StringReader {
 
     private static final Predicate<Character> ONPRED = c -> true;
 
+    public String collect() {
+        return collect(ONPRED, null);
+    }
+
     public String collect(Predicate<Character> pred, int offEnd) {
         String str = collect(pred);
         next(offEnd);
