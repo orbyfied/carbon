@@ -83,6 +83,13 @@ public class CarbonChunk {
      */
     CompoundTag cacheTag = new CompoundTag();
 
+    /**
+     * If it should use safe loading.
+     * Features:
+     * - Allocate a temporary, thread safe buffer of block states.
+     */
+    boolean safeLoad = true;
+
     public CarbonChunk(final CarbonWorld world, int x, int z, LevelChunk nmsChunk) {
         this.world = world;
         this.cx    = x;
@@ -253,7 +260,12 @@ public class CarbonChunk {
 
     /* Loading */
 
-    void loadBlockState(String loc, CompoundTag statesTag) {
+    public void unload() {
+        isLoaded = false;
+    }
+
+    void loadBlockState(String loc, CompoundTag statesTag,
+                        CarbonBlockState[][] states) {
         // parse location
         StringReader reader = new StringReader(loc, 0);
         int x = Integer.parseInt(reader.collect(c -> c != ','));
@@ -266,11 +278,17 @@ public class CarbonChunk {
             return;
         CarbonBlockState state = stateTag.getObject();
 
+        // get subsection index
+        int si = getYInSub(y);
+        // get or create subsection
+        CarbonBlockState[] subsect = states[si];
+        if (subsect == null)
+            states[si] = (subsect = new CarbonBlockState[CHUNK_WIDTH * CHUNK_WIDTH * SUB_SECT_HEIGHT]);
         // set state
-        setBlockState(x, y, z, state);
+        subsect[get1dInSub(x, y, z)] = state;
     }
 
-    synchronized void load() {
+    public synchronized void load() {
         // check if it should still load
         if (!isLoaded) return;
 
@@ -297,12 +315,22 @@ public class CarbonChunk {
 
             fileIn.close();
 
+            // allocate or get state array
+            CarbonBlockState[][] states;
+            if (safeLoad)
+                states = (CarbonBlockState[][]) Array.newInstance(CarbonBlockState[].class, 5);
+            else
+                states = blockStates;
+
             // get block states tag
             CompoundTag statesTag = dataTag.getCompound("BlockStates");
             for (Map.Entry<String, Tag> entry : statesTag.tags.entrySet()) {
                 // load block state
-                loadBlockState(entry.getKey(), statesTag);
+                loadBlockState(entry.getKey(), statesTag, states);
             }
+
+            // set array
+            blockStates = states;
 
         } catch (IOException e) {
             // handle exception
@@ -312,7 +340,7 @@ public class CarbonChunk {
 
     /* Saving */
 
-    synchronized void save() {
+    public synchronized void save() {
         // get manager reference
         // and other references
         final CarbonWorldManager manager = world.manager;

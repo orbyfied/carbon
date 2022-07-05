@@ -2,13 +2,21 @@ package net.orbyfied.carbon.world;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.orbyfied.carbon.Carbon;
 import net.orbyfied.carbon.config.AbstractConfiguration;
 import net.orbyfied.carbon.config.Configurable;
 import net.orbyfied.carbon.config.Configuration;
 import net.orbyfied.carbon.config.Configure;
 import net.orbyfied.carbon.logging.BukkitLogger;
-import org.bukkit.World;
+import net.orbyfied.carbon.util.mc.NmsHelper;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,6 +63,8 @@ public class CarbonWorldManager implements Configurable {
      */
     Executor asyncChunkLoadExecutor;
 
+    MyListener listener;
+
     public CarbonWorldManager(Carbon main) {
         this.main   = main;
         this.logger = main.getLogger("CarbonWorldManager");
@@ -68,6 +78,9 @@ public class CarbonWorldManager implements Configurable {
         asyncChunkLoadExecutor = Executors.newFixedThreadPool(
                 config.asyncChunkLoadConfig.numThreads
         );
+
+        // register listener
+        Bukkit.getPluginManager().registerEvents(listener = new MyListener(), main.getPlugin());
 
         return this;
     }
@@ -153,6 +166,43 @@ public class CarbonWorldManager implements Configurable {
 
     public ArrayList<CarbonWorld> getWorlds() {
         return worlds;
+    }
+
+    //////////////////////////////////
+
+    class MyListener implements Listener {
+
+        @EventHandler
+        public void worldLoad(WorldLoadEvent event) {
+            Level level = NmsHelper.getWorldHandle(event.getWorld());
+            loadWorld(level);
+        }
+
+        @EventHandler
+        public void worldUnload(WorldUnloadEvent event) {
+            Level level = NmsHelper.getWorldHandle(event.getWorld());
+            unloadWorld(level);
+        }
+
+        @EventHandler
+        public void chunkLoad(ChunkLoadEvent event) {
+            Level      level = NmsHelper.getWorldHandle(event.getWorld());
+            LevelChunk lchunk = NmsHelper.getChunkHandle(event.getChunk());
+
+            CarbonChunk chunk = getWorld(level).createChunk(lchunk);
+            chunk.loadAsync();
+        }
+
+        @EventHandler
+        public void chunkUnload(ChunkUnloadEvent event) {
+            Level      level = NmsHelper.getWorldHandle(event.getWorld());
+            LevelChunk lchunk = NmsHelper.getChunkHandle(event.getChunk());
+
+            CarbonChunk chunk = getWorld(level).getChunk(CarbonWorld.getPositionCompound(lchunk.locX, lchunk.locZ));
+            chunk.unload();
+            chunk.saveAsync();
+        }
+
     }
 
     //////////////////////////////////

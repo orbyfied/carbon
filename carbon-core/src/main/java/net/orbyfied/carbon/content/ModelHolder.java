@@ -36,12 +36,21 @@ public interface ModelHolder<T extends RegistrableElement> {
             Material base,
             CMDRegistryService<T> service,
             int amount) {
+        // check for amount
         if (amount == 0) return -1;
+
+        // create edit session for the base material
         CMDRegistryService<T>.BaseEditing edit = service.edit(base);
+
+        // create initial
         int start = edit.next(this);
+        // create all others
+        // start at one offset because we already inserted the first one
         int off = 1;
         for (; off < amount; off++)
             edit.next(this);
+
+        // return
         return start;
     }
 

@@ -8,6 +8,10 @@ import net.orbyfied.carbon.content.pack.ResourcePackBuilder;
  */
 public interface AssetPreparingService {
 
+    /**
+     * Prepares assets for the resource pack.
+     * @param builder The resource pack.
+     */
     void prepareAssets(ResourcePackBuilder builder);
 
 }

@@ -2,10 +2,16 @@ package net.orbyfied.carbon.util.mc;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.orbyfied.carbon.util.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
 import org.bukkit.entity.Player;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 
 import static net.orbyfied.carbon.util.ReflectionUtil.getDeclaredFieldSafe;
@@ -67,6 +73,17 @@ public class NmsHelper {
 
     public static ServerLevel getWorldHandle(World world) {
         return queryFieldSafe(world, worldHandleField);
+    }
+
+    /* ---- Chunk Handles ---- */
+
+    private static Field chunkHandleField = getDeclaredFieldSafe(
+            getCraftBukkitClass("CraftChunk"),
+            "weakChunk" // WeakReference<LevelChunk>
+    );
+
+    public static LevelChunk getChunkHandle(Chunk chunk) {
+        return ReflectionUtil.<WeakReference<LevelChunk>>queryFieldSafe(chunk, chunkHandleField).get();
     }
 
 }

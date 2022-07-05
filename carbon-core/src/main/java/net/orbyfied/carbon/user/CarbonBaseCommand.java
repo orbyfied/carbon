@@ -151,4 +151,14 @@ public class CarbonBaseCommand {
 
     }
 
+    @Subcommand("debug utpself <system:double x> <system:double y> <system:double z>")
+    public void utpSelf(Context context, Node node,
+
+                        @CommandParameter("x") Double x,
+                        @CommandParameter("y") Double y,
+                        @CommandParameter("z") Double z) {
+        NmsHelper.getPlayerHandle((Player) context.sender())
+                .setPos(x, y, z);
+    }
+
 }

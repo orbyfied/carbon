@@ -19,16 +19,45 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * Carbon debug report.
+ */
 public class CarbonReport {
 
+    /**
+     * Writers to output to.
+     */
     protected List<Writer> outputs = new ArrayList<>();
+
+    /**
+     * If it has a verbose output.
+     */
     protected boolean hasVerbose = false;
 
+    /**
+     * The time the report was made.
+     */
     protected Date time;
+
+    /**
+     * The main report message.
+     */
     protected String message;
+
+    /**
+     * The errors that caused or are related to
+     * this report, optional.
+     */
     protected List<Throwable> errors = new ArrayList<>();
+
+    /**
+     * An optional more detailed message.
+     */
     protected String details;
 
+    /**
+     * Additional properties.
+     */
     protected Map<String, Object> properties = new HashMap<>();
 
     public CarbonReport withOutput(Writer w) {
