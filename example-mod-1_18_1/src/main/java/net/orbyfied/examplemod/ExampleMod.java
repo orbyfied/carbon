@@ -92,14 +92,6 @@ public class ExampleMod
                 .result(Result.ofItem(ruby, 1))
                 .register(recipeRegistry);
 
-        RecipeTypes.CRAFTING_UNSHAPED.newRecipe(Identifier.of("example:ruby_sussy_baka"))
-                .ingredients(
-                        Ingredient.ofItem(Material.BLAZE_ROD, 1),
-                        Ingredient.ofItem(Material.ENDER_PEARL, 1)
-                )
-                .result(Result.ofItem(ruby, 2))
-                .register(recipeRegistry);
-
         RecipeTypes.CRAFTING_SHAPED.newRecipe(Identifier.of("example:amogus"))
                 .ingredients(
                         Ingredient.ofItem(Material.REDSTONE, 1), EMPTY,
